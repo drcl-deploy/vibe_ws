@@ -1,25 +1,57 @@
 # Vibe experiment commands
 
-The Vibe task launches own both `encoder_node` and `g1_vibe_sonic_node`. Do not
-start a second encoder or controller for the same experiment. The camera and
-telemetry bridge remain separate processes.
+Each Vibe task launch owns the complete experiment runtime: the CDR/TCP
+telemetry server, `encoder_node`, and one `g1_vibe_sonic_node`. Do not start a
+second encoder, bridge server, or controller. `Ctrl-C` stops all three.
 
-## Real robot
+## 1. Select the experiment environment
 
-Run the camera streamer onboard first:
+Source one setup file in each fresh terminal. Use the real setup on both the
+onboard and offboard computers during a real-robot experiment; use the local
+setup in every simulation terminal:
 
 ```bash
-cd ~/unitree_ros2
-python3 cyclonedds_ws/src/vision_encoders/scripts/camera_streamer.py
+# Real robot (onboard and offboard)
+source ~/unitree_ros2/setup.sh
+
+# OR: simulation
+source ~/unitree_ros2/setup_local.sh
 ```
 
-In a sourced onboard terminal, start exactly one task. The launch starts the
-Theia Tiny encoder and then its controller:
+The setup selects everything that differs between deployments:
+
+| Environment | ROS domain | Camera TCP source | Bridge TCP endpoint |
+| --- | ---: | --- | --- |
+| Real | `0` | `127.0.0.1:5555` | `gilfoyle-rth:5556` |
+| Simulation | `1` | `127.0.0.1:5555` | `127.0.0.1:5556` |
+
+The offboard bridge client internally uses isolated ROS domain `71`; no manual
+domain export is needed.
+
+## 2. Start the camera source
+
+For a real experiment, run the camera streamer onboard:
 
 ```bash
-cd ~/unitree_ros2
-source setup.sh
+source ~/unitree_ros2/setup.sh
+python3 ~/unitree_ros2/cyclonedds_ws/src/vision_encoders/scripts/camera_streamer.py
+```
 
+For simulation, start MuJoCo's camera TCP source instead:
+
+```bash
+source ~/unitree_ros2/setup_local.sh
+cd ~/unitree_ros2/unitree_mujoco/simulate/build
+./unitree_mujoco
+```
+
+## 3. Launch exactly one experiment
+
+These commands are identical for real and simulation after sourcing the
+matching setup. The launch starts the bridge server and encoder, then starts
+the controller when the encoder process is running.
+
+```bash
 # UOLM
 ros2 launch cpp_control g1_vibe_uolm.launch.py \
   artifact_dir:=/home/loki/drcl_projects/vibe/logs/rsl_rl/vibe_uolm/wandb_checkpoints/xhej6sbd
@@ -43,66 +75,28 @@ For UOLM or PerLoco, stage the motion after the task is running:
 publish-motion /path/to/motion.npz
 ```
 
-Start the telemetry server in another sourced onboard terminal:
+The bridge server is intentionally enabled by default. It uses a listener,
+five latest-only subscriptions, and local serialized-message copies; there is
+no TCP traffic without a client, but its idle cost is not zero. For a strict
+controller/encoder benchmark with no viewing or recording, append
+`enable_bridge:=false` to the task launch.
+
+## 4. View or record offboard
+
+In an offboard terminal, source the same experiment environment and run the
+same command for both real and simulation:
 
 ```bash
-cd ~/unitree_ros2
-source setup.sh
-ros2 run cdr_tcp_bridge bridge_server.sh
-```
-
-On the offboard computer, open a completely fresh terminal at the repository
-root. No manual ROS or workspace sourcing is needed:
-
-```bash
-cd ~/unitree_ros2
-
 # Live encoder-frame + attention viewer
-bash cyclonedds_ws/src/cpp_control/scripts/vibe/stream_vibes.sh
+bash ~/unitree_ros2/cyclonedds_ws/src/cpp_control/scripts/vibe/stream_vibes.sh
 
 # The same viewer plus a timestamped bag
-bash cyclonedds_ws/src/cpp_control/scripts/vibe/stream_vibes.sh record
+bash ~/unitree_ros2/cyclonedds_ws/src/cpp_control/scripts/vibe/stream_vibes.sh record
 ```
 
 Bags are written under `~/unitree_ros2/bags/` with names such as
-`15Aug2026_16_34`. The real bridge client resolves `gilfoyle-rth`, currently
-`192.168.0.177`.
-
-## Simulation
-
-Start the configured G1 simulator, which supplies the camera TCP stream:
-
-```bash
-cd ~/unitree_ros2/unitree_mujoco/simulate/build
-./unitree_mujoco
-```
-
-Start one Vibe task in another terminal using the same task commands above:
-
-```bash
-cd ~/unitree_ros2
-source setup_local.sh
-export ROS_DOMAIN_ID=1
-ros2 launch cpp_control g1_vibe_uolm.launch.py \
-  artifact_dir:=/home/loki/drcl_projects/vibe/logs/rsl_rl/vibe_uolm/wandb_checkpoints/xhej6sbd
-```
-
-Start the simulation-side bridge server:
-
-```bash
-cd ~/unitree_ros2
-source setup_local.sh
-export ROS_DOMAIN_ID=1
-ros2 run cdr_tcp_bridge bridge_server.sh -p bind_address:=127.0.0.1
-```
-
-Finally, stream or stream-and-record from a fresh terminal:
-
-```bash
-cd ~/unitree_ros2
-bash cyclonedds_ws/src/cpp_control/scripts/vibe/stream_vibes.sh --deployed_in sim
-bash cyclonedds_ws/src/cpp_control/scripts/vibe/stream_vibes.sh record --deployed_in sim
-```
+`15Aug2026_16_34`. They contain `/enc/frame`, `/enc/tokens`, the attention
+mask, `/lowstate`, and `/lowcmd`.
 
 ## Controls and shutdown
 
@@ -110,7 +104,6 @@ bash cyclonedds_ws/src/cpp_control/scripts/vibe/stream_vibes.sh record --deploye
 - Dodge: `A` or `RB` engages its nominal reactive reference.
 - If the controller prints `STALE VISION TOKENS`, press `Y` for damping if the
   experiment requires it.
-- Stop the task launch before starting a different experiment. `Ctrl-C` stops
-  both the controller and its encoder.
-- Stop `stream_vibes.sh` with `Ctrl-C` or close its viewer; recording is closed
-  with the bridge and viewer.
+- Stop the task launch before starting a different experiment.
+- Stop `stream_vibes.sh` with `Ctrl-C` or close its viewer; recording closes
+  with the bridge client and viewer.
