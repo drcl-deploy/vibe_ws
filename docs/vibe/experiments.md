@@ -52,6 +52,9 @@ matching setup. The launch starts the bridge server and encoder, then starts
 the controller when the encoder process is running.
 
 ```bash
+# Repose (this run contains two exports, so select the tested checkpoint)
+ros2 launch cpp_control g1_vibe_repose.launch.py artifact_dir:=/home/loki/drcl_projects/vibe/logs/rsl_rl/g1_repose_adapt_sonic/wandb_checkpoints/011pgzbh checkpoint:=58000
+
 # UOLM
 ros2 launch cpp_control g1_vibe_uolm.launch.py \
   artifact_dir:=/home/loki/drcl_projects/vibe/logs/rsl_rl/vibe_uolm/wandb_checkpoints/xhej6sbd
@@ -69,7 +72,13 @@ ros2 launch cpp_control g1_vibe_dodge.launch.py \
   artifact_dir:=/home/loki/drcl_projects/vibe/logs/rsl_rl/vibe_dodge/wandb_checkpoints/wm8wjywv
 ```
 
-For UOLM or PerLoco, stage the motion after the task is running:
+Each launch discovers the matching `.onnx` and `.manifest.json` pair inside
+`artifact_dir`; checkpoint-specific filenames are not encoded in the launch
+files. Most export directories contain one pair and need no other argument. If
+a directory contains several pairs, launch fails instead of guessing; add
+`checkpoint:=<training_step>` to select one explicitly.
+
+For Repose, UOLM, or PerLoco, stage the motion after the task is running:
 
 ```bash
 publish-motion /path/to/motion.npz
