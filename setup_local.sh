@@ -13,6 +13,12 @@ UNITREE_ROS2_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "${UNITREE_ROS2_ROOT}/cyclonedds_ws/install/setup.bash"
 
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+# Models and data the packages read but do not track: checkpoints, motion
+# libraries, clip tables. Same path on every box — rsync into <root>/vibe on
+# the Orin and every config string stays identical.
+export UNITREE_ROS2_ROOT
+export VIBE_ASSET_ROOT="${UNITREE_ROS2_ROOT}/vibe"
 UNITREE_SIM_CONFIG="${UNITREE_ROS2_ROOT}/unitree_mujoco/simulate/config.yaml"
 VIBE_SIM_DOMAIN_ID=1
 if [[ -f "${UNITREE_SIM_CONFIG}" ]]; then
