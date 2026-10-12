@@ -62,3 +62,23 @@ The operator joystick gate is deferred to the end at the user's request.
   all nine sledgehammer CTests; 16 workspace tests; both camera tests; real-policy
   smoke; CUDA provider; 63 historical and four packaged payload hashes.
 - Evidence: `.migration/phase5/`. The operator gate remains deferred.
+
+## Phase 6 — final workflows and release validation
+
+- Two terminals launch a tracker experiment; the optional frozen planner uses
+  a third terminal. Imported exports resolve by name; the README and setup/test
+  guides now describe the implemented workflows.
+- A separate planner launch owns only its node. The workspace tracker supervisor
+  waits for V9.3 status and shuts down the launch on heartbeat loss. This preserves
+  process shutdown behavior; it does not invent a robot damping transition.
+- The planner now rejects stale controller status as well as stale low-state.
+  This lifecycle fix is separate from the unchanged algorithm extraction.
+- Validation so far: 18 workspace tests; both camera tests; real-policy and V9.3
+  data checks; CUDA provider; installed data hashes; launch argument resolution;
+  isolated domain-93 QoS, arming/status loss, low-state loss, disarmed reconnect
+  and planner-loss supervision tests. No joystick events or control nodes were
+  used in that isolated graph test.
+- Fresh-checkout replay is the next automated gate. Physical joystick rollout,
+  clean-OS provisioning and onboard/offboard hardware validation are still open.
+- Hugging Face ONNX publication is pending. Local exporter imports are usable;
+  no policy/encoder binaries have been committed or uploaded.

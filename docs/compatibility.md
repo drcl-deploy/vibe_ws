@@ -25,9 +25,10 @@ The public Repose release manifest names the same source run `vbp/repose/011pgzb
 and checkpoint iteration 59999. That identity alone does not establish equality
 between a fresh public export and the frozen deployment ONNX.
 
-The optional planner's NPZ payload belongs to `sledgehammer`. During relocation
-its legacy data lives under `artifacts/data`; planner extraction will make this
-ownership explicit without changing array values or dropping frame dependencies.
+The optional planner's complete NPZ payload now belongs to `sledgehammer`.
+V9.3 uses its installed baked frames. Phase 5 restored missing contact sidecars
+from the relocation inputs and verified all four arrays byte-for-byte against
+the Phase 0 snapshot; see [testing.md](testing.md#parity).
 
 ## Checks performed on the frozen snapshot
 

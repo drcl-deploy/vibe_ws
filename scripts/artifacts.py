@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import shlex
 import tempfile
 import urllib.parse
 import urllib.request
@@ -48,9 +49,8 @@ def import_exports(name, policy, encoder, family, artifact_root):
         raise ValueError('Use a simple experiment name')
     policy, policy_manifest, _ = pair(policy, Path.cwd())
     encoder, encoder_manifest, _ = pair(encoder, Path.cwd())
+    artifact_root = artifact_root.expanduser().resolve()
     descriptor = artifact_root / 'experiments' / (name + '.yaml')
-    if descriptor.exists():
-        raise ValueError('Experiment already exists; use another name: ' + str(descriptor))
     # Validate together before copying any input or publishing a descriptor.
     config = dict(schema='vibe.experiment.v1', task_family=family,
                   policy=policy, encoder=encoder, scene='repose' if family == 'repose' else 'g1')
@@ -64,10 +64,14 @@ def import_exports(name, policy, encoder, family, artifact_root):
             destination = artifact_root / subdir / Path(filename).name
             checked_copy(filename, destination, digest(filename))
         config[key] = subdir + '/' + Path(source).name
+    if family == 'repose':
+        config.update(goal_color=4, planner='v9.3')
+    if descriptor.exists() and yaml.safe_load(descriptor.read_text()) != config:
+        raise ValueError('Different experiment exists; left untouched: ' + str(descriptor))
     descriptor.parent.mkdir(parents=True, exist_ok=True)
     descriptor.write_text(yaml.safe_dump(config, sort_keys=False))
     print('Experiment: ' + str(descriptor))
-    print('./run.sh tracker ' + str(descriptor))
+    print('VIBE_ARTIFACT_ROOT=' + shlex.quote(str(artifact_root)) + ' ./run.sh tracker ' + shlex.quote(name))
 
 
 def fetch(lock_path, artifact_root):

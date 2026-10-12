@@ -22,4 +22,4 @@ repositories:
   cyclonedds_ws/src/sledgehammer:
     type: git
     url: https://github.com/drcl-deploy/sledgehammer.git
-    version: 1c32ec3a7203fac9489afcad14a329c0c9793a02
+    version: 1b08da46fb6edab5233b9ff1bbfec3408a3e8907

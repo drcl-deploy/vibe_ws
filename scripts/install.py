@@ -114,8 +114,9 @@ def main():
                         '-DONNXRUNTIME_ROOT=' + ort, '-DONNXRUNTIME_ROOT_DIR=' + ort], overlay=True)
         else:
             run([sys.executable, 'scripts/doctor.py', '--profile', args.profile, '--build-only'])
-    print('\nSetup stages complete. ONNX exports stay in ignored artifacts/.')
-    if args.profile == 'sim':
+    print('\nCompleted stages: ' + ', '.join(selected))
+    print('ONNX exports stay in ignored artifacts/.')
+    if args.profile == 'sim' and 'doctor' in selected:
         print('Scene: ' + str(ROOT / 'generated/repose/g1_repose.xml'))
         print('Terminal 1: ./run.sh sim repose-v9.3')
         print('Terminal 2: ./run.sh tracker repose-v9.3')

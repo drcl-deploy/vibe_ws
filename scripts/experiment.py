@@ -32,7 +32,14 @@ def load(name, root=ROOT, artifact_root=None):
         'VIBE_ARTIFACT_ROOT', os.environ.get('VIBE_ASSET_ROOT', root / 'artifacts')))
     path = Path(name).expanduser()
     if not path.is_file():
-        path = root / 'experiments' / (str(name) + '.yaml')
+        candidates = [root / 'experiments' / (str(name) + '.yaml'),
+                      artifact_root / 'experiments' / (str(name) + '.yaml')]
+        existing = [candidate for candidate in candidates if candidate.is_file()]
+        if len(existing) > 1:
+            raise ValueError('Ambiguous experiment name; use an explicit YAML path: ' + str(name))
+        if not existing:
+            raise FileNotFoundError('Experiment not found; import your policy and encoder exports: ' + str(name))
+        path = existing[0]
     data = yaml.safe_load(path.read_text())
     allowed = {'schema', 'task_family', 'policy', 'encoder', 'scene', 'goal_color',
                'planner', 'motion'}
@@ -42,6 +49,8 @@ def load(name, root=ROOT, artifact_root=None):
         raise ValueError('Expected experiment schema vibe.experiment.v1')
     if data.get('task_family') not in FAMILIES:
         raise ValueError('Unsupported task_family: ' + str(data.get('task_family')))
+    if data.get('planner') not in {None, 'v9.3'}:
+        raise ValueError('Only the frozen v9.3 planner is supported')
     policy, policy_manifest, pm = pair(data['policy'], artifact_root)
     encoder, encoder_manifest, em = pair(data['encoder'], artifact_root)
     if pm.get('schema') != 'vibe.onnx.v1' or em.get('schema') != 'vision.onnx.v1':

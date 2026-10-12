@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import hashlib
 from pathlib import Path
 import subprocess
 
@@ -20,7 +21,8 @@ def main():
                 'cyclonedds_ws/install/cdr_tcp_bridge/lib/cdr_tcp_bridge/cdr_tcp_bridge']
     if args.profile in {'sim', 'onboard'}:
         required += ['cyclonedds_ws/install/vision_encoders/lib/vision_encoders/encoder_node',
-                     'cyclonedds_ws/install/cpp_control/lib/cpp_control/g1_vibe_sonic_node']
+                     'cyclonedds_ws/install/cpp_control/lib/cpp_control/g1_vibe_sonic_node',
+                     'cyclonedds_ws/install/sledgehammer/lib/sledgehammer/g1_repose_planner_node']
     if args.profile == 'sim':
         required += ['unitree_mujoco/simulate/build/unitree_mujoco', 'generated/repose/g1_repose.xml']
     for relative in required:
@@ -32,6 +34,16 @@ def main():
         result = subprocess.run(['ldd', str(ROOT / required[-2])], capture_output=True, text=True)
         if result.returncode or 'not found' in result.stdout:
             failures.append('Simulator has unresolved libraries: ' + result.stdout)
+    if args.profile != 'offboard':
+        share = ROOT / 'cyclonedds_ws/install/sledgehammer/share/sledgehammer'
+        try:
+            for name, spec in json.loads((share / 'data.lock.json').read_text())['files'].items():
+                payload = (share / name).read_bytes()
+                if len(payload) != spec['bytes'] or hashlib.sha256(payload).hexdigest() != spec['sha256']:
+                    failures.append('Planner data differs from its lock: ' + name)
+            print('OK frozen planner data checked against installed lock')
+        except (OSError, ValueError, KeyError) as error:
+            failures.append('Planner data: ' + str(error))
     if not args.build_only and args.profile != 'offboard':
         try:
             selected = load(args.experiment)

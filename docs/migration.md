@@ -1,4 +1,8 @@
-# Release migration checkpoint
+# Historical Phase 1 migration checkpoint
+
+Current setup: [setup.md](setup.md). Current workflows/tests: [testing.md](testing.md).
+Phases 2–6 supersede the paths and pending-work notes below; see
+[build_progress.md](build_progress.md). This document preserves the original checkpoint.
 
 Phase 1 has passed its automated relocation gates on Ubuntu 22.04 / ROS Humble.
 The operator joystick regression is deferred to the end at the user's request.

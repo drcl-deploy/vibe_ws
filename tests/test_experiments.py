@@ -43,6 +43,22 @@ class ExperimentTest(unittest.TestCase):
         self.assertEqual(loaded['policy'], str(self.root / 'artifacts/agent.onnx'))
         self.assertIn('encoder_path:=' + loaded['encoder'], experiment.tracker_arguments(loaded))
 
+    def test_imported_experiment_discovered_by_name(self):
+        self.load()
+        target = self.root / 'artifacts/experiments'
+        target.mkdir()
+        (self.root / 'experiments/test.yaml').rename(target / 'local.yaml')
+        loaded = experiment.load('local', self.root, self.root / 'artifacts')
+        self.assertEqual(loaded['task_family'], 'repose')
+
+    def test_ambiguous_name_requires_explicit_path(self):
+        self.load()
+        target = self.root / 'artifacts/experiments'
+        target.mkdir()
+        (target / 'test.yaml').write_text((self.root / 'experiments/test.yaml').read_text())
+        with self.assertRaisesRegex(ValueError, 'Ambiguous'):
+            experiment.load('test', self.root, self.root / 'artifacts')
+
     def test_wrong_camera_token_grid(self):
         self.encoder['outputs']['patch_tokens']['num'] = 28
         with self.assertRaisesRegex(ValueError, 'patch-token'):

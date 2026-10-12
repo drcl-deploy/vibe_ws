@@ -2,6 +2,9 @@
 set -euo pipefail
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$root"
+if [[ "${1:-}" == --help || "${1:-}" == -h || "${1:-}" == --plan ]]; then
+  exec python3 scripts/install.py "$@"
+fi
 if [[ "${1:-}" == --system ]]; then
   shift
   distro="${ROS_DISTRO:-humble}"

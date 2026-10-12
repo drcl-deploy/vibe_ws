@@ -8,83 +8,80 @@ Training and ONNX export live in [vibe](https://github.com/lok-i/vibe).
 
 ## install
 
-Tested on Ubuntu 22.04 / ROS Humble with NVIDIA CUDA. Source import requires Git,
-Git LFS, Python with PyYAML, and vcstool.
+Ubuntu 22.04 / ROS Humble, an NVIDIA driver, and Git LFS. Start in a fresh shell.
 
 ```bash
 git clone https://github.com/drcl-deploy/vibe_ws && cd vibe_ws
-python3 scripts/sources.py import    # pinned module repositories
-python3 scripts/sources.py check
+./install.sh --system
 ```
 
-build steps and host dependencies: [docs/migration.md](docs/migration.md#rebuild-this-host-checkpoint).
+Fetches pinned modules, installs runtime dependencies, generates the scenes, and
+builds the simulator and ROS packages. The generated XML paths are printed.
+ROS itself must already be installed. Resume stages and onboard setup:
+[docs/setup.md](docs/setup.md).
 
-The installer and downloadable deployment bundles are still being packaged.
-The example below requires the built workspace and local V9.3 artifacts;
-cloning alone does not fetch the models or planner data.
+### exports
+
+Export a policy and its matching encoder using
+[vibe's exporter](https://github.com/lok-i/vibe/blob/main/docs/export.md), then import them:
+
+```bash
+python3 scripts/artifacts.py import --name repose --task-family repose \
+  --policy /path/to/model.onnx --encoder /path/to/theia-tiny.onnx
+```
+
+Keep each ONNX beside its exporter-generated `.manifest.json`. Import preserves
+their bytes in ignored `artifacts/`; no models are stored in this Git repository.
+Pre-exported Hugging Face downloads are pending publication. Local exports work now.
 
 ## usage
 
-### Repose · V9.3
-
-Run from the workspace root in each terminal, with an Xbox-compatible gamepad connected.
-
-```bash
-# generate the G1 + cube scene once; prints the simulator's XML path
-PYTHONPATH=assets/src python3 -m assets.repose_scene \
-  --robot-xml unitree_mujoco/unitree_robots/g1/g1_29dof_with_camera.xml \
-  --out-dir generated/repose
-```
+Run from the workspace root in each terminal, with an Xbox-compatible gamepad.
 
 ```bash
 # terminal 1 — simulator
-unitree_mujoco/simulate/build/unitree_mujoco -r g1 -i 1 -n lo \
-  -s "$PWD/generated/repose/g1_repose.xml" --use_joystick 1 \
-  --camera_width 112 --camera_height 63 --camera_fps 50 \
-  --camera_depth_width 112 --camera_depth_height 63 \
-  --camera_textures 0 --camera_visual_groups 1
+./run.sh sim repose
+
+# terminal 2 — encoder + tracker
+./run.sh tracker repose --motion /path/to/motion.npz
 ```
 
+The same tracker flow supports Repose, UoLM and PerLoco (OmRe/Grail); select the
+corresponding exports with `--task-family repose|uolm|perloco`. Preserve any
+motion companion files beside `motion.npz`. Dodge remains loadable, with no
+dedicated task scene in this release.
+
+### sledgehammer · V9.3
+
+The optional frozen cube planner supplies the motion. Use three terminals:
+
 ```bash
-# terminal 2 — encoder, tracker and planner
-source setup_local.sh
-ros2 launch cpp_control g1_repose_planner.launch.py \
-  artifact_dir:="$PWD/artifacts/models/repose-v9.3" \
-  planner_config:="$PWD/cyclonedds_ws/src/cpp_control/config/repose_planner/g1_sim_v9_3.yaml" \
-  env:=sim camera_ip:=127.0.0.1 enable_bridge:=true goal_color:=4
+./run.sh sim repose                       # terminal 1
+./run.sh tracker repose --with-planner    # terminal 2; waits for terminal 3
+./run.sh planner repose                   # terminal 3
 ```
 
 | control | action |
 |---|---|
 | **RB** | enter stand; disarm an active rollout |
 | **A** | arm the planner from stand |
-| `goal_color` | `0` red · `1` orange · `2` green · `3` yellow · `4` blue · `5` pink |
+| `--goal-color` | `0` red · `1` orange · `2` green · `3` yellow · `4` blue · `5` pink |
 
-The current launch starts the planner inside `cpp_control`. Its move to
-[sledgehammer](https://github.com/drcl-deploy/sledgehammer) is pending;
-the tracker stays in `cpp_control`.
-
-### artifacts
-
-```text
-artifacts/
-  models/repose-v9.3/     policy ONNX + manifest
-  encoders/              encoder ONNX + manifest
-  data/                  current V9.3 planner tables and motion frames
-generated/repose/        generated G1 + cube XML
-```
-
-`setup_local.sh` selects loopback / DDS domain 1 and prints the resolved paths.
-`VIBE_ASSET_ROOT` defaults to `artifacts/`; set `VIBE_ARTIFACT_ROOT` before sourcing
-to use another directory. Keep each ONNX file and its matching manifest together.
-
-export compatibility: [docs/compatibility.md](docs/compatibility.md).
+Use the same experiment and goal color in the tracker and planner terminals.
+Planner loss stops the supervised tracker launch; restart it explicitly.
+For this machine's frozen reference exports, use `repose-v9.3` as the experiment.
 
 ### test
 
-automated checks and joystick regression: [docs/migration.md](docs/migration.md#automated-regression).
-camera, cube and encoder parity results: [docs/parity.md](docs/parity.md).
-The live joystick regression is still pending.
+```bash
+python3 scripts/doctor.py --experiment repose
+bash scripts/regression.sh                 # requires the frozen V9.3 model files
+```
+
+Automated checks, current results and the final joystick gate:
+[docs/testing.md](docs/testing.md). Camera/cube alignment:
+[docs/parity.md](docs/parity.md). Export contracts:
+[docs/compatibility.md](docs/compatibility.md).
 
 ## modules
 
@@ -95,6 +92,7 @@ The live joystick regression is still pending.
 | [unitree_mujoco](https://github.com/lok-i/unitree_mujoco) | simulator and G1 model |
 | [assets](https://github.com/drcl-deploy/assets) | objects and scene generation |
 | [cdr_tcp_bridge](https://github.com/lok-i/cdr_tcp_bridge) | onboard/offboard telemetry |
-| [sledgehammer](https://github.com/drcl-deploy/sledgehammer) | optional frozen cube planner; extraction pending |
+| [sledgehammer](https://github.com/drcl-deploy/sledgehammer) | optional frozen planner and NPZ data |
 
-source pins: [sources.repos](sources.repos). Release progress: [docs/migration.md](docs/migration.md#remaining-phases).
+Source pins: [sources.repos](sources.repos). Build checkpoints:
+[docs/build_progress.md](docs/build_progress.md).

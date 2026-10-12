@@ -21,7 +21,7 @@ and README branding. It has not been pushed. The ONNX artifacts are unchanged.
   visual groups are converted in a generated copy, preserving robot dynamics.
 - Use `--camera_textures 0 --camera_visual_groups 1` with this scene: the camera
   draws groups 0/2, with textures and shadows disabled. Generic object scenes
-  retain texture support. The [runbook](migration.md) supplies the full command.
+  retain texture support. The [runbook](testing.md) supplies the full command.
 - The CUDA encoder disables TF32 on ONNX Runtime 1.18+ to honor fp32 export
   precision. The runtime documents that control in its
   [CUDA provider options](https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html#use_tf32).
