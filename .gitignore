@@ -1,6 +1,23 @@
+# Independently versioned sources; sources.repos is their source of truth.
+/assets/
+/unitree_mujoco/
+/cyclonedds_ws/src/cdr_tcp_bridge/
+/cyclonedds_ws/src/vision_encoders/
+/cyclonedds_ws/src/cpp_control/
+/cyclonedds_ws/src/sledgehammer/
+
+# Downloaded artifacts, generated state and local migration evidence.
+/artifacts/
+/generated/
+/.deps/
+/.migration/
 **/build/
-**/.vscode/
-**/__pycache__/
-**/log/
 **/install/
-.cache
+**/log/
+**/__pycache__/
+**/.pytest_cache/
+**/.vscode/
+/.venv/
+/venv/
+/bags/
+/.cache/
