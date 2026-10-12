@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$root"
+if [[ "${1:-}" == --system ]]; then
+  shift
+  distro="${ROS_DISTRO:-humble}"
+  [[ "$distro" == humble || "$distro" == foxy ]] || { echo 'Use ROS Humble or Foxy.' >&2; exit 2; }
+  sudo apt-get update
+  sudo apt-get install -y build-essential cmake git git-lfs curl pkg-config \
+    python3-venv python3-pip python3-colcon-common-extensions \
+    libyaml-cpp-dev libopencv-dev libboost-program-options-dev libglfw3-dev \
+    libgl1-mesa-dev libfmt-dev libeigen3-dev zlib1g-dev \
+    "ros-$distro-rmw-cyclonedds-cpp" "ros-$distro-rosidl-generator-dds-idl"
+fi
+if [[ ! -x .venv/bin/python ]]; then
+  python3 -m venv .venv
+fi
+.venv/bin/python -m pip install --disable-pip-version-check \
+  'PyYAML==6.0.2' 'vcstool==0.3.0'
+exec .venv/bin/python scripts/install.py "$@"

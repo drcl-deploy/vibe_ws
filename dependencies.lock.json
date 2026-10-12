@@ -1,0 +1,16 @@
+{
+  "schema": "vibe.dependencies.v1",
+  "unitree_sdk2": {
+    "url": "https://github.com/unitreerobotics/unitree_sdk2.git",
+    "revision": "29935ddcea461c26004978e95ed85d7e0452ea4f",
+    "host_x86_64_library_sha256": "ba018518707f511ddd47558ba4d5609e968c30998d3c52abe2e650ba4aab229d"
+  },
+  "mujoco": {
+    "version": "3.3.6",
+    "setup": "unitree_mujoco/scripts/setup_mujoco.sh"
+  },
+  "onnxruntime": {
+    "x86_64": "1.22.0",
+    "setup": "cyclonedds_ws/src/vision_encoders/scripts/setup_onnxruntime.sh"
+  }
+}

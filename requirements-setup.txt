@@ -1,0 +1,8 @@
+setuptools==80.9.0
+wheel==0.45.1
+numpy==1.26.4
+trimesh==4.12.2
+Pillow==12.1.1
+platformdirs==4.5.1
+PyYAML==6.0.2
+vcstool==0.3.0

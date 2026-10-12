@@ -21,3 +21,10 @@
 /venv/
 /bags/
 /.cache/
+
+# Learned payloads belong in artifact storage, including accidental root copies.
+*.onnx
+*.onnx.data
+*.npz
+*.pt
+*.pth
