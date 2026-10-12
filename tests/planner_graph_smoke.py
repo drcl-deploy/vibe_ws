@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Isolated ROS contract check; never launches a controller or publishes joystick input."""
+"""Isolated ROS contract check; no joystick input and no physical robot connection."""
 
 import os
 from pathlib import Path
@@ -10,7 +10,23 @@ import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / 'scripts'))
+
+
+def stop_process(child):
+    for sig, timeout in [(signal.SIGINT, 5), (signal.SIGTERM, 3), (signal.SIGKILL, 2)]:
+        try:
+            os.killpg(child.pid, sig)
+        except ProcessLookupError:
+            break
+        try:
+            child.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            continue
+        try:
+            os.killpg(child.pid, 0)
+        except ProcessLookupError:
+            break
+
 
 
 def main():
@@ -23,7 +39,6 @@ def main():
     from cpp_control.msg import ControllerStatus, MotionReference
     from unitree_hg.msg import LowState
     import yaml
-    from planner_supervisor import stop_process
 
     rclpy.init()
     node = rclpy.create_node('sledgehammer_contract_test')
@@ -49,13 +64,13 @@ def main():
                 status_pub.publish(status)
             rclpy.spin_once(node, timeout_sec=0.04)
 
-    planner = supervisor = None
+    planner = tracker = None
     with tempfile.TemporaryDirectory(prefix='vibe-graph-') as directory:
         folder = Path(directory)
         config = yaml.safe_load((ROOT / 'cyclonedds_ws/src/sledgehammer/config/repose_planner/g1_sim_v9_3.yaml').read_text())
         config['camera']['port'] = 59993  # no dependency on a running camera
         (folder / 'planner.yaml').write_text(yaml.safe_dump(config))
-        with (folder / 'planner.log').open('w') as log, (folder / 'supervisor.log').open('w') as slog:
+        with (folder / 'planner.log').open('w') as log, (folder / 'tracker.log').open('w') as tlog:
             try:
                 planner = subprocess.Popen([
                     'ros2', 'run', 'sledgehammer', 'g1_repose_planner_node', '--ros-args',
@@ -91,27 +106,44 @@ def main():
                 assert len(references) == count, 'References continued without lowstate'
                 print('PASS: lowstate disconnect stops references', flush=True)
 
-                marker = folder / 'dummy-started'
-                child_code = 'from pathlib import Path; import time; Path(' + repr(str(marker)) + ').touch(); time.sleep(60)'
-                supervisor_code = ('import sys; sys.path.insert(0, ' + repr(str(ROOT / 'scripts')) + '); '
-                                   'from planner_supervisor import supervise; '
-                                   'sys.exit(supervise(' + repr([sys.executable, '-c', child_code]) + '))')
-                supervisor = subprocess.Popen([sys.executable, '-c', supervisor_code],
-                                               stdout=slog, stderr=subprocess.STDOUT, start_new_session=True)
-                deadline = time.monotonic() + 10
-                while not marker.exists() and time.monotonic() < deadline:
-                    pump(0.1)
-                assert marker.exists(), 'Supervisor did not start its child after planner heartbeat'
+                # The remaining check uses the actual direct launch. Remove the
+                # test publishers before starting control; no state/joy is supplied.
+                node.destroy_publisher(state_pub)
+                node.destroy_publisher(status_pub)
+                tracker = subprocess.Popen([
+                    'ros2', 'launch', 'cpp_control', 'g1_vibe_sonic.launch.py',
+                    'policy_path:=' + str(ROOT / 'artifacts/models/repose-v9.3/model_59999.onnx'),
+                    'encoder_path:=' + str(ROOT / 'artifacts/encoders/theia-tiny.onnx'),
+                    'planner:=true', 'goal_color:=4', 'enable_bridge:=false',
+                    'stand_yaw_teleop:=true', 'stand_walk_teleop:=true',
+                    'stand_walk_motion:=' + str(ROOT / 'cyclonedds_ws/install/sledgehammer/share/sledgehammer/data/sys1_walk/walk_forward_amateur_001__A001/motion.npz')],
+                    stdout=tlog, stderr=subprocess.STDOUT, start_new_session=True)
+                deadline = time.monotonic() + 30
+                while node.count_subscribers('/vibe/planner/status') == 0 and time.monotonic() < deadline:
+                    assert tracker.poll() is None, 'Direct tracker launch failed at startup'
+                    rclpy.spin_once(node, timeout_sec=0.1)
+                assert node.count_subscribers('/vibe/planner/status') > 0, 'Native heartbeat subscription missing'
+                until = time.monotonic() + 1.5
+                while time.monotonic() < until:
+                    rclpy.spin_once(node, timeout_sec=0.1)
+                    assert tracker.poll() is None, 'Healthy planner did not keep tracker alive'
                 stop_process(planner)
                 planner = None
-                assert supervisor.wait(timeout=12) == 1, 'Planner loss did not stop the supervised launch'
-                print('PASS: planner disconnect shuts down the supervised process', flush=True)
+                tracker.wait(timeout=15)
+                text = (folder / 'tracker.log').read_text()
+                assert 'planner heartbeat lost' in text, 'Native tracker did not report planner loss'
+                assert 'encoder_node' in text and 'process has finished cleanly' in text, text[-2500:]
+                deadline = time.monotonic() + 5
+                while node.count_publishers('/enc/tokens') and time.monotonic() < deadline:
+                    rclpy.spin_once(node, timeout_sec=0.1)
+                assert node.count_publishers('/enc/tokens') == 0, 'Encoder survived direct launch shutdown'
+                print('PASS: native tracker heartbeat guard stops the direct tracker/encoder launch', flush=True)
             except BaseException:
                 print((folder / 'planner.log').read_text()[-5000:])
-                print((folder / 'supervisor.log').read_text()[-3000:])
+                print((folder / 'tracker.log').read_text()[-3000:])
                 raise
             finally:
-                for process in [supervisor, planner]:
+                for process in [tracker, planner]:
                     if process is not None:
                         stop_process(process)
     node.destroy_subscription(sub)

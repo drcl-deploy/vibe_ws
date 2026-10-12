@@ -15,73 +15,97 @@ git clone https://github.com/drcl-deploy/vibe_ws && cd vibe_ws
 ./install.sh --system
 ```
 
-Fetches pinned modules, installs runtime dependencies, generates the scenes, and
-builds the simulator and ROS packages. The generated XML paths are printed.
-ROS itself must already be installed. Resume stages and onboard setup:
-[docs/setup.md](docs/setup.md).
+Fetches pinned modules, installs dependencies, generates the scenes and builds
+the simulator and ROS packages. Generated XML paths are printed. ROS must already
+be installed. Resume stages and onboard setup: [docs/setup.md](docs/setup.md).
 
-### exports
+### models
 
-Export a policy and its matching encoder using
-[vibe's exporter](https://github.com/lok-i/vibe/blob/main/docs/export.md), then import them:
+Use the policy and matching encoder from [vibe's exporter](https://github.com/lok-i/vibe/blob/main/docs/export.md).
+Keep each `.onnx` beside its `.manifest.json`; pass their paths directly to ROS.
+The commands below use the frozen Repose files already present on this machine:
 
-```bash
-python3 scripts/artifacts.py import --name repose --task-family repose \
-  --policy /path/to/model.onnx --encoder /path/to/theia-tiny.onnx
+```text
+artifacts/models/repose-v9.3/model_59999.onnx
+artifacts/models/repose-v9.3/model_59999.manifest.json
+artifacts/encoders/theia-tiny.onnx
+artifacts/encoders/theia-tiny.manifest.json
 ```
 
-Keep each ONNX beside its exporter-generated `.manifest.json`. Import preserves
-their bytes in ignored `artifacts/`; no models are stored in this Git repository.
-Pre-exported Hugging Face downloads are pending publication. Local exports work now.
+`artifacts/` is ignored by Git. Exports can live elsewhere—absolute paths work too.
+Pre-exported Hugging Face downloads are pending publication.
 
 ## usage
 
-Run from the workspace root in each terminal, with an Xbox-compatible gamepad.
+Run from `~/vibe_ws` in each terminal, with an Xbox-compatible gamepad connected.
+
+### Repose · V9.3
+
+Terminal 1 — simulator:
 
 ```bash
-# terminal 1 — simulator
-./run.sh sim repose
-
-# terminal 2 — encoder + tracker
-./run.sh tracker repose --motion /path/to/motion.npz
+./unitree_mujoco/simulate/build/unitree_mujoco -r g1 -i 1 -n lo \
+  -s "$PWD/generated/repose/g1_repose.xml" --use_joystick 1 \
+  --camera_width 112 --camera_height 63 --camera_fps 50 \
+  --camera_depth_width 112 --camera_depth_height 63 \
+  --camera_textures 0 --camera_visual_groups 1
 ```
 
-The same tracker flow supports Repose, UoLM and PerLoco (OmRe/Grail); select the
-corresponding exports with `--task-family repose|uolm|perloco`. Preserve any
-motion companion files beside `motion.npz`. Dodge remains loadable, with no
-dedicated task scene in this release.
-
-### sledgehammer · V9.3
-
-The optional frozen cube planner supplies the motion. Use three terminals:
+Terminal 2 — encoder + tracker:
 
 ```bash
-./run.sh sim repose                       # terminal 1
-./run.sh tracker repose --with-planner    # terminal 2; waits for terminal 3
-./run.sh planner repose                   # terminal 3
+source setup_local.sh
+ros2 launch cpp_control g1_vibe_sonic.launch.py \
+  policy_path:=models/repose-v9.3/model_59999.onnx \
+  encoder_path:=encoders/theia-tiny.onnx \
+  planner:=true goal_color:=4 \
+  stand_yaw_teleop:=true stand_walk_teleop:=true \
+  stand_walk_motion:="$PWD/cyclonedds_ws/install/sledgehammer/share/sledgehammer/data/sys1_walk/walk_forward_amateur_001__A001/motion.npz"
+```
+
+Terminal 3 — planner:
+
+```bash
+source setup_local.sh
+ros2 launch sledgehammer planner.launch.py env:=sim goal_color:=4
 ```
 
 | control | action |
 |---|---|
 | **RB** | enter stand; disarm an active rollout |
-| **A** | arm the planner from stand |
-| `--goal-color` | `0` red · `1` orange · `2` green · `3` yellow · `4` blue · `5` pink |
+| **A** | arm from stand, once the planner is available |
+| `goal_color` | `0` red · `1` orange · `2` green · `3` yellow · `4` blue · `5` pink |
 
-Use the same experiment and goal color in the tracker and planner terminals.
-Planner loss stops the supervised tracker launch; restart it explicitly.
-For this machine's frozen reference exports, use `repose-v9.3` as the experiment.
+Set the same `goal_color` in terminals 2 and 3. The tracker exits if a connected
+planner stops publishing status for one second; ROS launch then stops the encoder
+and bridge. Restart terminal 2 explicitly after restarting the planner.
+
+### tracker only
+
+Use the simulator above and start only the encoder + tracker in terminal 2:
+
+```bash
+source setup_local.sh
+ros2 launch cpp_control g1_vibe_sonic.launch.py \
+  policy_path:=/path/to/policy.onnx encoder_path:=/path/to/encoder.onnx \
+  motion_path:=/path/to/motion.npz
+```
+
+For Repose, UoLM and PerLoco (OmRe/Grail): **RB** stand, **L1** prep, **A** run.
+Keep the motion's contact/object sidecars beside it. For the generic G1 floor
+scene, use `generated/g1/g1.xml` in terminal 1 and omit the two Repose render flags.
+Dodge remains loadable, with no dedicated task scene in this release.
 
 ### test
 
 ```bash
-python3 scripts/doctor.py --experiment repose
-bash scripts/regression.sh                 # requires the frozen V9.3 model files
+python3 scripts/doctor.py
+bash scripts/regression.sh
 ```
 
-Automated checks, current results and the final joystick gate:
-[docs/testing.md](docs/testing.md). Camera/cube alignment:
-[docs/parity.md](docs/parity.md). Export contracts:
-[docs/compatibility.md](docs/compatibility.md).
+These defaults check the frozen Repose files above. Automated checks and the
+joystick gate: [docs/testing.md](docs/testing.md). Camera/cube alignment:
+[docs/parity.md](docs/parity.md). Export contracts: [docs/compatibility.md](docs/compatibility.md).
 
 ## modules
 

@@ -118,10 +118,7 @@ def main():
     print('ONNX exports stay in ignored artifacts/.')
     if args.profile == 'sim' and 'doctor' in selected:
         print('Scene: ' + str(ROOT / 'generated/repose/g1_repose.xml'))
-        print('Terminal 1: ./run.sh sim repose-v9.3')
-        print('Import policy/encoder exports before launching; see README.md#exports.')
-        print('Terminal 2: ./run.sh tracker repose-v9.3 --with-planner')
-        print('Terminal 3: ./run.sh planner repose-v9.3')
+        print('Direct simulator and ROS commands: README.md#usage')
 
 
 if __name__ == '__main__':

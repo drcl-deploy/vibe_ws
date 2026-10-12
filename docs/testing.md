@@ -9,7 +9,7 @@ joystick rollout and onboard/offboard hardware checks remain pending. See
 ```bash
 source setup_local.sh
 python3 -m unittest discover -s tests -v
-python3 scripts/doctor.py --experiment repose-v9.3
+python3 scripts/doctor.py
 bash scripts/regression.sh
 python3 tests/planner_graph_smoke.py
 cd cyclonedds_ws
@@ -22,10 +22,12 @@ both simulator camera tests, V9.3 planning over packaged frames/walk, four model
 hashes and four packaged NPZ hashes. Historical dataset hashes are also checked
 when present; a fresh checkout does not need the retargeted dataset.
 
-The graph smoke uses loopback domain 93, test low-state/controller-status messages,
-and a dummy supervised process. It checks QoS compatibility, disarmed startup,
-controller and low-state loss, disarmed reconnect, and planner loss. It launches
-no tracker, sends no joystick events and is not a closed-loop control test.
+The graph smoke uses loopback domain 93. It first checks planner QoS and stale
+state/controller gates using test messages. It then removes those publishers
+and starts the actual cpp_control tracker/encoder launch to verify that the
+native heartbeat check shuts down both processes when the planner exits.
+No joystick events are sent, no physical robot is connected, and no closed-loop
+control result is claimed. Run this separately from the operator experiment.
 
 Bridge runtime tests and all nine planner tests pass. cpp_control and
 vision_encoders retain pre-existing lint-suite failures; the full colcon result
@@ -46,25 +48,22 @@ Fresh OS provisioning and `--system` apt installation were not executed here.
 
 ## operator gate
 
-Attach the physical gamepad and use the three-terminal V9.3 flow:
-
-```bash
-./run.sh sim repose-v9.3
-./run.sh tracker repose-v9.3 --with-planner
-./run.sh planner repose-v9.3
-```
+Attach the physical gamepad and run the three direct commands in
+[README.md](../README.md#repose--v93): the simulator executable, the cpp_control
+ROS launch, and the sledgehammer ROS launch. Each command runs in its own terminal.
 
 Use the established simulator/gamepad startup sequence, then **RB** for nominal
 stand and **A** to arm. Verify **RB** disarms and re-arming starts a fresh episode.
-Repeat the same scene reset for colors 0–5 (pass the same `--goal-color` to both
+Repeat the same scene reset for colors 0–5 (pass the same `goal_color:=` to both
 tracker and planner), including an approach case. Record duration, falls,
 interventions and planner/controller telemetry. No success-rate threshold has
 been invented in place of these measurements.
 
-The tracker wrapper waits for a V9.3 planner heartbeat before starting. Losing
-that heartbeat for one second stops its whole launch, matching the former
-combined launch's process shutdown. This is not a commanded damping transition;
-verify the platform's command-loss behavior in the operator/hardware gate.
+The tracker starts independently and refuses **A** until planner status is fresh.
+After a planner has connected, one second without status shuts down the C++
+tracker; its ROS launch then stops the encoder and bridge. This retains process
+shutdown without a wrapper and is not a commanded damping transition. Verify
+the platform's command-loss behavior in the operator/hardware gate.
 The planner stops reference publication when controller status or low-state is
 stale. A stalled camera retains the original V9.3 behavior: depleted visual
 evidence requests a nominal stand at an act boundary.

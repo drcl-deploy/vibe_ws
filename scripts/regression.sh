@@ -9,7 +9,7 @@ mkdir -p ".migration/$phase"
 exec > >(tee ".migration/$phase/regression.log") 2>&1
 export PYTHONDONTWRITEBYTECODE=1
 python3 -m unittest discover -s tests -v
-python3 scripts/experiment.py repose-v9.3
+python3 scripts/doctor.py
 ctest --test-dir unitree_mujoco/simulate/build --output-on-failure
 cyclonedds_ws/build/cpp_control/deploy_selftest \
   artifacts/models/repose-v9.3/model_59999.onnx

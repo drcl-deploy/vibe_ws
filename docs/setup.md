@@ -35,36 +35,38 @@ the host NVIDIA driver remains a prerequisite. Scene generation uses `.venv/`.
 
 ## artifacts
 
+Keep policy and encoder exports unchanged, each beside its `.manifest.json`.
+The ROS launch takes `policy_path:=...` and `encoder_path:=...` directly. Relative
+paths resolve under `VIBE_ASSET_ROOT`; absolute paths can point at the training
+repo's exports without copying or registering them.
+
 ```text
-artifacts/                         ignored, local deployment inputs
-  models/<hash>/                   policy ONNX + manifest
-  encoders/<hash>/                 encoder ONNX + manifest
-  experiments/<name>.yaml          selection of those two exports
+artifacts/                          ignored local exports
+  models/repose-v9.3/                frozen policy ONNX + manifest
+  encoders/                         encoder ONNX + manifest
 cyclonedds_ws/src/sledgehammer/data/  versioned planner NPZ payload
 ```
 
-`artifacts/` is a storage location, not a modified export format. Import checks
-policy/encoder token shapes and copies both pairs unchanged. A same-name import
-with identical inputs is repeatable; different inputs need a new name.
+`setup_local.sh` sets `VIBE_ASSET_ROOT` to the workspace's `artifacts/`. Set
+`VIBE_ARTIFACT_ROOT` before sourcing to select another storage root. Preserve
+motion contact/object sidecars beside any `motion.npz` you pass to the tracker.
+
+`artifacts.lock.json` records the historical V9.3 model hashes. A fresh export
+can use the same launch directly, but is not automatically that frozen baseline.
+Check an explicit pair without starting nodes:
 
 ```bash
-python3 scripts/artifacts.py import --name my-run --task-family perloco \
-  --policy /path/to/policy.onnx --encoder /path/to/encoder.onnx
-./run.sh tracker my-run --motion /path/to/motion.npz
+python3 scripts/doctor.py --policy /path/to/policy.onnx --encoder /path/to/encoder.onnx
 ```
 
-Keep the motion's contact/object sidecars alongside it. Set `VIBE_ARTIFACT_ROOT`
-to select another storage root. `VIBE_ASSET_ROOT` is the compatibility alias set
-by the environment scripts. Explicit YAML paths resolve name ambiguity.
+Hugging Face publication is pending. The setup-only downloader accepts a lock
+with immutable HF revisions and SHA-256 hashes:
 
-The tracked `experiments/repose-v9.3.yaml` selects the exact historical regression
-exports; `artifacts.lock.json` records their hashes. A fresh export can be used
-under another experiment name, but is not automatically that frozen baseline.
+```bash
+python3 scripts/artifacts.py --lock /path/to/published-lock.json
+```
 
-If pre-exported models are published on Hugging Face, the intended release unit
-is the policy, matching encoder and both manifests. `scripts/artifacts.py fetch
---lock <file>` accepts only immutable HF commit IDs and SHA-256 checksums. No
-published ONNX download lock exists yet, and installation does not upload files.
+No published ONNX download lock exists yet. Installation does not upload files.
 
 ## profiles
 
@@ -74,11 +76,10 @@ published ONNX download lock exists yet, and installation does not upload files.
 ```
 
 For onboard operation, set `VIBE_ROBOT_INTERFACE` to the robot-facing interface
-and source `setup.sh`; `VIBE_PROFILE=onboard ./run.sh tracker <experiment>` uses
-that profile. Offboard setup uses `VIBE_ROBOT_HOST` and `source setup.sh offboard`.
+and source `setup.sh onboard`; then use the same `ros2 launch cpp_control`
+command shown in the README. For the planner, select `env:=real`. Offboard setup uses `VIBE_ROBOT_HOST` and `source setup.sh offboard`.
 See the bridge package documentation for telemetry-client launch options.
 
 Simulation uses domain 1 on loopback, onboard uses domain 0 on the explicit robot
-interface, and offboard telemetry uses domain 71. The simulator wrappers always
-select loopback. Foxy-compatible interfaces are preserved, but only the Humble
+interface, and offboard telemetry uses domain 71. The documented simulator command selects loopback. Foxy-compatible interfaces are preserved, but only the Humble
 simulation build has been exercised here; Jetson/Foxy hardware gates remain open.

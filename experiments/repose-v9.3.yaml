@@ -1,7 +1,0 @@
-schema: vibe.experiment.v1
-task_family: repose
-policy: models/repose-v9.3/model_59999.onnx
-encoder: encoders/theia-tiny.onnx
-scene: repose
-goal_color: 4
-planner: v9.3

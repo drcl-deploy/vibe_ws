@@ -4,16 +4,38 @@
 import argparse
 import json
 import hashlib
+import os
 from pathlib import Path
 import subprocess
 
-from experiment import ROOT, load
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def check_exports(policy, encoder):
+    """Check the two explicit exporter pairs without creating a descriptor."""
+    metadata = []
+    for path in [policy, encoder]:
+        path = Path(path).expanduser().resolve(strict=True)
+        if path.suffix != '.onnx' or not path.is_file():
+            raise ValueError('Expected an ONNX file: ' + str(path))
+        metadata.append(json.loads(path.with_suffix('.manifest.json').read_text()))
+    pm, em = metadata
+    if pm.get('schema') != 'vibe.onnx.v1' or em.get('schema') != 'vision.onnx.v1':
+        raise ValueError('Unsupported policy or encoder manifest schema')
+    ports = {port['name']: port['shape'] for port in pm['inputs']}
+    tokens = em['outputs']['patch_tokens']
+    if ports.get('kv_tokens__img_tokens') != [tokens['num'], tokens['dim']]:
+        raise ValueError('Policy and encoder patch-token shapes differ')
+    if 'q_cls' in ports and ports['q_cls'] != [em['outputs'].get('cls_token', {}).get('dim')]:
+        raise ValueError('Policy and encoder CLS shapes differ')
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--profile', choices=['sim', 'onboard', 'offboard'], default='sim')
-    parser.add_argument('--experiment', default='repose-v9.3')
+    artifacts = Path(os.environ.get('VIBE_ARTIFACT_ROOT', os.environ.get('VIBE_ASSET_ROOT', ROOT / 'artifacts')))
+    parser.add_argument('--policy', type=Path, default=artifacts / 'models/repose-v9.3/model_59999.onnx')
+    parser.add_argument('--encoder', type=Path, default=artifacts / 'encoders/theia-tiny.onnx')
     parser.add_argument('--build-only', action='store_true')
     args = parser.parse_args()
     failures = []
@@ -46,9 +68,9 @@ def main():
             failures.append('Planner data: ' + str(error))
     if not args.build_only and args.profile != 'offboard':
         try:
-            selected = load(args.experiment)
-            print('OK policy: ' + selected['policy'])
-            print('OK encoder: ' + selected['encoder'])
+            check_exports(args.policy, args.encoder)
+            print('OK policy: ' + str(args.policy))
+            print('OK encoder: ' + str(args.encoder))
         except (OSError, ValueError, KeyError) as error:
             failures.append('Artifacts: ' + str(error))
     for failure in failures:

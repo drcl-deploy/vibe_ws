@@ -99,3 +99,27 @@ The operator joystick gate is deferred to the end at the user's request.
   clean-OS provisioning and onboard/offboard hardware validation remain open.
 - Hugging Face ONNX publication is pending. Local exporter imports are usable;
   no policy/encoder binaries have been committed or uploaded.
+
+## Direct ROS workflow revision
+
+The operator requested native executable/ROS commands instead of a runtime script
+API. Work is isolated on `refactor/direct-ros-workflow` (workspace/controller)
+and `docs/direct-ros-workflow` (planner documentation).
+
+- Removed `run.sh`, its Python dispatcher/supervisor, named experiment descriptors,
+  descriptor resolution and the export import API. Exports are used directly.
+- Retained installation, pinned downloads and checks as setup/test utilities.
+- Moved the existing one-second planner heartbeat guard into the C++ tracker.
+  It starts independently, refuses arming until status arrives, and exits on
+  subsequent heartbeat loss; ROS launch stops its encoder/bridge siblings.
+- README usage now shows the simulator executable, `ros2 launch cpp_control`,
+  and `ros2 launch sledgehammer` explicitly. Earlier phase notes above record
+  the superseded workflow, not another supported runtime entry point.
+- The joystick is visible at `/dev/input/js0`; the operator rollout is pending.
+- Validation: focused Humble build passed; 14 workspace tests; both camera
+  tests; real-policy inference; CUDA; V9.3 with zero failures; all 63 historical
+  and four packaged data hashes. Native tracker/encoder shutdown was exercised
+  on isolated domain 93 with no joystick input. All nine planner tests pass;
+  cpp_control retains its existing lint failures. Logs: `.migration/direct-ros-workflow/`.
+- This revision is committed on the local review branches; the operator can
+  test the built checkout before publishing or merging them.
