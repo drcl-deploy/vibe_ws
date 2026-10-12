@@ -33,3 +33,17 @@ The operator joystick gate is deferred to the end at the user's request.
   CUDA provider; all 63 hashes. Runtime RPATH resolves only the selected SDK
   and MuJoCo trees. Evidence: `.migration/phase3/`.
 - Clean-checkout replay and final operator flows are reserved for Phase 6.
+
+## Phase 4 — planner extraction
+
+- Planner sources, headers, configurations, utilities, documentation and self-tests
+  now belong to sledgehammer. cpp_control exports its shared deployment libraries
+  and retains tracker/control implementations and ROS interface names.
+- Legacy planner launch names forward to the optional sledgehammer package.
+- All 17 C++ algorithm/header/test files compare exactly after only include-path
+  normalization. Tracker and shared utility implementations were not changed.
+- Fresh cpp_control products replace archived pre-extraction build/install trees.
+- Validation: 16 workspace tests; camera tests; real-policy smoke; V9.3 using
+  original retargeted frames and walk (zero failures); CUDA; 63 file hashes;
+  all eight sledgehammer CTests. cpp_control retains its failing lint suites.
+- Evidence and rollback products: `.migration/phase4/`.

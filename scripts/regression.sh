@@ -13,8 +13,8 @@ python3 scripts/experiment.py repose-v9.3
 ctest --test-dir unitree_mujoco/simulate/build --output-on-failure
 cyclonedds_ws/build/cpp_control/deploy_selftest \
   artifacts/models/repose-v9.3/model_59999.onnx
-cyclonedds_ws/build/cpp_control/repose_planner_selftest \
-  --config cyclonedds_ws/src/cpp_control/config/repose_planner/g1_sim_v9_3.yaml \
+cyclonedds_ws/build/sledgehammer/repose_planner_selftest \
+  --config cyclonedds_ws/src/sledgehammer/config/repose_planner/g1_sim_v9_3.yaml \
   --table artifacts/data/sys1_clips.npz \
   --library artifacts/data/sys1_library.npz \
   --frames artifacts/data/retargeted_motions \
