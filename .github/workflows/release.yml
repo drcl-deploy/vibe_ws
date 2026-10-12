@@ -7,6 +7,8 @@ on:
 
 jobs:
   release:
+    # Inherited Unitree release automation; inactive in vibe_ws.
+    if: github.repository == 'unitreerobotics/unitree_ros2'
     runs-on: ubuntu-latest
 
     steps:

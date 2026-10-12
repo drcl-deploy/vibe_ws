@@ -1,69 +1,100 @@
-# ViBe workspace
+# vibe_ws
 
-Deploy exported ViBe policies on the Unitree G1 with ROS 2 and Unitree MuJoCo.
-The workspace composes independently versioned simulator, assets, controller,
-encoder and transport repositories. The optional frozen Repose V9.3 planner
-will ship separately as [sledgehammer](https://github.com/drcl-deploy/sledgehammer).
+[![Project](https://img.shields.io/badge/Project-Page-brightgreen)](https://lok-i.github.io/vibe-control/)
+[![Training](https://img.shields.io/badge/Training-vibe-blue)](https://github.com/lok-i/vibe)
 
-This checkout is under staged release migration. The one-command installer and
-final tracker quick start are not yet implemented. Phase 1 and the automated
-camera/scene parity fixes are complete; Phases 2–6 remain. Current evidence, build
-instructions and remaining gates are in [the migration record](docs/migration.md).
+ROS 2 deployment for **ViBe**: vision-conditioned whole-body trackers on the Unitree G1.
+Training and ONNX export live in [vibe](https://github.com/lok-i/vibe).
 
-## Sources
+## install
 
-With Git, Git LFS, Python 3 with PyYAML, and vcstool installed:
+Tested on Ubuntu 22.04 / ROS Humble with NVIDIA CUDA. Source import requires Git,
+Git LFS, Python with PyYAML, and vcstool.
 
 ```bash
-git clone https://github.com/drcl-deploy/vibe_ws.git
-cd vibe_ws
-python3 scripts/sources.py import
+git clone https://github.com/drcl-deploy/vibe_ws && cd vibe_ws
+python3 scripts/sources.py import    # pinned module repositories
 python3 scripts/sources.py check
 ```
 
-`sources.repos` pins exact commits. Import creates missing repositories and
-refuses changed or mismatched existing checkouts; it never resets local work.
-Unitree ROS interfaces are inherited from the tested Unitree workspace in this
-repository's history. Child implementations remain in their own repositories.
+build steps and host dependencies: [docs/migration.md](docs/migration.md#rebuild-this-host-checkpoint).
 
-## Layout
+The installer and downloadable deployment bundles are still being packaged.
+The example below requires the built workspace and local V9.3 artifacts;
+cloning alone does not fetch the models or planner data.
+
+## usage
+
+### Repose · V9.3
+
+Run from the workspace root in each terminal, with an Xbox-compatible gamepad connected.
+
+```bash
+# generate the G1 + cube scene once; prints the simulator's XML path
+PYTHONPATH=assets/src python3 -m assets.repose_scene \
+  --robot-xml unitree_mujoco/unitree_robots/g1/g1_29dof_with_camera.xml \
+  --out-dir generated/repose
+```
+
+```bash
+# terminal 1 — simulator
+unitree_mujoco/simulate/build/unitree_mujoco -r g1 -i 1 -n lo \
+  -s "$PWD/generated/repose/g1_repose.xml" --use_joystick 1 \
+  --camera_width 112 --camera_height 63 --camera_fps 50 \
+  --camera_depth_width 112 --camera_depth_height 63 \
+  --camera_textures 0 --camera_visual_groups 1
+```
+
+```bash
+# terminal 2 — encoder, tracker and planner
+source setup_local.sh
+ros2 launch cpp_control g1_repose_planner.launch.py \
+  artifact_dir:="$PWD/artifacts/models/repose-v9.3" \
+  planner_config:="$PWD/cyclonedds_ws/src/cpp_control/config/repose_planner/g1_sim_v9_3.yaml" \
+  env:=sim camera_ip:=127.0.0.1 enable_bridge:=true goal_color:=4
+```
+
+| control | action |
+|---|---|
+| **RB** | enter stand; disarm an active rollout |
+| **A** | arm the planner from stand |
+| `goal_color` | `0` red · `1` orange · `2` green · `3` yellow · `4` blue · `5` pink |
+
+The current launch starts the planner inside `cpp_control`. Its move to
+[sledgehammer](https://github.com/drcl-deploy/sledgehammer) is pending;
+the tracker stays in `cpp_control`.
+
+### artifacts
 
 ```text
-assets/                         simulation objects and scene-generation tools
-unitree_mujoco/                  simulator and G1 model
-cyclonedds_ws/src/
-  unitree/                      Unitree ROS messages (tracked here)
-  cpp_control/                  tracker and controller
-  vision_encoders/              CUDA vision encoder
-  cdr_tcp_bridge/               optional onboard/offboard telemetry
-  sledgehammer/                 reserved for planner extraction
-artifacts/                      local ONNX exports and processed data
-generated/                      generated object models and scenes
-profiles/                       sim, onboard and offboard environments
+artifacts/
+  models/repose-v9.3/     policy ONNX + manifest
+  encoders/              encoder ONNX + manifest
+  data/                  current V9.3 planner tables and motion frames
+generated/repose/        generated G1 + cube XML
 ```
 
-## Environment after building
+`setup_local.sh` selects loopback / DDS domain 1 and prints the resolved paths.
+`VIBE_ASSET_ROOT` defaults to `artifacts/`; set `VIBE_ARTIFACT_ROOT` before sourcing
+to use another directory. Keep each ONNX file and its matching manifest together.
 
-```bash
-source setup_local.sh
-```
+export compatibility: [docs/compatibility.md](docs/compatibility.md).
 
-Simulation uses DDS domain 1 and loopback. `VIBE_ASSET_ROOT` points at
-`artifacts/`; `VIBE_ARTIFACT_ROOT` optionally selects another artifact root.
-The environment script prints resolved addresses and paths.
+### test
 
-Onboard/offboard environment profiles are explicit, but hardware validation is
-still pending:
+automated checks and joystick regression: [docs/migration.md](docs/migration.md#automated-regression).
+camera, cube and encoder parity results: [docs/parity.md](docs/parity.md).
+The live joystick regression is still pending.
 
-```bash
-export VIBE_ROBOT_INTERFACE=enp3s0  # replace with the actual robot interface
-source setup.sh onboard
+## modules
 
-# On the offboard machine:
-export VIBE_ROBOT_HOST=192.168.123.10  # replace with the actual onboard host
-source setup.sh offboard
-```
+| repo | owns |
+|---|---|
+| [cpp_control](https://github.com/drcl-deploy/cpp_control) | tracker and robot control |
+| [vision_encoders](https://github.com/drcl-deploy/vision_encoders) | CUDA image encoding |
+| [unitree_mujoco](https://github.com/lok-i/unitree_mujoco) | simulator and G1 model |
+| [assets](https://github.com/drcl-deploy/assets) | objects and scene generation |
+| [cdr_tcp_bridge](https://github.com/lok-i/cdr_tcp_bridge) | onboard/offboard telemetry |
+| [sledgehammer](https://github.com/drcl-deploy/sledgehammer) | optional frozen cube planner; extraction pending |
 
-The main release target is tracker deployment. Dodge-specific simulation is
-deferred; controller support remains available. The legacy combined V9.3
-launch remains the migration regression until planner extraction is validated.
+source pins: [sources.repos](sources.repos). Release progress: [docs/migration.md](docs/migration.md#remaining-phases).

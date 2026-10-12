@@ -88,4 +88,5 @@ parity fix. The new generator is tested against that actual primitive builder.
 are done. Still pending: Phase 2 artifact descriptor/path wiring; Phase 3
 resumable installer and clean-machine dependencies; Phase 4 planner extraction;
 Phase 5 frozen planner payload; Phase 6 final launch flows and deployment gates.
-New module fixes and source pins are local checkpoints, not published releases.
+Module fixes are kept on separate branches and pinned by `sources.repos`.
+The workspace snapshot is a development checkpoint, not a completed release.

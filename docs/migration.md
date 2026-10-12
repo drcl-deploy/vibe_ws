@@ -12,7 +12,9 @@ The original `~/unitree_ros2` source checkout is preserved. All new source,
 builds, artifacts, generated scenes and logs live under `~/vibe_ws`.
 The root inherits tested workspace commit
 `8d0066efecac04706598305fe4010a68c1234631`; independent module revisions are in
-`sources.repos`. All five pins are advertised by their public remotes.
+`sources.repos`. The five runtime repositories are pinned separately from the
+`sledgehammer` documentation scaffold; planner extraction has not started.
+Module sources remain outside root Git, including the nested planner clone.
 The camera hotfix is published on `lok-i/unitree_mujoco:fix/vibe-camera-fov`
 at `5d35e648f2348cbfed4accd541873db620392224`; it is not merged into main.
 
