@@ -47,3 +47,18 @@ The operator joystick gate is deferred to the end at the user's request.
   original retargeted frames and walk (zero failures); CUDA; 63 file hashes;
   all eight sledgehammer CTests. cpp_control retains its failing lint suites.
 - Evidence and rollback products: `.migration/phase4/`.
+
+## Phase 5 — frozen planner payload
+
+- sledgehammer owns four NPZ files: clips, library, baked frames and approach walk
+  (10.9 MB total), installed with the ROS package and independently checksummed.
+- V9.3 defaults to the baked loader. All four arrays match the Phase 0 snapshot
+  byte-for-byte, including all 10,980 rows and their contact commands.
+- This check exposed a relocation omission: the motion copies lacked sibling
+  contact files, silently zeroing 1,249 contact values. Earlier smoke-test passes
+  did not establish complete data parity. Sidecars were restored before baking;
+  no planner algorithm changed. Their provenance hashes accompany the bundle.
+- Validation: V9.3 with the packaged baked frames and walk, zero failures;
+  all nine sledgehammer CTests; 16 workspace tests; both camera tests; real-policy
+  smoke; CUDA provider; 63 historical and four packaged payload hashes.
+- Evidence: `.migration/phase5/`. The operator gate remains deferred.
