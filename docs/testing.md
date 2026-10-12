@@ -31,6 +31,19 @@ Bridge runtime tests and all nine planner tests pass. cpp_control and
 vision_encoders retain pre-existing lint-suite failures; the full colcon result
 is not green. No hardware validation is inferred from simulation or file checks.
 
+## fresh-checkout replay
+
+The published workspace was cloned into `/tmp/vibe-release-replay` and completed
+all installer stages on the same ROS host. Sources and runtime dependencies were
+downloaded; scenes and binaries were built there. A second source/build/doctor
+pass verified resumability. Only the four frozen model files were supplied from
+local storage; no historical retargeted dataset or previous build was reused.
+
+All 18 workspace tests, both camera tests, V9.3, policy inference, CUDA, file
+hashes and the isolated disconnect graph passed. Package results reproduce the
+known lint failures. Runtime and build paths contain neither earlier workspace.
+Fresh OS provisioning and `--system` apt installation were not executed here.
+
 ## operator gate
 
 Attach the physical gamepad and use the three-terminal V9.3 flow:

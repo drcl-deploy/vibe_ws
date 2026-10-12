@@ -73,12 +73,29 @@ The operator joystick gate is deferred to the end at the user's request.
   process shutdown behavior; it does not invent a robot damping transition.
 - The planner now rejects stale controller status as well as stale low-state.
   This lifecycle fix is separate from the unchanged algorithm extraction.
-- Validation so far: 18 workspace tests; both camera tests; real-policy and V9.3
+- Development-checkout validation: 18 workspace tests; both camera tests; real-policy and V9.3
   data checks; CUDA provider; installed data hashes; launch argument resolution;
   isolated domain-93 QoS, arming/status loss, low-state loss, disarmed reconnect
   and planner-loss supervision tests. No joystick events or control nodes were
   used in that isolated graph test.
-- Fresh-checkout replay is the next automated gate. Physical joystick rollout,
-  clean-OS provisioning and onboard/offboard hardware validation are still open.
+- Fresh public clone `/tmp/vibe-release-replay` completed every installer stage
+  on the existing ROS host, then repeated source import/build/doctor successfully.
+  No prebuilt workspace products or training dataset were copied into that clone.
+  The four frozen model files were supplied locally because ONNX publication is
+  pending; the normal exporter import also passed twice with unchanged bytes.
+- Fresh-build regression: 18 workspace tests, both real camera tests, V9.3 with
+  packaged data, real-policy smoke, CUDA, four model hashes and four data hashes
+  all pass. The isolated disconnect graph also passes from this checkout.
+- Fresh runtime/library paths and CMake caches contain no references to either
+  earlier workspace or `/opt/unitree_robotics`. System ROS, graphics and host
+  NVIDIA libraries remain shared prerequisites; this is not a clean-OS test.
+- Final focused package result: 961 entries, 0 errors, 853 lint failures, 57
+  skips. All nine sledgehammer tests and bridge runtime tests pass. Existing
+  cpp_control/vision_encoders lint failures are preserved, not waived.
+- Root ownership audit covers 201 tracked paths: no child sources, ONNX, NPZ,
+  generated scenes or build trees. Published dependency pins are fetchable.
+  Original workspace commits and working-tree statuses still match Phase 0.
+- All six implementation phases are complete. Physical joystick rollout,
+  clean-OS provisioning and onboard/offboard hardware validation remain open.
 - Hugging Face ONNX publication is pending. Local exporter imports are usable;
   no policy/encoder binaries have been committed or uploaded.
