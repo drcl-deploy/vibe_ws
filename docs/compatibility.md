@@ -46,7 +46,9 @@ numerical equivalence, complete C++ observation equivalence, or closed-loop pari
 
 ## Differences found in the Phase 1 snapshot
 
-The camera, cube and encoder issues below have since received local fixes;
+The camera and encoder issues below received local fixes. The native scene
+now preserves Phase 0 physics after a training-timestep change caused damping
+instability; exact training contact/solver parity is not the native contract;
 see [parity.md](parity.md) for exact checks and remaining limits. The public
 clone now carries a local correction to `BIG_CUBE_MASS = 0.62369`; the
 published reference at `ed4ee6c` still says 1.5 kg until that fix is published.

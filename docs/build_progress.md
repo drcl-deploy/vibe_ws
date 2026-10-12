@@ -1,6 +1,7 @@
 # Release build progress
 
-The operator joystick gate is deferred to the end at the user's request.
+The first operator joystick run exposed a generated-scene damping regression.
+The native correction is described below; the operator rerun remains pending.
 
 ## Phase 2 — artifact wiring
 
@@ -123,3 +124,31 @@ and `docs/direct-ros-workflow` (planner documentation).
   cpp_control retains its existing lint failures. Logs: `.migration/direct-ros-workflow/`.
 - This revision is committed on the local review branches; the operator can
   test the built checkout before publishing or merging them.
+
+
+## Native scene dynamics correction
+
+- The operator found heavy vibration under Y damping. Earlier parity work had
+  changed the timestep from 2 to 5 ms, integration/solver settings, cube contacts
+  and floor appearance. Previous automated checks had missed dynamic settling.
+- Restored Phase 0 native physics, cube inertia/friction and the original flat
+  grid floor/lighting. Kept the 0.62369 kg cube, colored visual faces and 42.5°
+  camera; no controller gains or G1 actuators changed.
+- A 15-second MuJoCo 3.3.6 `kd=5` simulation reproduces the regression: final
+  joint-speed RMS 10.4636 rad/s before the fix, 0.0152809 after it. Restored
+  qpos/qvel match Phase 0 at every step with maximum difference zero.
+- Added compiled native robot/contact/damping checks to the routine regression.
+  The deterministic test does not cover DDS scheduling or closed-loop inference.
+- Generated scenes now live under `~/.local/share/vibe/scenes/<checkout>/`
+  (honoring XDG_DATA_HOME), with the ignored `generated` shortcut retaining the
+  direct executable commands. Setup prints the actual file paths. Storage tests
+  cover preservation of local files and separation of relocated/copied checkouts.
+- Evidence and pre-fix XML: `.migration/native-scene-dynamics/`. Restart the
+  running simulator to load the repaired scene, then repeat the joystick gate.
+- Validation: 16 workspace tests, 10 assets tests, the native damping check,
+  both simulator camera tests and the generated scene's actual RGB-D stream
+  pass. Policy inference, CUDA provider, V9.3 (zero failures), all 63 historical
+  hashes and four planner payload hashes pass. Assets' Python tests use host
+  MuJoCo 3.3.5; all native dynamics and stream checks use pinned C++ 3.3.6.
+- The original unitree_ros2 checkout is untouched. Fixes are committed locally
+  on the workspace review branch and assets' `fix/native-scene-dynamics` branch.

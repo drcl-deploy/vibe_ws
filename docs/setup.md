@@ -21,7 +21,13 @@ system packages already exist. Run from a fresh shell without another ROS overla
 The full command runs these in order. Sources are pinned commits; an existing
 dirty or mismatched checkout stops setup without resetting local work. Dependency
 scripts reuse verified downloads. Generated scenes contain local absolute paths:
-rerun `--stage scene` after moving the workspace. Paths printed during setup:
+rerun `--stage scene` after moving the workspace. XML files live in
+`$XDG_DATA_HOME/vibe/scenes/<checkout>/` (default `~/.local/share/vibe/scenes/`).
+Each checkout gets its own directory, avoiding stale mesh paths between clones.
+`generated/` is an ignored symlink, so the direct launch commands stay the same.
+Setup prints the resolved paths; inspect them with `realpath generated/repose/g1_repose.xml`.
+Regeneration replaces generated XML; keep experimental edits under a different filename.
+The first migration preserves the existing directory's other files. Launch shortcuts:
 
 ```text
 generated/g1/g1.xml                 G1 camera + floor

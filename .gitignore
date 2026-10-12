@@ -8,7 +8,7 @@
 
 # Downloaded artifacts, generated state and local migration evidence.
 /artifacts/
-/generated/
+/generated
 /.deps/
 /.migration/
 **/build/

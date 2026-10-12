@@ -117,7 +117,7 @@ def main():
     print('\nCompleted stages: ' + ', '.join(selected))
     print('ONNX exports stay in ignored artifacts/.')
     if args.profile == 'sim' and 'doctor' in selected:
-        print('Scene: ' + str(ROOT / 'generated/repose/g1_repose.xml'))
+        print('Scene: ' + str((ROOT / 'generated/repose/g1_repose.xml').resolve()))
         print('Direct simulator and ROS commands: README.md#usage')
 
 

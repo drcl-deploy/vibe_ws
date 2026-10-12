@@ -10,6 +10,14 @@ exec > >(tee ".migration/$phase/regression.log") 2>&1
 export PYTHONDONTWRITEBYTECODE=1
 python3 -m unittest discover -s tests -v
 python3 scripts/doctor.py
+# Compile against the exact MuJoCo used by the simulator, not a Python wheel.
+c++ -std=c++17 -O2 tests/integration/native_scene_check.cpp \
+  -I.deps/mujoco-3.3.6/include -L.deps/mujoco-3.3.6/lib \
+  "-Wl,-rpath,$root/.deps/mujoco-3.3.6/lib" -lmujoco \
+  -o ".migration/$phase/native_scene_check"
+".migration/$phase/native_scene_check" \
+  unitree_mujoco/unitree_robots/g1/g1_29dof_with_camera.xml \
+  generated/repose/g1_repose_robot.xml generated/repose/g1_repose.xml
 ctest --test-dir unitree_mujoco/simulate/build --output-on-failure
 cyclonedds_ws/build/cpp_control/deploy_selftest \
   artifacts/models/repose-v9.3/model_59999.onnx

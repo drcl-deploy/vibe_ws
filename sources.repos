@@ -2,7 +2,7 @@ repositories:
   assets:
     type: git
     url: https://github.com/drcl-deploy/assets.git
-    version: 34f59845ca8b0518bb7735c523caabad372d548d
+    version: 99c71244a8e954a30ec7cb0f7f66a4703a6a06ce
   unitree_mujoco:
     type: git
     url: https://github.com/lok-i/unitree_mujoco.git

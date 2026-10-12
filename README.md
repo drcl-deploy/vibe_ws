@@ -17,7 +17,8 @@ git clone https://github.com/drcl-deploy/vibe_ws && cd vibe_ws
 
 Fetches pinned modules, installs dependencies, generates the scenes and builds
 the simulator and ROS packages. Generated XML paths are printed. ROS must already
-be installed. Resume stages and onboard setup: [docs/setup.md](docs/setup.md).
+be installed. XML lives in `~/.local/share/vibe/scenes/<checkout>/`, linked as
+`generated/` here. Resume stages and onboard setup: [docs/setup.md](docs/setup.md).
 
 ### models
 
@@ -72,6 +73,7 @@ ros2 launch sledgehammer planner.launch.py env:=sim goal_color:=4
 
 | control | action |
 |---|---|
+| **Y** | damping |
 | **RB** | enter stand; disarm an active rollout |
 | **A** | arm from stand, once the planner is available |
 | `goal_color` | `0` red · `1` orange · `2` green · `3` yellow · `4` blue · `5` pink |

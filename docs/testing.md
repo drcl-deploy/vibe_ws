@@ -1,7 +1,8 @@
 # testing
 
-The automated migration gates pass on Ubuntu 22.04 / ROS Humble. The physical
-joystick rollout and onboard/offboard hardware checks remain pending. See
+The automated gates run on Ubuntu 22.04 / ROS Humble. The first operator run
+exposed unstable damping in the generated scene; the native physics correction
+now has a settling regression. The operator rerun and hardware checks remain pending. See
 [build progress](build_progress.md) for phase-by-phase evidence and known limits.
 
 ## automated
@@ -18,7 +19,8 @@ colcon test-result --verbose
 ```
 
 The frozen regression checks real policy inference, CUDA provider availability,
-both simulator camera tests, V9.3 planning over packaged frames/walk, four model
+both simulator camera tests, a 15-second native `kd=5` damping simulation,
+V9.3 planning over packaged frames/walk, four model
 hashes and four packaged NPZ hashes. Historical dataset hashes are also checked
 when present; a fresh checkout does not need the retargeted dataset.
 
@@ -51,6 +53,10 @@ Fresh OS provisioning and `--system` apt installation were not executed here.
 Attach the physical gamepad and run the three direct commands in
 [README.md](../README.md#repose--v93): the simulator executable, the cpp_control
 ROS launch, and the sledgehammer ROS launch. Each command runs in its own terminal.
+
+After restarting the simulator with the regenerated scene, press **Y** and
+check that the fallen robot settles without persistent vibration. The offline
+check uses the same damping torque law but does not exercise DDS/thread timing.
 
 Use the established simulator/gamepad startup sequence, then **RB** for nominal
 stand and **A** to arm. Verify **RB** disarms and re-arming starts a fresh episode.

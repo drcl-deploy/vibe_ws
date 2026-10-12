@@ -6,7 +6,8 @@
 - The Repose tracker remains in `cpp_control`; only its planner moves to
   `sledgehammer`. Preserve V9.3 behavior during extraction.
 - Keep downloaded models/data in ignored `artifacts/`, generated scenes in
-  ignored `generated/`, and local migration evidence in ignored `.migration/`.
+  `$XDG_DATA_HOME/vibe/scenes/` (default `~/.local/share/vibe/scenes/`) with an ignored
+  `generated` symlink per checkout, and local migration evidence in ignored `.migration/`.
 - Preserve ROS Foxy/Humble compatibility, snake_case ROS topics/YAML keys,
   two-space C++ indentation and the inherited formatting conventions.
 - Use focused colcon builds/tests. Run the V9.3 regression after each phase;
