@@ -47,7 +47,7 @@ _vibe_setup_environment() {
   export BRIDGE_ROS_DOMAIN_ID="$bridge_domain_id"
   export CYCLONEDDS_URI="<CycloneDDS><Domain><General><Interfaces><NetworkInterface name=\"$interface\" priority=\"default\" multicast=\"default\" /></Interfaces></General></Domain></CycloneDDS>"
   unset ROS_LOCALHOST_ONLY
-  echo "Vibe $profile: DDS domain $domain_id, interface $interface"
+  echo "ViBe $profile: DDS domain $domain_id, interface $interface"
   echo "Artifacts: $VIBE_ASSET_ROOT"
   echo "Camera: $camera_address:5555; bridge: $bridge_address:5556 (offboard domain $bridge_domain_id)"
 }

@@ -1,12 +1,13 @@
-# Vibe workspace
+# ViBe workspace
 
-Deploy exported Vibe policies on the Unitree G1 with ROS 2 and Unitree MuJoCo.
+Deploy exported ViBe policies on the Unitree G1 with ROS 2 and Unitree MuJoCo.
 The workspace composes independently versioned simulator, assets, controller,
 encoder and transport repositories. The optional frozen Repose V9.3 planner
 will ship separately as [sledgehammer](https://github.com/drcl-deploy/sledgehammer).
 
 This checkout is under staged release migration. The one-command installer and
-final tracker quick start are not yet implemented. Current evidence, build
+final tracker quick start are not yet implemented. Phase 1 and the automated
+camera/scene parity fixes are complete; Phases 2–6 remain. Current evidence, build
 instructions and remaining gates are in [the migration record](docs/migration.md).
 
 ## Sources

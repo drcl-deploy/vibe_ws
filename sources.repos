@@ -2,11 +2,11 @@ repositories:
   assets:
     type: git
     url: https://github.com/drcl-deploy/assets.git
-    version: cc719481812cb6a5ba4c3299b36b7397314c3712
+    version: 34f59845ca8b0518bb7735c523caabad372d548d
   unitree_mujoco:
     type: git
     url: https://github.com/lok-i/unitree_mujoco.git
-    version: 5d35e648f2348cbfed4accd541873db620392224
+    version: 6c8be631ba7f372f5f2523e7aea92cf3f02ddee7
   cyclonedds_ws/src/cdr_tcp_bridge:
     type: git
     url: https://github.com/lok-i/cdr_tcp_bridge.git
@@ -14,7 +14,7 @@ repositories:
   cyclonedds_ws/src/vision_encoders:
     type: git
     url: https://github.com/drcl-deploy/vision_encoders.git
-    version: 70fce2c8415f6ca9d620fb34025cea926fa05ad4
+    version: 7e575c57e769155cfe99d76644eb263718a8dccb
   cyclonedds_ws/src/cpp_control:
     type: git
     url: https://github.com/drcl-deploy/cpp_control.git

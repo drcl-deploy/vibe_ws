@@ -4,6 +4,10 @@ Phase 1 has passed its automated relocation gates on Ubuntu 22.04 / ROS Humble.
 The operator joystick regression is deferred to the end at the user's request.
 No live rollout, hardware test, or full release acceptance is claimed.
 
+A subsequent parity checkpoint corrects native camera rendering, encoder
+sampling/precision, and the generated Repose cube; see [parity fixes](parity.md).
+The original Phase 1 baseline remains commit `75cbb033a0e1f54f882328ee2920d2306711ed02`.
+
 The original `~/unitree_ros2` source checkout is preserved. All new source,
 builds, artifacts, generated scenes and logs live under `~/vibe_ws`.
 The root inherits tested workspace commit
@@ -17,7 +21,7 @@ at `5d35e648f2348cbfed4accd541873db620392224`; it is not merged into main.
 - `artifacts.lock.json` records the byte-identical V9.3 migration payload:
   policy, encoder, clip/library tables, walking motion and 56 retargeted files.
   These are local copies, not links into the training or original workspace.
-- `artifacts/` is compatible with public Vibe's exporter conventions. See
+- `artifacts/` is compatible with public ViBe's exporter conventions. See
   [the compatibility audit](compatibility.md) for contract checks and the separate
   camera, renderer and cube-physics alignment work required for public parity.
 - The encoder temporarily retains an ignored `models/` copy for its legacy tag
@@ -69,19 +73,19 @@ Generate the scene locally. The generator prints its output, and the last line
 prints the absolute path used by the simulator command below.
 
 ```bash
-PYTHONPATH=assets/src python3 -m assets.cli generate --object cube \
-  --no-decompose --output-root generated/assets
-PYTHONPATH=assets/src python3 -m assets.omni_objects.generate_uolm_scene_xmls \
+PYTHONPATH=assets/src python3 -m assets.repose_scene \
   --robot-xml unitree_mujoco/unitree_robots/g1/g1_29dof_with_camera.xml \
-  --object cube --model hull --generated-root generated/assets \
-  --out-dir generated/scenes
-realpath generated/scenes/g1_29dof_with_camera_cube.xml
+  --out-dir generated/repose
+realpath generated/repose/g1_repose.xml
 ```
 
 Generated XML contains absolute paths into this workspace. Regenerate after
 moving it. No generated scene, model binary or build tree belongs in root Git.
 
 ## Automated regression
+
+The results in this section record Phase 1; later parity results are in
+[parity.md](parity.md).
 
 ```bash
 cd ~/vibe_ws
@@ -120,7 +124,10 @@ Simulator terminal:
 ```bash
 cd ~/vibe_ws
 unitree_mujoco/simulate/build/unitree_mujoco -r g1 -i 1 -n lo \
-  -s "$PWD/generated/scenes/g1_29dof_with_camera_cube.xml" --use_joystick 1
+  -s "$PWD/generated/repose/g1_repose.xml" --use_joystick 1 \
+  --camera_width 112 --camera_height 63 --camera_fps 50 \
+  --camera_depth_width 112 --camera_depth_height 63 \
+  --camera_textures 0 --camera_visual_groups 1
 ```
 
 ROS terminal (legacy combined planner launch until extraction):

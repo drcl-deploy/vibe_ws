@@ -1,4 +1,4 @@
-# Public Vibe compatibility
+# Public ViBe compatibility
 
 The training/export reference is [lok-i/vibe](https://github.com/lok-i/vibe),
 commit `ed4ee6c581af9a7effcb53ee219d10784a839ca3`. A separate reference checkout
@@ -9,7 +9,7 @@ runtime source in `sources.repos`.
 ## Artifact boundary
 
 `artifacts/` is a storage root. Copy the exporter outputs unchanged, retaining
-the `.onnx` and matching `.manifest.json` pair. Public Vibe permits an explicit
+the `.onnx` and matching `.manifest.json` pair. Public ViBe permits an explicit
 export output directory; its default `exports/` name is not a runtime contract.
 Do not rewrite the embedded manifests, input ports, history layout, joint order,
 action scaling, or encoder preprocessing to accommodate deployment paths.
@@ -43,7 +43,12 @@ ownership explicit without changing array values or dropping frame dependencies.
 These checks establish artifact/loader compatibility, not checkpoint-to-ONNX
 numerical equivalence, complete C++ observation equivalence, or closed-loop parity.
 
-## Known differences to resolve in a separate behavior gate
+## Differences found in the Phase 1 snapshot
+
+The camera, cube and encoder issues below have since received local fixes;
+see [parity.md](parity.md) for exact checks and remaining limits. The public
+clone now carries a local correction to `BIG_CUBE_MASS = 0.62369`; the
+published reference at `ed4ee6c` still says 1.5 kg until that fix is published.
 
 | Area | Public reference | Frozen deployment baseline |
 |---|---|---|
@@ -69,5 +74,5 @@ a separate checkpoint so relocation regressions remain distinguishable.
 
 Exact file bytes are enforceable with hashes. Literal bit-for-bit trajectories
 across different simulators/providers are not a defensible release promise:
-public Vibe's `docs/export.md` itself notes MuJoCo Warp nondeterminism and FSQ
+public ViBe's `docs/export.md` itself notes MuJoCo Warp nondeterminism and FSQ
 token sensitivity. Record numerical tolerances and observed behavior separately.

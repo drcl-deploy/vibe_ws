@@ -1,4 +1,4 @@
-# Vibe deployment commands
+# ViBe deployment commands
 
 Current `vibe_ws` build and regression commands are maintained in
 [the migration record](../migration.md). Public training/export compatibility
