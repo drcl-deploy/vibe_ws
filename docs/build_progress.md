@@ -152,3 +152,23 @@ and `docs/direct-ros-workflow` (planner documentation).
   MuJoCo 3.3.5; all native dynamics and stream checks use pinned C++ 3.3.6.
 - The original unitree_ros2 checkout is untouched. Fixes are committed locally
   on the workspace review branch and assets' `fix/native-scene-dynamics` branch.
+
+
+## Default planner console and two usage paths
+
+- README usage now starts with adapter tracking (two terminals), followed by
+  cube Repose with the planner (three terminals). Both show direct executable
+  and ROS commands.
+- `ros2 launch sledgehammer planner.launch.py env:=sim` opens the existing
+  console in the invoking terminal by default. `env:=real` uses the same TTY
+  path for onboard SSH/tmux. Color keys publish on the existing shared target
+  topic; initial blue remains explicit in the tracker command.
+- Both planner log streams stay in the ROS launch log while the console draws.
+  q/Ctrl-C stop planner and console together and restore terminal settings.
+  `console:=false` supports unattended launches; a missing TTY also skips the UI.
+- Validation: focused Humble build and all nine sledgehammer package tests pass,
+  including V9.3 with frozen data. The PTY smoke passes sim/real launches,
+  numeric/named colors, R, q/Ctrl-C cleanup and headless startup on isolated DDS
+  domain 94. It sends no joystick, low-state or controller commands; this is
+  terminal/ROS validation, not onboard hardware acceptance.
+- Evidence: `.migration/planner-console/`. Changes are committed locally.

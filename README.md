@@ -40,7 +40,32 @@ Pre-exported Hugging Face downloads are pending publication.
 
 Run from `~/vibe_ws` in each terminal, with an Xbox-compatible gamepad connected.
 
-### Repose · V9.3
+### adapter tracker · two terminals
+
+Terminal 1 — simulator:
+
+```bash
+./unitree_mujoco/simulate/build/unitree_mujoco -r g1 -i 1 -n lo \
+  -s "$PWD/generated/g1/g1.xml" --use_joystick 1 \
+  --camera_width 112 --camera_height 63 --camera_fps 50 \
+  --camera_depth_width 112 --camera_depth_height 63
+```
+
+Terminal 2 — encoder + adapter tracker:
+
+```bash
+source setup_local.sh
+ros2 launch cpp_control g1_vibe_sonic.launch.py \
+  policy_path:=/path/to/policy.onnx encoder_path:=/path/to/encoder.onnx \
+  motion_path:=/path/to/motion.npz
+```
+
+For Repose, UoLM and PerLoco (OmRe/Grail): **RB** stand, **L1** prep, **A** run;
+**Y** damping. Use the scene and reference motion for your export, keeping the
+motion's contact/object sidecars beside it. Cube tracking uses the Repose scene
+and render flags below. Dodge has no dedicated task scene in this release.
+
+### cube Repose with planner · three terminals
 
 Terminal 1 — simulator:
 
@@ -64,41 +89,31 @@ ros2 launch cpp_control g1_vibe_sonic.launch.py \
   stand_walk_motion:="$PWD/cyclonedds_ws/install/sledgehammer/share/sledgehammer/data/sys1_walk/walk_forward_amateur_001__A001/motion.npz"
 ```
 
-Terminal 3 — planner:
+Terminal 3 — planner + interactive console:
 
 ```bash
 source setup_local.sh
-ros2 launch sledgehammer planner.launch.py env:=sim goal_color:=4
+ros2 launch sledgehammer planner.launch.py env:=sim
 ```
 
-| control | action |
+The console opens in terminal 3. Press **0–5** or **r/o/g/y/b/p** to choose
+red/orange/green/yellow/blue/pink; each selection updates both planner and tracker.
+The commands above start with blue. **R** resets the current target's trial.
+
+| gamepad | action |
 |---|---|
 | **Y** | damping |
 | **RB** | enter stand; disarm an active rollout |
 | **A** | arm from stand, once the planner is available |
-| `goal_color` | `0` red · `1` orange · `2` green · `3` yellow · `4` blue · `5` pink |
 
-Set the same `goal_color` in terminals 2 and 3. The tracker exits if a connected
-planner stops publishing status for one second; ROS launch then stops the encoder
-and bridge. Restart terminal 2 explicitly after restarting the planner.
+Onboard over SSH/tmux, source `setup.sh onboard` and use the same planner command
+with `env:=real`. The console uses that terminal; select targets live as in sim.
+Use `console:=false` for an unattended planner. **q** or **Ctrl-C** stops the
+planner and console. The tracker exits after one second without planner status;
+its ROS launch stops the encoder and bridge. Restart terminal 2 after restarting
+the planner. Onboard setup: [docs/setup.md](docs/setup.md#profiles).
 
-### tracker only
-
-Use the simulator above and start only the encoder + tracker in terminal 2:
-
-```bash
-source setup_local.sh
-ros2 launch cpp_control g1_vibe_sonic.launch.py \
-  policy_path:=/path/to/policy.onnx encoder_path:=/path/to/encoder.onnx \
-  motion_path:=/path/to/motion.npz
-```
-
-For Repose, UoLM and PerLoco (OmRe/Grail): **RB** stand, **L1** prep, **A** run.
-Keep the motion's contact/object sidecars beside it. For the generic G1 floor
-scene, use `generated/g1/g1.xml` in terminal 1 and omit the two Repose render flags.
-Dodge remains loadable, with no dedicated task scene in this release.
-
-### test
+## test
 
 ```bash
 python3 scripts/doctor.py

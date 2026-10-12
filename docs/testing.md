@@ -13,6 +13,7 @@ python3 -m unittest discover -s tests -v
 python3 scripts/doctor.py
 bash scripts/regression.sh
 python3 tests/planner_graph_smoke.py
+python3 tests/planner_console_smoke.py
 cd cyclonedds_ws
 colcon test --packages-select cdr_tcp_bridge vision_encoders cpp_control sledgehammer
 colcon test-result --verbose
@@ -51,7 +52,7 @@ Fresh OS provisioning and `--system` apt installation were not executed here.
 ## operator gate
 
 Attach the physical gamepad and run the three direct commands in
-[README.md](../README.md#repose--v93): the simulator executable, the cpp_control
+[README.md](../README.md#cube-repose-with-planner--three-terminals): the simulator executable, the cpp_control
 ROS launch, and the sledgehammer ROS launch. Each command runs in its own terminal.
 
 After restarting the simulator with the regenerated scene, press **Y** and
@@ -60,8 +61,8 @@ check uses the same damping torque law but does not exercise DDS/thread timing.
 
 Use the established simulator/gamepad startup sequence, then **RB** for nominal
 stand and **A** to arm. Verify **RB** disarms and re-arming starts a fresh episode.
-Repeat the same scene reset for colors 0–5 (pass the same `goal_color:=` to both
-tracker and planner), including an approach case. Record duration, falls,
+Repeat the same scene reset for colors 0–5 (select each target in terminal 3's
+console), including an approach case. Record duration, falls,
 interventions and planner/controller telemetry. No success-rate threshold has
 been invented in place of these measurements.
 
@@ -88,3 +89,8 @@ ships those contacts directly, without needing the training dataset checkout.
 Model byte identity is checked separately from numerical inference and behavior.
 Public ViBe export compatibility does not promise bit-identical trajectories
 across MuJoCo Warp, native MuJoCo and different inference providers.
+
+The console smoke test uses PTYs and loopback domain 94. It exercises default
+sim/real console launches, numeric and named target keys, trial reset, q/Ctrl-C
+shutdown, terminal restoration and `console:=false`. It sends no joystick,
+low-state or controller commands and does not validate onboard hardware.
