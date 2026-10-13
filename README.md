@@ -57,7 +57,7 @@ ros2 launch cpp_control g1_vibe_sonic.launch.py \
 | `repose` | Double cube frontflip |
 | `uolm` | Suitcase |
 
-### with planner (cube repose)
+### with planner (cube repose only)
 
 ```bash
 # terminal 1: simulator + cube

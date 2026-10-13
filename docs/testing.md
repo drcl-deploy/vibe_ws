@@ -72,7 +72,7 @@ trial has not been established.
 
 ## manual planner
 
-Use the three [planner commands](../README.md#with-planner-cube-repose), which
+Use the three [planner commands](../README.md#with-planner-cube-repose-only), which
 select `generated/repose/g1_repose.xml`. **RB** stands/disarms, **A** arms, **Y**
 damps. Select the target in the console before arming. Exercise targets 0–5,
 a fresh trial, and an approach case.
@@ -98,8 +98,9 @@ public availability of every review pin remain separate publication checks.
 
 The runtime recovery build passed the full automated regression, sample launches,
 planner graph/console checks and focused cpp_control/sledgehammer CTests.
-Recovery and regression logs are under `.migration/runtime-recovery/`; manual
-task completion and hardware acceptance remain separate.
+Recovery and regression logs are under `.migration/runtime-recovery/`. The
+operator also confirmed all four README samples and the planner working in
+simulation on 2026-10-13. Hardware acceptance remains pending.
 
 Current sample-build logs are under `.migration/samples-*`. Earlier phase results
 remain in [build progress](build_progress.md) and [migration history](migration.md).
