@@ -36,7 +36,7 @@ Run from `~/vibe_ws` in each terminal, with the gamepad connected.
 |---|---|
 | `walk` · Grail curbs | `models/perloco-grail/model_14999.onnx` |
 | `parkour` · OmRe climb | `models/perloco-omre/model_14999.onnx` |
-| `repose` · cube frontflip | `models/repose/model_59999.onnx` |
+| `repose` · double cube frontflip | `models/repose/model_59999.onnx` |
 | `uolm` · suitcase | `models/uolm/model_24999.onnx` |
 
 ```bash
@@ -56,14 +56,14 @@ sample=walk
 ros2 launch cpp_control g1_vibe_sonic.launch.py \
   policy_path:=models/perloco-grail/model_14999.onnx \
   encoder_path:=encoders/theia-tiny.onnx \
-  motion_path:="$PWD/data/sample/$sample/motion.npz" goal_color:=3
+  motion_path:="$PWD/data/sample/$sample/motion.npz" goal_color:=5
 ```
 
 > [!NOTE]
 > **RB** stand → **L1** prep → **A** run · **Y** damping.
 >
 > Match `sample` in both terminals and select its policy from the table.
-> The Repose clip targets yellow (`goal_color:=3`); other samples ignore this argument.
+> The Repose clip targets pink (`goal_color:=5`); other samples ignore this argument.
 > Keep the motion sidecars together. [Sample details](data/sample/README.md).
 
 ### with planner for cube-repose

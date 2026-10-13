@@ -7,7 +7,7 @@ training checkout or `assets` package is required.
 |---|---|---|
 | `walk` | Grail `curb_111/level_0.00/sample0` | Two curbs, robot at sample0's recorded offset/yaw |
 | `parkour` | OmniRetarget `climb_16/level_1.00/sample0` | Climb from the 56 mm deck |
-| `repose` | `custom/cube_frontflip/sample1` | Cube at the clip's first pose; goal yellow (3) |
+| `repose` | `custom/cube_frontflip/sample3` | Double frontflip; cube 1 m ahead, blue up → pink (5) |
 | `uolm` | OMOMO `sub1_suitcase_010/sample1` | Suitcase with the original convex decomposition |
 
 `motion.npz` is the reference. Keep `contact_matrix.npz` and `object_motion.npz`
@@ -28,9 +28,9 @@ lists nine starts; this example uses sample0, not their mean. OmRe includes its
 starting deck. The sheets also list rounded construction dimensions; the simulator
 uses the exact exported geometry, not the rounded column.
 
-The planner uses `generated/repose/g1_repose.xml`, preserving its existing cube
-placement. Its motion library remains in `sledgehammer`; it does not use this
-single reference as a replacement library.
+The standalone and planner scenes both start the cube 1 m ahead, blue up.
+The sample retains its original object sidecar. The planner uses
+`generated/repose/g1_repose.xml` and its own library in `sledgehammer`.
 
 To adapt an example, replace its motion and required sidecars together, supply the
 matching geometry/start pose in `samples.json`, and regenerate. That file records

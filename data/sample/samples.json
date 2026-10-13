@@ -34,7 +34,7 @@
       "terrain_export": "exports/omre_terrain"
     },
     "repose": {
-      "source_clip": "retargeted_motions/data/unitree_g1/custom/cube_frontflip/sample1",
+      "source_clip": "retargeted_motions/data/unitree_g1/custom/cube_frontflip/sample3",
       "policy": "models/repose/model_59999.onnx",
       "robot_start": {
         "xy": [
@@ -46,18 +46,18 @@
       },
       "object_start": {
         "pos": [
-          0.5205557346343994,
-          0.03496600314974785,
-          0.37023213505744934
+          1.0,
+          0.0,
+          0.3
         ],
         "quat": [
-          0.015581187792122364,
-          0.71160888671875,
-          0.7022621631622314,
-          0.014064800925552845
+          1.0,
+          0.0,
+          0.0,
+          0.0
         ]
       },
-      "goal_color": 3
+      "goal_color": 5
     },
     "uolm": {
       "source_clip": "retargeted_motions/data/unitree_g1/omomo/sub1_suitcase_010/sample1",
@@ -94,10 +94,10 @@
     "parkour/scene.xml": "81d07b40da38597d65e32b220ae61e09ca71765abf1cd950bd764ed6c24634de",
     "parkour/terrain.json": "89b50a99d14a590c735b624379453e4be96c7f0c9f47454a6363c34f19a6a07d",
     "parkour/terrain.xml": "0af16bf672c4a38434d4e58cff74e0d681434876418514d2d415237687322fe3",
-    "repose/contact_matrix.npz": "3f8806ed0280b2596e46f6ddac2d65b8a438f205a1490b6575b357ea3f4de4de",
+    "repose/contact_matrix.npz": "8bd0d573610263bc9f317b321cb6a9fac9c438dff4d3f96887b7241a2ca4d07d",
     "repose/metadata.json": "c01352fbc9ba0304447c6d45f9937daaf27bd2afceb4c2df61c1237fef058738",
-    "repose/motion.npz": "5357a26611c49c22e646d56646989bed6653d2ab460b4c2b1e8e87631cf0a39e",
-    "repose/object_motion.npz": "bf4f10207f85dc7c2c7ca249c934e5c45796d0bd7f088b4ae0df714bcf91c37c",
+    "repose/motion.npz": "4530c3474bdf8093d65558df16ab6f8b0ae2848799ce2de175258f9699506f0a",
+    "repose/object_motion.npz": "46b63422951c14c21a912761ed6a75657fe05b936fd0d163e85a6b5736d9edd7",
     "repose/scene.xml": "82d56f1f181df6e20cad801226c49a266788ed7750442ec350edd8e67a1ba1b9",
     "uolm/contact_matrix.npz": "375c4652d6dfdd0486fdda33a12f792494fc5785d0f7e1ef01082dd5a9af18e6",
     "uolm/meshes/suitcase.mtl": "bea1989b4d3cd0dc2ecdbc3202c118e316a9d568d2b975d0eea1d0b8c33f34b8",

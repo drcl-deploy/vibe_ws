@@ -34,13 +34,41 @@ class SampleTest(unittest.TestCase):
                 with np.load(folder / 'object_motion.npz', allow_pickle=False) as obj:
                     self.assertEqual(obj['obj_pos_w'].shape, (frames, 3))
                     self.assertEqual(obj['obj_quat_w'].shape, (frames, 4))
-                    np.testing.assert_array_equal(obj['obj_pos_w'][0], samples[name]['object_start']['pos'])
+                    if name == 'uolm':
+                        np.testing.assert_array_equal(obj['obj_pos_w'][0], samples[name]['object_start']['pos'])
+                    # Repose deliberately uses the native 1 m, blue-up start.
+                    # Its original object sidecar remains unchanged.
                 with np.load(folder / 'contact_matrix.npz', allow_pickle=False) as contacts:
                     self.assertIn('body_names', contacts)
                     matrix = contacts['matrix']
                     self.assertEqual(matrix.shape[0], frames)
                     self.assertTrue(np.isin(matrix, [0, 1]).all())
                     self.assertTrue(matrix.any())
+
+    def test_repose_double_frontflip(self):
+        spec = check_samples()['repose']
+        self.assertTrue(spec['source_clip'].endswith('cube_frontflip/sample3'))
+        self.assertEqual(spec['object_start'],
+                         {'pos': [1.0, 0.0, 0.3], 'quat': [1.0, 0.0, 0.0, 0.0]})
+        with np.load(ROOT / 'data/sample/repose/object_motion.npz') as obj:
+            q = obj['obj_quat_w'].astype(float)
+        self.assertEqual(len(q), 384)
+        q /= np.linalg.norm(q, axis=1, keepdims=True)
+        # Replay the recorded rotations starting blue-up (identity), as the scene
+        # does. q(t) * inverse(q(0)) must tip forward twice: blue -> orange -> pink.
+        inverse = q[0].copy()
+        inverse[1:] *= -1
+        w = q[:, 0] * inverse[0] - q[:, 1:] @ inverse[1:]
+        xyz = (q[:, 0, None] * inverse[1:] + inverse[0] * q[:, 1:]
+               + np.cross(q[:, 1:], inverse[1:]))
+        x, y, z = xyz.T
+        up = np.column_stack([2 * (x*z - w*y), -2 * (x*z - w*y),
+                              2 * (y*z + w*x), -2 * (y*z + w*x),
+                              1 - 2 * (x*x + y*y), -(1 - 2 * (x*x + y*y))])
+        colors = np.argmax(up, axis=1)
+        changes = np.r_[True, colors[1:] != colors[:-1]]
+        self.assertEqual(colors[changes].tolist(), [4, 1, 5])
+        self.assertEqual(spec['goal_color'], int(colors[-1]))
 
     def test_portable_generation_and_selected_start(self):
         # A copied checkout with no assets package or training data reachable by path.

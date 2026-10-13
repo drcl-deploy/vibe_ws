@@ -51,7 +51,7 @@ policy in both terminals.
 |---|---|
 | `walk` | Grail sample0 crossing the two curbs from its recorded start |
 | `parkour` | OmRe sample0 climbing from the 56 mm starting deck |
-| `repose` | Cube frontflip toward yellow (`goal_color:=3`) |
+| `repose` | Two consecutive cube frontflips toward pink (`goal_color:=5`), starting 1 m ahead |
 | `uolm` | Suitcase interaction using the supplied contact/object sidecars |
 
 For each: **Y** settles without vibration, **RB** stands, **L1** prepares the

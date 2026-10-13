@@ -1,8 +1,9 @@
 # Release build progress
 
 Current usage is in the root README; entries below preserve the earlier build
-history. The user reported the corrected cube/planner workflow working. The four
-new standalone sample rollouts still need the final operator check.
+history. The user reported the corrected cube/planner workflow working, and
+walk and parkour working after the motion-entry fix.
+The updated Repose sample and UoLM still need operator checks.
 
 ## Self-contained samples — 2026-10-12
 
@@ -223,3 +224,20 @@ and `docs/direct-ros-workflow` (planner documentation).
   package lint failures remain outside this focused runtime check.
 - Evidence: `.migration/motion-path-before/` and `.migration/motion-path-fix/`.
   Restart terminal 2 and repeat RB → L1 → A with the same README commands.
+
+
+## Double-frontflip Repose sample
+
+- Replaced `cube_frontflip/sample1` with the original `sample3` and matching
+  contact/object sidecars: 384 frames at 50 Hz, two consecutive forward tips.
+  All source arrays remain byte-identical; recorded hashes were updated.
+- Restored the standalone cube to the earlier native start: position
+  `(1.0, 0.0, 0.3)`, identity orientation. The previous sample's closer pose came
+  from its recording. The planner scene is byte-identical to its prior version.
+- The reference rotations from the restored blue-up start go blue → orange →
+  pink, so README now uses `goal_color:=5` for the standalone sample.
+- All 19 workspace tests, native dynamics/rendering, four clip playback checks
+  through both joystick paths, CUDA and V9.3 pass. Evidence:
+  `.migration/repose-double/`; previous scene/manifest: `.migration/repose-double-before/`.
+  Synthetic playback does not establish physical task completion. Restart both
+  simulator and tracker for the operator's double-flip check.
