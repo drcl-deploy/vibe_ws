@@ -1,7 +1,38 @@
 # Release build progress
 
-The first operator joystick run exposed a generated-scene damping regression.
-The native correction is described below; the operator rerun remains pending.
+Current usage is in the root README; entries below preserve the earlier build
+history. The user reported the corrected cube/planner workflow working. The four
+new standalone sample rollouts still need the final operator check.
+
+## Self-contained samples — 2026-10-12
+
+- Ship walk (Grail sample0), parkour (OmRe sample0), repose (frontflip sample1)
+  and uolm (suitcase sample1), totaling about 9.3 MB of inputs. Required contact
+  and object sidecars are byte-identical to their source files.
+- Removed the workspace assets checkout, source pin, editable package and its
+  unused Python dependencies. The independent internal training checkout stays
+  intact. Preserved the unpublished assets fix in an external Git bundle.
+- One standard-library scene script composes all four examples. The planner's
+  separate cube start remains unchanged; the deterministic 15-second damping
+  trajectory has maximum qpos/qvel difference 0 against the saved baseline.
+- Removed verified obsolete artifacts/data copies, the old /tmp release replay,
+  and the duplicate temporary Dodge export. Active policies/encoders remain
+  ignored; the sample payload is tracked directly in this repository.
+- Complete installer passes after cleanup. All 18 workspace tests, four policy
+  inference checks, sample camera renders, Repose/UoLM contact checks, CUDA and
+  V9.3 pass. Four isolated sample ROS launches and both planner graph/console
+  checks pass. No joystick input was synthesized.
+- An isolated /tmp replay built a new venv, SDK, simulator and ROS packages and
+  passed the regression without assets. Exact local review commits supplied the
+  sources; model files and the MuJoCo vendor download were reused. ONNX Runtime
+  was downloaded anew. This is a clean build replay, not verification that all
+  review pins are already published or that fresh-OS apt provisioning passes.
+- Package tests reproduce 853 existing lint failures in cpp_control and
+  vision_encoders (961 tests, 57 skipped, no test errors). Bridge/planner runtime
+  tests pass. These independent source repositories were not modified.
+- Evidence: .migration/samples-before, samples-scenes, samples-clean,
+  samples-replay and the samples-{launch,graph,console,package-*}.log files.
+
 
 ## Phase 2 — artifact wiring
 

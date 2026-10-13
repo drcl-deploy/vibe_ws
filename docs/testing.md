@@ -1,96 +1,85 @@
 # testing
 
-The automated gates run on Ubuntu 22.04 / ROS Humble. The first operator run
-exposed unstable damping in the generated scene; the native physics correction
-now has a settling regression. The operator rerun and hardware checks remain pending. See
-[build progress](build_progress.md) for phase-by-phase evidence and known limits.
+Run from the workspace on Ubuntu 22.04 / ROS Humble. Automated checks establish
+build, data, rendering and ROS startup compatibility; joystick task completion
+and onboard/offboard behavior require the operator runs below.
 
 ## automated
 
 ```bash
 source setup_local.sh
-python3 -m unittest discover -s tests -v
-python3 scripts/doctor.py
 bash scripts/regression.sh
+python3 tests/sample_launch_smoke.py
 python3 tests/planner_graph_smoke.py
 python3 tests/planner_console_smoke.py
+```
+
+The regression checks sample hashes and channels, repeatable scene generation,
+all four policy inference paths, Repose/UoLM contacts, rendering each sample,
+CUDA, and the frozen V9.3 planner. Its native 15-second `kd=5` check protects the
+robot, cube, contacts and 2 ms timestep that fixed the damping regression.
+
+The sample launch smoke loads each reference through the actual ROS tracker
+launch on loopback domain 95. It sends no joystick or robot state. The planner
+graph and console tests use domains 93/94 and verify QoS, disconnect handling,
+console input and terminal restoration. Run them separately from manual tests.
+
+Package checks:
+
+```bash
 cd cyclonedds_ws
 colcon test --packages-select cdr_tcp_bridge vision_encoders cpp_control sledgehammer
 colcon test-result --verbose
 ```
 
-The frozen regression checks real policy inference, CUDA provider availability,
-both simulator camera tests, a 15-second native `kd=5` damping simulation,
-V9.3 planning over packaged frames/walk, four model
-hashes and four packaged NPZ hashes. Historical dataset hashes are also checked
-when present; a fresh checkout does not need the retargeted dataset.
+Bridge and planner runtime tests pass. The encoder and cpp_control packages have
+pre-existing lint failures; a successful focused regression does not mean the
+entire colcon lint suite is green.
 
-The graph smoke uses loopback domain 93. It first checks planner QoS and stale
-state/controller gates using test messages. It then removes those publishers
-and starts the actual cpp_control tracker/encoder launch to verify that the
-native heartbeat check shuts down both processes when the planner exits.
-No joystick events are sent, no physical robot is connected, and no closed-loop
-control result is claimed. Run this separately from the operator experiment.
+## manual samples
 
-Bridge runtime tests and all nine planner tests pass. cpp_control and
-vision_encoders retain pre-existing lint-suite failures; the full colcon result
-is not green. No hardware validation is inferred from simulation or file checks.
+Follow the two direct commands in [README](../README.md#without-planner).
+Restart simulator and tracker between samples; select the same sample and its
+policy in both terminals.
 
-## fresh-checkout replay
+| Sample | Observe |
+|---|---|
+| `walk` | Grail sample0 crossing the two curbs from its recorded start |
+| `parkour` | OmRe sample0 climbing from the 56 mm starting deck |
+| `repose` | Cube frontflip toward yellow (`goal_color:=3`) |
+| `uolm` | Suitcase interaction using the supplied contact/object sidecars |
 
-The published workspace was cloned into `/tmp/vibe-release-replay` and completed
-all installer stages on the same ROS host. Sources and runtime dependencies were
-downloaded; scenes and binaries were built there. A second source/build/doctor
-pass verified resumability. Only the four frozen model files were supplied from
-local storage; no historical retargeted dataset or previous build was reused.
+For each: **Y** settles without vibration, **RB** stands, **L1** prepares the
+reference, **A** starts it. Record falls, interventions and motion completion.
+Sample0 is the selected Grail example; its exact identity in the earlier hardware
+trial has not been established.
 
-All 18 workspace tests, both camera tests, V9.3, policy inference, CUDA, file
-hashes and the isolated disconnect graph passed. Package results reproduce the
-known lint failures. Runtime and build paths contain neither earlier workspace.
-Fresh OS provisioning and `--system` apt installation were not executed here.
+## manual planner
 
-## operator gate
+Use the three [planner commands](../README.md#with-planner-for-cube-repose), which
+select `generated/repose/g1_repose.xml`. **RB** stands/disarms, **A** arms, **Y**
+damps. Exercise targets 0–5, a fresh trial, and an approach case.
 
-Attach the physical gamepad and run the three direct commands in
-[README.md](../README.md#cube-repose-with-planner--three-terminals): the simulator executable, the cpp_control
-ROS launch, and the sledgehammer ROS launch. Each command runs in its own terminal.
+The tracker refuses A until planner status is fresh. Losing a previously seen
+heartbeat for one second shuts down tracker and encoder; this is process shutdown,
+not an active damping command. Validate command-loss behavior on the target robot.
+The planner stops references when low-state or controller status becomes stale.
 
-After restarting the simulator with the regenerated scene, press **Y** and
-check that the fallen robot settles without persistent vibration. The offline
-check uses the same damping torque law but does not exercise DDS/thread timing.
+Hardware acceptance also includes topic QoS, camera/encoder reconnect, bridge
+disconnect and onboard/offboard command-loss checks. Simulator results do not
+establish hardware acceptance.
 
-Use the established simulator/gamepad startup sequence, then **RB** for nominal
-stand and **A** to arm. Verify **RB** disarms and re-arming starts a fresh episode.
-Repeat the same scene reset for colors 0–5 (select each target in terminal 3's
-console), including an approach case. Record duration, falls,
-interventions and planner/controller telemetry. No success-rate threshold has
-been invented in place of these measurements.
+## clean build replay
 
-The tracker starts independently and refuses **A** until planner status is fresh.
-After a planner has connected, one second without status shuts down the C++
-tracker; its ROS launch then stops the encoder and bridge. This retains process
-shutdown without a wrapper and is not a commanded damping transition. Verify
-the platform's command-loss behavior in the operator/hardware gate.
-The planner stops reference publication when controller status or low-state is
-stale. A stalled camera retains the original V9.3 behavior: depleted visual
-evidence requests a nominal stand at an act boundary.
+The sample checkpoint rebuilt the SDK, simulator and ROS packages in an isolated
+checkout and fresh venv, with no assets package. It passed the same regression.
+Sources came from the exact local review commits, models and the MuJoCo download
+were reused, and ONNX Runtime was downloaded. Fresh-OS `--system` provisioning and
+public availability of every review pin remain separate publication checks.
 
-Hardware acceptance also requires onboard/offboard topic QoS, camera/encoder
-reconnect, bridge disconnect and command-loss checks on the actual platform.
+## evidence
 
-## parity
-
-Phase 5 found that the initial relocation had copied motion files without their
-contact sidecars. The old loader silently zero-filled 1,249 values; its smoke
-tests did not detect that. The source sidecars were restored and all four baked
-arrays now match the Phase 0 snapshot byte-for-byte. sledgehammer's locked bundle
-ships those contacts directly, without needing the training dataset checkout.
-
-Model byte identity is checked separately from numerical inference and behavior.
-Public ViBe export compatibility does not promise bit-identical trajectories
-across MuJoCo Warp, native MuJoCo and different inference providers.
-
-The console smoke test uses PTYs and loopback domain 94. It exercises default
-sim/real console launches, numeric and named target keys, trial reset, q/Ctrl-C
-shutdown, terminal restoration and `console:=false`. It sends no joystick,
-low-state or controller commands and does not validate onboard hardware.
+Current sample-build logs are under `.migration/samples-*`. Earlier phase results
+remain in [build progress](build_progress.md) and [migration history](migration.md).
+Policy bytes are checked separately from numerical/closed-loop behavior; native
+MuJoCo and the training simulator need not produce bit-identical trajectories.

@@ -1,5 +1,8 @@
 # Historical Phase 1 migration checkpoint
 
+> Historical migration record. Commands below describe earlier phases; use
+> [setup.md](setup.md) and the root README for the current sample release.
+
 Current setup: [setup.md](setup.md). Current workflows/tests: [testing.md](testing.md).
 Phases 2–6 supersede the paths and pending-work notes below; see
 [build_progress.md](build_progress.md). This document preserves the original checkpoint.
@@ -99,7 +102,7 @@ source setup_local.sh
 python3 -m unittest discover -s tests -v
 ctest --test-dir unitree_mujoco/simulate/build --output-on-failure
 cyclonedds_ws/build/cpp_control/deploy_selftest \
-  artifacts/models/repose-v9.3/model_59999.onnx
+  artifacts/models/repose/model_59999.onnx
 cyclonedds_ws/build/cpp_control/repose_planner_selftest \
   --config cyclonedds_ws/src/cpp_control/config/repose_planner/g1_sim_v9_3.yaml \
   --table artifacts/data/sys1_clips.npz \
@@ -142,7 +145,7 @@ ROS terminal (legacy combined planner launch until extraction):
 cd ~/vibe_ws
 source setup_local.sh
 ros2 launch cpp_control g1_repose_planner.launch.py \
-  artifact_dir:="$PWD/artifacts/models/repose-v9.3" \
+  artifact_dir:="$PWD/artifacts/models/repose" \
   planner_config:="$PWD/cyclonedds_ws/src/cpp_control/config/repose_planner/g1_sim_v9_3.yaml" \
   env:=sim camera_ip:=127.0.0.1 enable_bridge:=true goal_color:=4
 ```

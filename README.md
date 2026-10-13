@@ -3,73 +3,73 @@
 [![Project](https://img.shields.io/badge/Project-Page-brightgreen)](https://lok-i.github.io/vibe-control/)
 [![Training](https://img.shields.io/badge/Training-vibe-blue)](https://github.com/lok-i/vibe)
 
-ROS 2 deployment for **ViBe**: vision-conditioned whole-body trackers on the Unitree G1.
-Training and ONNX export live in [vibe](https://github.com/lok-i/vibe).
+Deploy **ViBe** trackers on the Unitree G1.
+
+## requirements
+
+- Ubuntu 22.04 + ROS 2 Humble (tested).
+- NVIDIA GPU with a working driver (`nvidia-smi`).
+- Git + Git LFS.
 
 ## install
 
-Ubuntu 22.04 / ROS Humble, an NVIDIA driver, and Git LFS. Start in a fresh shell.
+From a fresh shell:
 
 ```bash
-git clone https://github.com/drcl-deploy/vibe_ws && cd vibe_ws
-./install.sh --system
+git clone https://github.com/drcl-deploy/vibe_ws
+cd vibe_ws
+./install.sh --system  # fetch, generate scenes, build
 ```
 
-Fetches pinned modules, installs dependencies, generates the scenes and builds
-the simulator and ROS packages. Generated XML paths are printed. ROS must already
-be installed. XML lives in `~/.local/share/vibe/scenes/<checkout>/`, linked as
-`generated/` here. Resume stages and onboard setup: [docs/setup.md](docs/setup.md).
-
-### models
-
-Use the policy and matching encoder from [vibe's exporter](https://github.com/lok-i/vibe/blob/main/docs/export.md).
-Keep each `.onnx` beside its `.manifest.json`; pass their paths directly to ROS.
-The commands below use the frozen Repose files already present on this machine:
-
-```text
-artifacts/models/repose-v9.3/model_59999.onnx
-artifacts/models/repose-v9.3/model_59999.manifest.json
-artifacts/encoders/theia-tiny.onnx
-artifacts/encoders/theia-tiny.manifest.json
-```
-
-`artifacts/` is ignored by Git. Exports can live elsewhere—absolute paths work too.
-Pre-exported Hugging Face downloads are pending publication.
+> [!NOTE]
+> Samples are included in `data/sample/`. Place your [policy + encoder exports](https://github.com/lok-i/vibe/blob/main/docs/export.md)
+> in `artifacts/`, keeping each `.onnx` beside its `.manifest.json`.
+> Absolute paths work too.
 
 ## usage
 
-Run from `~/vibe_ws` in each terminal, with an Xbox-compatible gamepad connected.
+Run from `~/vibe_ws` in each terminal, with the gamepad connected.
 
-### adapter tracker · two terminals
+### without planner
 
-Terminal 1 — simulator:
+| Sample | Policy under `artifacts/` |
+|---|---|
+| `walk` · Grail curbs | `models/perloco-grail/model_14999.onnx` |
+| `parkour` · OmRe climb | `models/perloco-omre/model_14999.onnx` |
+| `repose` · cube frontflip | `models/repose/model_59999.onnx` |
+| `uolm` · suitcase | `models/uolm/model_24999.onnx` |
 
 ```bash
+# terminal 1: simulator
+sample=walk  # walk | parkour | repose | uolm
 ./unitree_mujoco/simulate/build/unitree_mujoco -r g1 -i 1 -n lo \
-  -s "$PWD/generated/g1/g1.xml" --use_joystick 1 \
+  -s "$PWD/generated/$sample/scene.xml" --use_joystick 1 \
   --camera_width 112 --camera_height 63 --camera_fps 50 \
-  --camera_depth_width 112 --camera_depth_height 63
+  --camera_depth_width 112 --camera_depth_height 63 \
+  --camera_textures 0 --camera_visual_groups 1
 ```
 
-Terminal 2 — encoder + adapter tracker:
-
 ```bash
+# terminal 2: encoder + tracker
 source setup_local.sh
+sample=walk
 ros2 launch cpp_control g1_vibe_sonic.launch.py \
-  policy_path:=/path/to/policy.onnx encoder_path:=/path/to/encoder.onnx \
-  motion_path:=/path/to/motion.npz
+  policy_path:=models/perloco-grail/model_14999.onnx \
+  encoder_path:=encoders/theia-tiny.onnx \
+  motion_path:="$PWD/data/sample/$sample/motion.npz" goal_color:=3
 ```
 
-For Repose, UoLM and PerLoco (OmRe/Grail): **RB** stand, **L1** prep, **A** run;
-**Y** damping. Use the scene and reference motion for your export, keeping the
-motion's contact/object sidecars beside it. Cube tracking uses the Repose scene
-and render flags below. Dodge has no dedicated task scene in this release.
+> [!NOTE]
+> **RB** stand → **L1** prep → **A** run · **Y** damping.
+>
+> Match `sample` in both terminals and select its policy from the table.
+> The Repose clip targets yellow (`goal_color:=3`); other samples ignore this argument.
+> Keep the motion sidecars together. [Sample details](data/sample/README.md).
 
-### cube Repose with planner · three terminals
-
-Terminal 1 — simulator:
+### with planner for cube-repose
 
 ```bash
+# terminal 1: simulator + cube
 ./unitree_mujoco/simulate/build/unitree_mujoco -r g1 -i 1 -n lo \
   -s "$PWD/generated/repose/g1_repose.xml" --use_joystick 1 \
   --camera_width 112 --camera_height 63 --camera_fps 50 \
@@ -77,63 +77,35 @@ Terminal 1 — simulator:
   --camera_textures 0 --camera_visual_groups 1
 ```
 
-Terminal 2 — encoder + tracker:
-
 ```bash
+# terminal 2: encoder + tracker
 source setup_local.sh
 ros2 launch cpp_control g1_vibe_sonic.launch.py \
-  policy_path:=models/repose-v9.3/model_59999.onnx \
+  policy_path:=models/repose/model_59999.onnx \
   encoder_path:=encoders/theia-tiny.onnx \
   planner:=true goal_color:=4 \
   stand_yaw_teleop:=true stand_walk_teleop:=true \
   stand_walk_motion:="$PWD/cyclonedds_ws/install/sledgehammer/share/sledgehammer/data/sys1_walk/walk_forward_amateur_001__A001/motion.npz"
 ```
 
-Terminal 3 — planner + interactive console:
-
 ```bash
+# terminal 3: planner + console
 source setup_local.sh
 ros2 launch sledgehammer planner.launch.py env:=sim
 ```
 
-The console opens in terminal 3. Press **0–5** or **r/o/g/y/b/p** to choose
-red/orange/green/yellow/blue/pink; each selection updates both planner and tracker.
-The commands above start with blue. **R** resets the current target's trial.
+> [!NOTE]
+> **Gamepad:** **RB** stand/disarm · **A** arm · **Y** damping.
+>
+> **Console:** **0–5** or **r/o/g/y/b/p** target · **R** new trial · **q** quit.
+> Targets update both nodes; the initial target is blue.
+>
+> SSH/tmux onboard: `source setup.sh onboard`, then launch with `env:=real`.
+> Restart the tracker after restarting the planner.
 
-| gamepad | action |
-|---|---|
-| **Y** | damping |
-| **RB** | enter stand; disarm an active rollout |
-| **A** | arm from stand, once the planner is available |
+## docs
 
-Onboard over SSH/tmux, source `setup.sh onboard` and use the same planner command
-with `env:=real`. The console uses that terminal; select targets live as in sim.
-Use `console:=false` for an unattended planner. **q** or **Ctrl-C** stops the
-planner and console. The tracker exits after one second without planner status;
-its ROS launch stops the encoder and bridge. Restart terminal 2 after restarting
-the planner. Onboard setup: [docs/setup.md](docs/setup.md#profiles).
-
-## test
-
-```bash
-python3 scripts/doctor.py
-bash scripts/regression.sh
-```
-
-These defaults check the frozen Repose files above. Automated checks and the
-joystick gate: [docs/testing.md](docs/testing.md). Camera/cube alignment:
-[docs/parity.md](docs/parity.md). Export contracts: [docs/compatibility.md](docs/compatibility.md).
-
-## modules
-
-| repo | owns |
-|---|---|
-| [cpp_control](https://github.com/drcl-deploy/cpp_control) | tracker and robot control |
-| [vision_encoders](https://github.com/drcl-deploy/vision_encoders) | CUDA image encoding |
-| [unitree_mujoco](https://github.com/lok-i/unitree_mujoco) | simulator and G1 model |
-| [assets](https://github.com/drcl-deploy/assets) | objects and scene generation |
-| [cdr_tcp_bridge](https://github.com/lok-i/cdr_tcp_bridge) | onboard/offboard telemetry |
-| [sledgehammer](https://github.com/drcl-deploy/sledgehammer) | optional frozen planner and NPZ data |
-
-Source pins: [sources.repos](sources.repos). Build checkpoints:
-[docs/build_progress.md](docs/build_progress.md).
+- [Setup & deployment](docs/setup.md)
+- [Testing](docs/testing.md)
+- [Export compatibility](docs/compatibility.md)
+- [Pinned dependencies](sources.repos)

@@ -11,6 +11,15 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def check_samples(root=ROOT):
+    folder = root / 'data/sample'
+    manifest = json.loads((folder / 'samples.json').read_text())
+    for relative, expected in manifest['files'].items():
+        if hashlib.sha256((folder / relative).read_bytes()).hexdigest() != expected:
+            raise ValueError('Sample differs from its recorded source: ' + relative)
+    return manifest['samples']
+
+
 def check_exports(policy, encoder):
     """Check the two explicit exporter pairs without creating a descriptor."""
     metadata = []
@@ -34,11 +43,17 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--profile', choices=['sim', 'onboard', 'offboard'], default='sim')
     artifacts = Path(os.environ.get('VIBE_ARTIFACT_ROOT', os.environ.get('VIBE_ASSET_ROOT', ROOT / 'artifacts')))
-    parser.add_argument('--policy', type=Path, default=artifacts / 'models/repose-v9.3/model_59999.onnx')
+    parser.add_argument('--policy', type=Path, help='check one export instead of all sample policies')
     parser.add_argument('--encoder', type=Path, default=artifacts / 'encoders/theia-tiny.onnx')
     parser.add_argument('--build-only', action='store_true')
     args = parser.parse_args()
     failures = []
+    samples = {}
+    try:
+        samples = check_samples()
+        print('OK four sample payloads and source hashes')
+    except (OSError, ValueError, KeyError) as error:
+        failures.append('Samples: ' + str(error))
     required = ['cyclonedds_ws/install/setup.bash',
                 'cyclonedds_ws/install/cdr_tcp_bridge/lib/cdr_tcp_bridge/cdr_tcp_bridge']
     if args.profile in {'sim', 'onboard'}:
@@ -47,13 +62,15 @@ def main():
                      'cyclonedds_ws/install/sledgehammer/lib/sledgehammer/g1_repose_planner_node']
     if args.profile == 'sim':
         required += ['unitree_mujoco/simulate/build/unitree_mujoco', 'generated/repose/g1_repose.xml']
+        required += ['generated/' + name + '/scene.xml' for name in samples]
     for relative in required:
         if not (ROOT / relative).is_file():
             failures.append('Missing: ' + relative)
         else:
             print('OK ' + relative)
-    if args.profile == 'sim' and (ROOT / required[-2]).is_file():
-        result = subprocess.run(['ldd', str(ROOT / required[-2])], capture_output=True, text=True)
+    simulator = ROOT / 'unitree_mujoco/simulate/build/unitree_mujoco'
+    if args.profile == 'sim' and simulator.is_file():
+        result = subprocess.run(['ldd', str(simulator)], capture_output=True, text=True)
         if result.returncode or 'not found' in result.stdout:
             failures.append('Simulator has unresolved libraries: ' + result.stdout)
     if args.profile != 'offboard':
@@ -68,8 +85,10 @@ def main():
             failures.append('Planner data: ' + str(error))
     if not args.build_only and args.profile != 'offboard':
         try:
-            check_exports(args.policy, args.encoder)
-            print('OK policy: ' + str(args.policy))
+            policies = [args.policy] if args.policy else [artifacts / spec['policy'] for spec in samples.values()]
+            for policy in policies:
+                check_exports(policy, args.encoder)
+                print('OK policy: ' + str(policy))
             print('OK encoder: ' + str(args.encoder))
         except (OSError, ValueError, KeyError) as error:
             failures.append('Artifacts: ' + str(error))

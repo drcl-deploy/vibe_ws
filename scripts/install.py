@@ -6,7 +6,6 @@ import json
 import os
 from pathlib import Path
 import shlex
-import shutil
 import subprocess
 import sys
 
@@ -82,7 +81,6 @@ def main():
                 if sys.version_info < (3, 10):
                     raise ValueError('Simulation asset generation requires Python 3.10+; use Humble/22.04')
                 run([sys.executable, '-m', 'pip', 'install', '-r', 'requirements-setup.txt'])
-                run([sys.executable, '-m', 'pip', 'install', '--no-deps', '--no-build-isolation', '-e', 'assets'])
                 sdk_setup(args.jobs)
                 run(['bash', 'unitree_mujoco/scripts/setup_mujoco.sh', '--install-dir', ROOT / '.deps/mujoco-3.3.6'])
             if args.profile in {'sim', 'onboard'}:
@@ -117,7 +115,7 @@ def main():
     print('\nCompleted stages: ' + ', '.join(selected))
     print('ONNX exports stay in ignored artifacts/.')
     if args.profile == 'sim' and 'doctor' in selected:
-        print('Scene: ' + str((ROOT / 'generated/repose/g1_repose.xml').resolve()))
+        print('Sample scenes: ' + str((ROOT / 'generated').resolve()))
         print('Direct simulator and ROS commands: README.md#usage')
 
 

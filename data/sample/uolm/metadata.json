@@ -1,0 +1,13 @@
+{
+    "object_path": "omomo_objects/suitcase/suitcase.obj",
+    "retarget_method": "omni",
+    "retarget_hp": [],
+    "terminal_padded": {
+        "n_frames": 1,
+        "stand_height": 0.74,
+        "urdf": "g1_bm_hand_mesh.urdf",
+        "fk_residual": 5.125171324845874e-07,
+        "length_before": 332,
+        "length_after": 333
+    }
+}

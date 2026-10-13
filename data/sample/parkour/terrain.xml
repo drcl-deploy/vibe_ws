@@ -1,0 +1,11 @@
+<mujoco model="terrain_omni_climb_16_level_1.00">
+  <compiler angle="radian"/>
+
+  <worldbody>
+    <body name="terrain">
+      <geom name="ground" size="3 3 0.25" pos="1.69374 -0.122773 -0.25" quat="0.528034 0 0 -0.849223" type="box" mass="0" rgba="0.35 0.36 0.38 1"/>
+      <geom name="box_0" size="0.352247 0.593258 0.177978" pos="1.9123 0.0588277 0.177978" quat="0.102732 0 0 0.994709" type="box" mass="0" rgba="0.24 0.46 0.86 1"/>
+      <geom name="box_1" size="1.85393 1.85393 0.027809" pos="1.69374 -0.122773 0.027809" quat="0.973868 0 0 -0.227115" type="box" mass="0" rgba="0.24 0.46 0.86 1"/>
+    </body>
+  </worldbody>
+</mujoco>

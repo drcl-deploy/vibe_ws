@@ -112,7 +112,7 @@ def main():
                 node.destroy_publisher(status_pub)
                 tracker = subprocess.Popen([
                     'ros2', 'launch', 'cpp_control', 'g1_vibe_sonic.launch.py',
-                    'policy_path:=' + str(ROOT / 'artifacts/models/repose-v9.3/model_59999.onnx'),
+                    'policy_path:=' + str(ROOT / 'artifacts/models/repose/model_59999.onnx'),
                     'encoder_path:=' + str(ROOT / 'artifacts/encoders/theia-tiny.onnx'),
                     'planner:=true', 'goal_color:=4', 'enable_bridge:=false',
                     'stand_yaw_teleop:=true', 'stand_walk_teleop:=true',

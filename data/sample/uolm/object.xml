@@ -1,0 +1,66 @@
+<mujoco model="suitcase_cvx_dcmp">
+  <asset>
+    <mesh name="suitcase_visual" file="meshes/suitcase.obj" />
+    <mesh name="suitcase_cvx_000" file="meshes/suitcase_cvx_000.obj" />
+    <mesh name="suitcase_cvx_001" file="meshes/suitcase_cvx_001.obj" />
+    <mesh name="suitcase_cvx_002" file="meshes/suitcase_cvx_002.obj" />
+    <mesh name="suitcase_cvx_003" file="meshes/suitcase_cvx_003.obj" />
+    <mesh name="suitcase_cvx_004" file="meshes/suitcase_cvx_004.obj" />
+    <mesh name="suitcase_cvx_005" file="meshes/suitcase_cvx_005.obj" />
+    <mesh name="suitcase_cvx_006" file="meshes/suitcase_cvx_006.obj" />
+    <mesh name="suitcase_cvx_007" file="meshes/suitcase_cvx_007.obj" />
+    <mesh name="suitcase_cvx_008" file="meshes/suitcase_cvx_008.obj" />
+    <mesh name="suitcase_cvx_009" file="meshes/suitcase_cvx_009.obj" />
+    <mesh name="suitcase_cvx_010" file="meshes/suitcase_cvx_010.obj" />
+    <mesh name="suitcase_cvx_011" file="meshes/suitcase_cvx_011.obj" />
+    <mesh name="suitcase_cvx_012" file="meshes/suitcase_cvx_012.obj" />
+    <mesh name="suitcase_cvx_013" file="meshes/suitcase_cvx_013.obj" />
+    <mesh name="suitcase_cvx_014" file="meshes/suitcase_cvx_014.obj" />
+    <mesh name="suitcase_cvx_015" file="meshes/suitcase_cvx_015.obj" />
+    <mesh name="suitcase_cvx_016" file="meshes/suitcase_cvx_016.obj" />
+    <mesh name="suitcase_cvx_017" file="meshes/suitcase_cvx_017.obj" />
+    <mesh name="suitcase_cvx_018" file="meshes/suitcase_cvx_018.obj" />
+    <mesh name="suitcase_cvx_019" file="meshes/suitcase_cvx_019.obj" />
+    <mesh name="suitcase_cvx_020" file="meshes/suitcase_cvx_020.obj" />
+    <mesh name="suitcase_cvx_021" file="meshes/suitcase_cvx_021.obj" />
+    <mesh name="suitcase_cvx_022" file="meshes/suitcase_cvx_022.obj" />
+    <mesh name="suitcase_cvx_023" file="meshes/suitcase_cvx_023.obj" />
+    <mesh name="suitcase_cvx_024" file="meshes/suitcase_cvx_024.obj" />
+    <mesh name="suitcase_cvx_025" file="meshes/suitcase_cvx_025.obj" />
+    <texture name="suitcase_texture" type="2d" file="textures/plastic.png" />
+    <material name="suitcase_material" texture="suitcase_texture" specular="0.25" shininess="0.6" reflectance="0.1" />
+  </asset>
+  <worldbody>
+    <body name="suitcase" pos="0.4803 -0.0100 0.0175" quat="0.6488 0.6423 0.2996 0.2771">
+      <freejoint />
+      <inertial pos="0.0236054 0.195595 -0.0369414" mass="3.265" fullinertia="0.0599506 0.0344171 0.0598409 3.0135e-05 0.00611489 0.000248368" />
+      <geom name="suitcase_visual" type="mesh" mesh="suitcase_visual" contype="0" conaffinity="0" material="suitcase_material" />
+      <geom type="mesh" mesh="suitcase_cvx_000" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_001" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_002" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_003" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_004" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_005" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_006" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_007" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_008" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_009" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_010" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_011" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_012" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_013" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_014" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_015" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_016" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_017" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_018" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_019" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_020" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_021" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_022" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_023" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_024" friction="0.6 0.6 0.0001" group="3" />
+      <geom type="mesh" mesh="suitcase_cvx_025" friction="0.6 0.6 0.0001" group="3" />
+    </body>
+  </worldbody>
+</mujoco>

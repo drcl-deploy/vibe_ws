@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13200 17452" width="100%">
+<rect width="13200" height="17452" fill="#ffffff"/>
+<text x="900.0" y="860.0" font-size="255" font-family="DejaVu Sans Mono, monospace" font-weight="bold" text-anchor="start" fill="#111">climb_16/level_1.00   —   2 part(s), all bottoms on the floor</text>
+<text x="900.0" y="1150.0" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#777">Vibe-PerLoco-OmRe-AdaptSonic-ImgFeat-Ext  |  grid row 0 col 0  |  robot starts at (0,0) facing +X</text>
+<text x="900.0" y="1540.0" font-size="195" font-family="DejaVu Sans Mono, monospace" font-weight="bold" text-anchor="start" fill="#111">PLAN — top view, +X right, +Y up</text>
+<rect x="900.0" y="1800.0" width="6365.6" height="7715.6" fill="#fbfbfa" stroke="#ddd" stroke-width="9.0"/>
+<text x="960.0" y="9455.6" font-size="128" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#aaa">framed on the course; the sim tile is 6000 x 6000 mm</text>
+<polygon points="1600.0,7175.4 4925.4,8815.6 6565.6,5490.2 3240.2,3850.0" fill="#3d75db" fill-opacity="0.45" stroke="#3d75db" stroke-width="12.6"/>
+<line x1="4082.8" y1="3850.0" x2="4082.8" y2="3770.0" stroke="#bbb" stroke-width="5.4"/>
+<text x="4082.8" y="3410.0" font-size="165" font-family="DejaVu Sans Mono, monospace" font-weight="bold" text-anchor="middle" fill="#111">#1</text>
+<text x="4082.8" y="3560.0" font-size="120" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="middle" fill="#444">3708x3708x56</text>
+<text x="4082.8" y="3710.0" font-size="120" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="middle" fill="#c0392b">yaw -26.25°</text>
+<polygon points="4767.4,5642.4 4077.8,5498.5 3835.3,6659.9 4524.9,6803.9" fill="#3d75db" fill-opacity="0.45" stroke="#3d75db" stroke-width="12.6"/>
+<line x1="4301.3" y1="5498.5" x2="4301.3" y2="4858.5" stroke="#bbb" stroke-width="5.4"/>
+<text x="4301.3" y="4498.5" font-size="165" font-family="DejaVu Sans Mono, monospace" font-weight="bold" text-anchor="middle" fill="#111">#0</text>
+<text x="4301.3" y="4648.5" font-size="120" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="middle" fill="#444">704x1187x356</text>
+<text x="4301.3" y="4798.5" font-size="120" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="middle" fill="#c0392b">yaw +168.21°</text>
+<circle cx="2389.0" cy="6210.0" r="80" fill="#111"/>
+<line x1="2389.0" y1="6210.0" x2="2809.0" y2="6210.0" stroke="#111" stroke-width="9.0"/>
+<line x1="2389.0" y1="6210.0" x2="1969.0" y2="6210.0" stroke="#111" stroke-width="9.0"/>
+<line x1="2389.0" y1="6210.0" x2="2389.0" y2="6630.0" stroke="#111" stroke-width="9.0"/>
+<line x1="2389.0" y1="6210.0" x2="2389.0" y2="5790.0" stroke="#111" stroke-width="9.0"/>
+<text x="2389.0" y="6540.0" font-size="135" font-family="DejaVu Sans Mono, monospace" font-weight="bold" text-anchor="middle" fill="#111">ROBOT STARTS HERE — (0,0), facing +X</text>
+<line x1="2389.0" y1="6210.0" x2="2936.5" y2="6262.8" stroke="#1a7f37" stroke-width="18.0"/>
+<polygon points="2936.5,6262.8 2667.2,6347.3 2688.3,6128.3" fill="#1a7f37"/>
+<text x="3136.5" y="6262.8" font-size="135" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#1a7f37">travel</text>
+<text x="900.0" y="10655.6" font-size="195" font-family="DejaVu Sans Mono, monospace" font-weight="bold" text-anchor="start" fill="#111">ELEVATION — robot walks +X (left to right), heights from ground (z=0)</text>
+<line x1="900.0" y1="12731.5" x2="5665.1" y2="12731.5" stroke="#111" stroke-width="13.5"/>
+<rect x="1300.0" y="12675.9" width="3965.1" height="55.6" fill="#3d75db" fill-opacity="0.45" stroke="#3d75db" stroke-width="12.6"/>
+<line x1="5095.1" y1="12731.5" x2="5095.1" y2="12675.9" stroke="#c0392b" stroke-width="5.4"/><line x1="5005.1" y1="12731.5" x2="5185.1" y2="12731.5" stroke="#c0392b" stroke-width="5.4"/><line x1="5005.1" y1="12675.9" x2="5185.1" y2="12675.9" stroke="#c0392b" stroke-width="5.4"/><text x="5095.1" y="12658.7" font-size="150" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="middle" fill="#c0392b">56</text>
+<text x="3282.5" y="12545.9" font-size="165" font-family="DejaVu Sans Mono, monospace" font-weight="bold" text-anchor="middle" fill="#111">#1</text>
+<rect x="3128.3" y="12375.6" width="708.8" height="356.0" fill="#3d75db" fill-opacity="0.45" stroke="#3d75db" stroke-width="12.6"/>
+<line x1="3667.1" y1="12731.5" x2="3667.1" y2="12375.6" stroke="#c0392b" stroke-width="5.4"/><line x1="3577.1" y1="12731.5" x2="3757.1" y2="12731.5" stroke="#c0392b" stroke-width="5.4"/><line x1="3577.1" y1="12375.6" x2="3757.1" y2="12375.6" stroke="#c0392b" stroke-width="5.4"/><text x="3667.1" y="12508.5" font-size="150" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="middle" fill="#c0392b">356</text>
+<text x="3482.7" y="12245.6" font-size="165" font-family="DejaVu Sans Mono, monospace" font-weight="bold" text-anchor="middle" fill="#111">#0</text>
+<line x1="1300.0" y1="13451.5" x2="3837.1" y2="13451.5" stroke="#c0392b" stroke-width="5.4"/><line x1="1300.0" y1="13361.5" x2="1300.0" y2="13541.5" stroke="#c0392b" stroke-width="5.4"/><line x1="3837.1" y1="13361.5" x2="3837.1" y2="13541.5" stroke="#c0392b" stroke-width="5.4"/><text x="2568.5" y="13406.5" font-size="150" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="middle" fill="#c0392b">course 2537</text>
+<text x="900.0" y="14411.5" font-size="195" font-family="DejaVu Sans Mono, monospace" font-weight="bold" text-anchor="start" fill="#111">CUT LIST — 2 part(s), bottom on the floor</text>
+<text x="900.0" y="14671.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="bold" text-anchor="start" fill="#555">part</text>
+<text x="1600.0" y="14671.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="bold" text-anchor="start" fill="#555">cut L x W x H (mm)</text>
+<text x="3500.0" y="14671.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="bold" text-anchor="start" fill="#555">as-built @5mm</text>
+<text x="5500.0" y="14671.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="bold" text-anchor="start" fill="#555">centre X</text>
+<text x="7200.0" y="14671.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="bold" text-anchor="start" fill="#555">centre Y</text>
+<text x="8900.0" y="14671.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="bold" text-anchor="start" fill="#555">yaw</text>
+<text x="10700.0" y="14671.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="bold" text-anchor="start" fill="#555">top</text>
+<line x1="900.0" y1="14741.5" x2="12300.0" y2="14741.5" stroke="#bbb" stroke-width="9.0"/>
+<text x="900.0" y="14971.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#111">#1</text>
+<text x="1600.0" y="14971.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#111">3708 x 3708 x 56</text>
+<text x="3500.0" y="14971.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#111">3710 x 3710 x 55</text>
+<text x="5500.0" y="14971.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#111">1694</text>
+<text x="7200.0" y="14971.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#111">-123</text>
+<text x="8900.0" y="14971.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#111">-26.25°</text>
+<text x="10700.0" y="14971.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#111">56</text>
+<text x="900.0" y="15211.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#111">#0</text>
+<text x="1600.0" y="15211.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#111">704 x 1187 x 356</text>
+<text x="3500.0" y="15211.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#111">705 x 1185 x 355</text>
+<text x="5500.0" y="15211.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#111">1912</text>
+<text x="7200.0" y="15211.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#111">59</text>
+<text x="8900.0" y="15211.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#111">+168.21°</text>
+<text x="10700.0" y="15211.5" font-size="142" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#111">356</text>
+<text x="900.0" y="16751.5" font-size="135" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#777">frame: robot start pose at (0,0), facing +X. z=0 = ground, quat wxyz. drawn TRUE SCALE.</text>
+<text x="900.0" y="16971.5" font-size="135" font-family="DejaVu Sans Mono, monospace" font-weight="normal" text-anchor="start" fill="#777">render_z_scale = 0.75  |  data: /home/loki/drcl_projects/vibe/data/terrain_motions/omni/climb_16/level_1.00</text>
+</svg>

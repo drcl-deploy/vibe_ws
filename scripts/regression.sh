@@ -19,8 +19,23 @@ c++ -std=c++17 -O2 tests/integration/native_scene_check.cpp \
   unitree_mujoco/unitree_robots/g1/g1_29dof_with_camera.xml \
   generated/repose/g1_repose_robot.xml generated/repose/g1_repose.xml
 ctest --test-dir unitree_mujoco/simulate/build --output-on-failure
-cyclonedds_ws/build/cpp_control/deploy_selftest \
-  artifacts/models/repose-v9.3/model_59999.onnx
+python3 - <<'PY'
+from pathlib import Path
+import json
+import os
+import subprocess
+root = Path.cwd()
+artifacts = Path(os.environ.get('VIBE_ARTIFACT_ROOT', root / 'artifacts'))
+samples = json.loads(Path('data/sample/samples.json').read_text())['samples']
+for name, spec in samples.items():
+    command = ['cyclonedds_ws/build/cpp_control/deploy_selftest', str(artifacts / spec['policy'])]
+    motion = root / 'data/sample' / name / 'motion.npz'
+    if motion.with_name('contact_matrix.npz').exists():
+        command += ['--motion', str(motion)]
+    subprocess.run(command, check=True)
+    subprocess.run(['unitree_mujoco/simulate/build/camera_stream_test',
+                    str(root / 'generated' / name / 'scene.xml')], check=True)
+PY
 cyclonedds_ws/build/sledgehammer/repose_planner_selftest \
   --config cyclonedds_ws/src/sledgehammer/config/repose_planner/g1_sim_v9_3.yaml \
   --table cyclonedds_ws/src/sledgehammer/data/sys1_clips.npz \
@@ -35,12 +50,10 @@ lock = json.loads(Path('artifacts.lock.json').read_text())
 checked = 0
 for name, spec in lock['files'].items():
     path = Path('artifacts') / name
-    if name.startswith('data/') and not path.exists():
-        continue  # historical retargeted inputs are replaced by the frozen package bundle
     data = path.read_bytes()
     checked += 1
     assert len(data) == spec['bytes'] and hashlib.sha256(data).hexdigest() == spec['sha256'], name
-print('PASS:', checked, 'baseline artifact hashes match (4 model files required)')
+print('PASS:', checked, 'sample policy/encoder hashes match')
 pkg = Path('cyclonedds_ws/src/sledgehammer')
 for name, spec in json.loads((pkg / 'data.lock.json').read_text())['files'].items():
     data = (pkg / name).read_bytes()
