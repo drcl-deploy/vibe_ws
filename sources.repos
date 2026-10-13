@@ -2,7 +2,7 @@ repositories:
   unitree_mujoco:
     type: git
     url: https://github.com/lok-i/unitree_mujoco.git
-    version: 909c13a3b3c2c6f3b2f10446bc50c6408b7608e5
+    version: ef73c60a540a459969626e927be3d6f14bd4a5c5
   cyclonedds_ws/src/cdr_tcp_bridge:
     type: git
     url: https://github.com/lok-i/cdr_tcp_bridge.git
