@@ -12,7 +12,8 @@ input ports, joint order, history, action scaling and encoder preprocessing come
 from the exporter. Absolute paths are supported; the directory name is not an
 export contract.
 
-`artifacts.lock.json` records four policy pairs and the shared encoder pair.
+`artifacts.lock.json` pins the HF revision, paths and hashes of four policy pairs
+and the shared encoder pair. Setup downloads those exact bytes into `artifacts/`.
 Their source checkpoints match ViBe's v0.1.0 release; the four ONNX exports retain
 their historical exporter revisions. They have passed ONNX/manifest checks,
 encoder shape checks and native C++ inference. A fresh public-export numerical

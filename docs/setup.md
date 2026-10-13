@@ -10,6 +10,7 @@ assumes the system packages are already installed.
 ./install.sh --plan
 ./install.sh --stage sources
 ./install.sh --stage deps
+./install.sh --stage artifacts
 ./install.sh --stage scene
 ./install.sh --stage sim
 ./install.sh --stage ros
@@ -45,9 +46,14 @@ Setup preserves the native 2 ms dynamics and 42.5 degree camera.
 
 ## policy and encoder exports
 
-Place unchanged ONNX exports and their matching `.manifest.json` files under
-`artifacts/`. The README lists paths for the four samples. All use the shared
-112×63 Theia-tiny encoder. Policies and encoders are excluded from Git.
+Simulation and onboard setup download the four sample policy pairs and shared
+112×63 Theia-tiny encoder pair from [lkrajan/vibe](https://huggingface.co/lkrajan/vibe)
+into ignored `artifacts/`. `artifacts.lock.json` pins the HF commit, remote paths,
+SHA-256 hashes and sizes. Matching local files are reused; different local exports
+are left untouched and stop the download. Offboard setup skips model downloads.
+
+For your own models, place unchanged ONNX exports beside their `.manifest.json`
+files and pass their paths directly to the tracker launch.
 
 `setup_local.sh` sets `VIBE_ASSET_ROOT` to `artifacts/`. Set `VIBE_ARTIFACT_ROOT`
 before sourcing to use another model directory. Relative launch paths resolve
@@ -58,10 +64,14 @@ python3 scripts/doctor.py  # all sample exports + installed build + sample hashe
 python3 scripts/doctor.py --policy /path/to/policy.onnx --encoder /path/to/encoder.onnx
 ```
 
-ONNX publication on Hugging Face is a separate release step; installation does
-not download models yet. `artifacts.lock.json` records the tested local exports.
-The existing setup downloader accepts a future lock with immutable HF revisions:
-`python3 scripts/artifacts.py --lock /path/to/published-lock.json`.
+To fetch or verify only the sample exports:
+
+```bash
+python3 scripts/artifacts.py --lock artifacts.lock.json
+```
+
+The lock currently references the published deployment review commit. The original
+HF `v0.1.0` tag remains the checkpoint-only release.
 
 ## onboard and offboard
 

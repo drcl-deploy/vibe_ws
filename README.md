@@ -22,9 +22,10 @@ cd vibe_ws
 ```
 
 > [!NOTE]
-> Samples are included in `data/sample/`. Place your [policy + encoder exports](https://github.com/lok-i/vibe/blob/main/docs/export.md)
-> in `artifacts/`, keeping each `.onnx` beside its `.manifest.json`.
-> Absolute paths work too.
+> Samples are included in `data/sample/`. Setup downloads the matching policies,
+> shared encoder and manifests from [Hugging Face](https://huggingface.co/lkrajan/vibe) into `artifacts/`.
+> For your own [exports](https://github.com/lok-i/vibe/blob/main/docs/export.md), keep each `.onnx`
+> beside its `.manifest.json`; absolute paths work too.
 
 ## usage
 

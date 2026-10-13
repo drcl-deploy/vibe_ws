@@ -5,6 +5,18 @@ history. The user reported the corrected cube/planner workflow working and,
 on 2026-10-13, all four standalone samples (walk, parkour, repose, uolm) working
 in simulation. Dodge is outside the release check; onboard validation is separate.
 
+## Deployment exports — 2026-10-13
+
+- Published the four tested policy ONNX/manifest pairs beside their HF checkpoints,
+  plus `encoders/theia-tiny.{onnx,manifest.json}`, on a review branch and draft PR.
+- The original checkpoints and `v0.1.0` tag are unchanged. Encoder attribution and
+  its upstream license accompany the export; portable hashes/lineage are in HF
+  `deployment.json`.
+- The workspace lock now pins that immutable HF commit. Simulation/onboard setup
+  downloads the sample bundle; offboard setup skips it. No ONNX is tracked in GitHub.
+- Source branches are being published for review. Known module/packaging issues
+  from the final review remain open; fresh-machine testing follows the PR merges.
+
 ## Self-contained samples — 2026-10-12
 
 - Ship walk (Grail sample0), parkour (OmRe sample0), repose (frontflip sample1)

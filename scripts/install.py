@@ -10,7 +10,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-STAGES = ['sources', 'deps', 'scene', 'sim', 'ros', 'doctor']
+STAGES = ['sources', 'deps', 'artifacts', 'scene', 'sim', 'ros', 'doctor']
 
 
 def run(command, cwd=ROOT, env=None):
@@ -67,6 +67,8 @@ def main():
         selected = STAGES[STAGES.index(args.from_stage):]
     if args.profile != 'sim':
         selected = [stage for stage in selected if stage not in {'scene', 'sim'}]
+    if args.profile == 'offboard':
+        selected = [stage for stage in selected if stage != 'artifacts']
     if args.plan:
         print(' -> '.join(selected))
         return
@@ -88,6 +90,8 @@ def main():
                 if os.uname().machine == 'x86_64':
                     command.append('--install-cuda-runtime')
                 run(command)
+        elif stage == 'artifacts':
+            run([sys.executable, 'scripts/artifacts.py', '--lock', ROOT / 'artifacts.lock.json'])
         elif stage == 'scene':
             run([sys.executable, 'scripts/scenes.py'])
         elif stage == 'sim':
