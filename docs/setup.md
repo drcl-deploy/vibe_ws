@@ -79,6 +79,22 @@ python3 scripts/artifacts.py --lock artifacts.lock.json
 The lock currently references the published deployment review commit. The original
 HF `v0.1.0` tag remains the checkpoint-only release.
 
+## optional telemetry
+
+The tracker launch starts the bridge server by default. A server exit or an
+offboard client disconnect leaves the encoder and tracker running. Ctrl-C on
+the tracker launch still closes all its children.
+
+To run the server in its own terminal, add `enable_bridge:=false` to the tracker
+launch, then run:
+
+```bash
+source setup_local.sh  # setup.sh onboard on the robot
+ros2 run cdr_tcp_bridge bridge_server.sh
+```
+
+The README's `stream_vibes.sh` command starts the offboard client and viewer.
+
 ## onboard and offboard
 
 ```bash

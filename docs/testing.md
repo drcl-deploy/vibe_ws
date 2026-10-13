@@ -12,6 +12,7 @@ bash scripts/regression.sh
 python3 tests/sample_launch_smoke.py
 python3 tests/planner_graph_smoke.py
 python3 tests/planner_console_smoke.py
+python3 tests/runtime_recovery_smoke.py  # also included in regression.sh
 ```
 
 The regression checks sample hashes and channels, repeatable scene generation,
@@ -28,6 +29,13 @@ The sample launch smoke loads each reference through the actual ROS tracker
 launch on loopback domain 95. It sends no joystick or robot state. The planner
 graph and console tests use domains 93/94 and verify QoS, disconnect handling,
 console input and terminal restoration. Run them separately from manual tests.
+
+The recovery smoke uses loopback domain 97 and a local synthetic camera. It
+checks fragmented frames, silent/partial-frame timeouts, camera server restart,
+and prompt Ctrl-C during reads and retries in all three camera consumers.
+Synthetic state goes only to the planner's remapped input. A separate tracker
+launch receives no state/joystick input; stopping its telemetry server must
+leave commands flowing, while stopping the launch must close its children.
 
 Package checks:
 
@@ -87,6 +95,11 @@ were reused, and ONNX Runtime was downloaded. Fresh-OS `--system` provisioning a
 public availability of every review pin remain separate publication checks.
 
 ## evidence
+
+The runtime recovery build passed the full automated regression, sample launches,
+planner graph/console checks and focused cpp_control/sledgehammer CTests.
+Recovery and regression logs are under `.migration/runtime-recovery/`; manual
+task completion and hardware acceptance remain separate.
 
 Current sample-build logs are under `.migration/samples-*`. Earlier phase results
 remain in [build progress](build_progress.md) and [migration history](migration.md).
