@@ -7,7 +7,7 @@ training checkout or `assets` package is required.
 |---|---|---|
 | `walk` | Grail `curb_111/level_0.00/sample0` | Two curbs, robot at sample0's recorded offset/yaw |
 | `parkour` | OmniRetarget `climb_16/level_1.00/sample0` | Climb from the 56 mm deck |
-| `repose` | `custom/cube_frontflip/sample3` | Double frontflip; cube 1 m ahead, blue up → pink (5) |
+| `repose` | `custom/cube_frontflip/sample3` | Double frontflip; cube 1 m ahead |
 | `uolm` | OMOMO `sub1_suitcase_010/sample1` | Suitcase with the original convex decomposition |
 
 `motion.npz` is the reference. Keep `contact_matrix.npz` and `object_motion.npz`

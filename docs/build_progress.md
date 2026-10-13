@@ -1,9 +1,9 @@
 # Release build progress
 
 Current usage is in the root README; entries below preserve the earlier build
-history. The user reported the corrected cube/planner workflow working, and
-walk and parkour working after the motion-entry fix.
-The updated Repose sample and UoLM still need operator checks.
+history. The user reported the corrected cube/planner workflow working and,
+on 2026-10-13, all four standalone samples (walk, parkour, repose, uolm) working
+in simulation. Dodge is outside the release check; onboard validation is separate.
 
 ## Self-contained samples — 2026-10-12
 

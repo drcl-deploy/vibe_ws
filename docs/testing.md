@@ -43,6 +43,9 @@ entire colcon lint suite is green.
 
 ## manual samples
 
+The operator reported all four samples working in simulation on 2026-10-13.
+Dodge is outside this release check.
+
 Follow the two direct commands in [README](../README.md#without-planner).
 Restart simulator and tracker between samples; select the same sample and its
 policy in both terminals.
@@ -51,7 +54,7 @@ policy in both terminals.
 |---|---|
 | `walk` | Grail sample0 crossing the two curbs from its recorded start |
 | `parkour` | OmRe sample0 climbing from the 56 mm starting deck |
-| `repose` | Two consecutive cube frontflips toward pink (`goal_color:=5`), starting 1 m ahead |
+| `repose` | Two consecutive cube frontflips, starting 1 m ahead |
 | `uolm` | Suitcase interaction using the supplied contact/object sidecars |
 
 For each: **Y** settles without vibration, **RB** stands, **L1** prepares the
@@ -63,7 +66,8 @@ trial has not been established.
 
 Use the three [planner commands](../README.md#with-planner-for-cube-repose), which
 select `generated/repose/g1_repose.xml`. **RB** stands/disarms, **A** arms, **Y**
-damps. Exercise targets 0–5, a fresh trial, and an approach case.
+damps. Select the target in the console before arming. Exercise targets 0–5,
+a fresh trial, and an approach case.
 
 The tracker refuses A until planner status is fresh. Losing a previously seen
 heartbeat for one second shuts down tracker and encoder; this is process shutdown,

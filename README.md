@@ -56,14 +56,13 @@ sample=walk
 ros2 launch cpp_control g1_vibe_sonic.launch.py \
   policy_path:=models/perloco-grail/model_14999.onnx \
   encoder_path:=encoders/theia-tiny.onnx \
-  motion_path:="$PWD/data/sample/$sample/motion.npz" goal_color:=5
+  motion_path:="$PWD/data/sample/$sample/motion.npz"
 ```
 
 > [!NOTE]
 > **RB** stand → **L1** prep → **A** run · **Y** damping.
 >
 > Match `sample` in both terminals and select its policy from the table.
-> The Repose clip targets pink (`goal_color:=5`); other samples ignore this argument.
 > Keep the motion sidecars together. [Sample details](data/sample/README.md).
 
 ### with planner for cube-repose
@@ -83,7 +82,7 @@ source setup_local.sh
 ros2 launch cpp_control g1_vibe_sonic.launch.py \
   policy_path:=models/repose/model_59999.onnx \
   encoder_path:=encoders/theia-tiny.onnx \
-  planner:=true goal_color:=4 \
+  planner:=true \
   stand_yaw_teleop:=true stand_walk_teleop:=true \
   stand_walk_motion:="$PWD/cyclonedds_ws/install/sledgehammer/share/sledgehammer/data/sys1_walk/walk_forward_amateur_001__A001/motion.npz"
 ```
@@ -98,7 +97,7 @@ ros2 launch sledgehammer planner.launch.py env:=sim
 > **Gamepad:** **RB** stand/disarm · **A** arm · **Y** damping.
 >
 > **Console:** **0–5** or **r/o/g/y/b/p** target · **R** new trial · **q** quit.
-> Targets update both nodes; the initial target is blue.
+> Select a target here before arming; it updates both nodes.
 >
 > SSH/tmux onboard: `source setup.sh onboard`, then launch with `env:=real`.
 > Restart the tracker after restarting the planner.
