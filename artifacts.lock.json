@@ -2,56 +2,56 @@
   "schema": "vibe.hf_artifacts.v1",
   "name": "sample-exports",
   "files": {
-    "models/perloco-grail/model_14999.onnx": {
+    "models/walk/policy.onnx": {
       "sha256": "f1a36fca7adc887f7777a0340dbb62905d4ef6e47617b3fe95e82d76b686f4d9",
       "bytes": 59046539,
       "repo_id": "lkrajan/vibe",
       "revision": "ff79137d921d0124fea5877e01d1065f10e852a3",
       "path": "Vibe-PerLoco-Grail-ImgFeat-Ext/model_14999.onnx"
     },
-    "models/perloco-grail/model_14999.manifest.json": {
+    "models/walk/policy.manifest.json": {
       "sha256": "efb166c0c8b8f3b4b13ecc6568787a5769dc6cca93fa22c95ad336d6d0004d87",
       "bytes": 8755,
       "repo_id": "lkrajan/vibe",
       "revision": "ff79137d921d0124fea5877e01d1065f10e852a3",
       "path": "Vibe-PerLoco-Grail-ImgFeat-Ext/model_14999.manifest.json"
     },
-    "models/perloco-omre/model_14999.onnx": {
+    "models/parkour/policy.onnx": {
       "sha256": "45fd7c1077d716bd4253b47b829a86b49f824cdf4e3fa9f64af5e4c6c4f4a293",
       "bytes": 59046537,
       "repo_id": "lkrajan/vibe",
       "revision": "ff79137d921d0124fea5877e01d1065f10e852a3",
       "path": "Vibe-PerLoco-OmRe-ImgFeat-Ext/model_14999.onnx"
     },
-    "models/perloco-omre/model_14999.manifest.json": {
+    "models/parkour/policy.manifest.json": {
       "sha256": "47b74773dad3fa4aa3d1810100479388b93dda0784bd86cee3ed953a98ba4cd1",
       "bytes": 8753,
       "repo_id": "lkrajan/vibe",
       "revision": "ff79137d921d0124fea5877e01d1065f10e852a3",
       "path": "Vibe-PerLoco-OmRe-ImgFeat-Ext/model_14999.manifest.json"
     },
-    "models/repose/model_59999.onnx": {
+    "models/repose/policy.onnx": {
       "sha256": "6f8df52ae99ec6d2af98a8f5f2047b4cdcdef3b2cefb4c12174dc493f02fc318",
       "bytes": 59145237,
       "repo_id": "lkrajan/vibe",
       "revision": "ff79137d921d0124fea5877e01d1065f10e852a3",
       "path": "Vibe-Repose-BigCubeFloor-ImgFeat-Ext/model_59999.onnx"
     },
-    "models/repose/model_59999.manifest.json": {
+    "models/repose/policy.manifest.json": {
       "sha256": "ed9313b22414b0080df0ba9c647573500f3b6b2a12618dbf6935248479e58a29",
       "bytes": 9316,
       "repo_id": "lkrajan/vibe",
       "revision": "ff79137d921d0124fea5877e01d1065f10e852a3",
       "path": "Vibe-Repose-BigCubeFloor-ImgFeat-Ext/model_59999.manifest.json"
     },
-    "models/uolm/model_24999.onnx": {
+    "models/uolm/policy.onnx": {
       "sha256": "0efa4a8a2aa52de4502f060880c936ad675eacc234dc91659deab7d6cff9c70b",
       "bytes": 59146118,
       "repo_id": "lkrajan/vibe",
       "revision": "ff79137d921d0124fea5877e01d1065f10e852a3",
       "path": "Vibe-Uolm-ImgFeat-Ext/model_24999.onnx"
     },
-    "models/uolm/model_24999.manifest.json": {
+    "models/uolm/policy.manifest.json": {
       "sha256": "987815b5bdb46ebefdb956c03c3d95c176e9dd2ede5040b2c6c000123f34fbc4",
       "bytes": 9507,
       "repo_id": "lkrajan/vibe",

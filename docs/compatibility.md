@@ -13,7 +13,9 @@ from the exporter. Absolute paths are supported; the directory name is not an
 export contract.
 
 `artifacts.lock.json` pins the HF revision, paths and hashes of four policy pairs
-and the shared encoder pair. Setup downloads those exact bytes into `artifacts/`.
+and the shared encoder pair. Setup downloads those exact bytes into `artifacts/`,
+using `models/<sample>/policy.onnx` and `policy.manifest.json` locally. Original
+checkpoint filenames remain in the HF paths; model and manifest contents are unchanged.
 Their source checkpoints match ViBe's v0.1.0 release; the four ONNX exports retain
 their historical exporter revisions. They have passed ONNX/manifest checks,
 encoder shape checks and native C++ inference. A fresh public-export numerical

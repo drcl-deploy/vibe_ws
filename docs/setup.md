@@ -52,8 +52,14 @@ into ignored `artifacts/`. `artifacts.lock.json` pins the HF commit, remote path
 SHA-256 hashes and sizes. Matching local files are reused; different local exports
 are left untouched and stop the download. Offboard setup skips model downloads.
 
-For your own models, place unchanged ONNX exports beside their `.manifest.json`
-files and pass their paths directly to the tracker launch.
+Policies live at `artifacts/models/<sample>/policy.onnx`, with a matching
+`policy.manifest.json`. Sample names match `data/sample/`: `walk`, `parkour`,
+`repose`, `uolm`. The shared encoder stays at `artifacts/encoders/theia-tiny.onnx`.
+
+For custom [exports](https://github.com/lok-i/vibe/blob/main/docs/export.md),
+pass absolute `policy_path` and `encoder_path` values to the tracker launch.
+Each ONNX file loads its matching `.manifest.json` beside it by default.
+Use `policy_manifest` / `encoder_manifest` for manifests stored elsewhere.
 
 `setup_local.sh` sets `VIBE_ASSET_ROOT` to `artifacts/`. Set `VIBE_ARTIFACT_ROOT`
 before sourcing to use another model directory. Relative launch paths resolve

@@ -9,7 +9,7 @@
   "samples": {
     "walk": {
       "source_clip": "terrain_motions/grail/curb_111/level_0.00/sample0",
-      "policy": "models/perloco-grail/model_14999.onnx",
+      "policy": "models/walk/policy.onnx",
       "robot_start": {
         "xy": [
           -0.101667612270448,
@@ -22,7 +22,7 @@
     },
     "parkour": {
       "source_clip": "terrain_motions/omni/climb_16/level_1.00/sample0",
-      "policy": "models/perloco-omre/model_14999.onnx",
+      "policy": "models/parkour/policy.onnx",
       "robot_start": {
         "xy": [
           0.0,
@@ -35,7 +35,7 @@
     },
     "repose": {
       "source_clip": "retargeted_motions/data/unitree_g1/custom/cube_frontflip/sample3",
-      "policy": "models/repose/model_59999.onnx",
+      "policy": "models/repose/policy.onnx",
       "robot_start": {
         "xy": [
           0.0,
@@ -61,7 +61,7 @@
     },
     "uolm": {
       "source_clip": "retargeted_motions/data/unitree_g1/omomo/sub1_suitcase_010/sample1",
-      "policy": "models/uolm/model_24999.onnx",
+      "policy": "models/uolm/policy.onnx",
       "robot_start": {
         "xy": [
           0.0,

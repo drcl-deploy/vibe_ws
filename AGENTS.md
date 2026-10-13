@@ -1,23 +1,134 @@
-# Workspace migration guidelines
+# vibe_ws agent guide
 
-- Work in this workspace. Do not modify `/home/loki/unitree_ros2` during migration.
-- `sources.repos` pins independent repositories. Commit module changes from
-  their own repository; never absorb their source trees into the root commit.
-- The Repose tracker remains in `cpp_control`; only its planner moves to
-  `sledgehammer`. Preserve V9.3 behavior during extraction.
-- Ship the four small frozen examples in `data/sample/` (walk, parkour, repose,
-  uolm), including required motion sidecars and the suitcase model. The public
-  workspace does not depend on the internal assets repository. Keep ONNX
-  policies/encoders in ignored `artifacts/`, generated scenes in
-  `$XDG_DATA_HOME/vibe/scenes/` (default `~/.local/share/vibe/scenes/`) with an ignored
-  `generated` symlink per checkout, and local migration evidence in ignored `.migration/`.
-- Preserve ROS Foxy/Humble compatibility, snake_case ROS topics/YAML keys,
-  two-space C++ indentation and the inherited formatting conventions.
-- Use focused colcon builds/tests. Run the V9.3 regression after each phase;
-  distinguish automated validation from the operator joystick gate.
-- Hardware-facing changes require an explicit onboard/offboard smoke test,
-  including QoS and disconnect behavior, before claiming hardware validation.
-- Do not merge compatibility branches or delete development branches unless
-  requested. Keep upstream sync and behavioral changes separate from packaging.
-- See `docs/migration.md` and `.migration/phase0/PHASE0.md` for phase boundaries,
-  baseline details and known lint failures. Do not silently waive pending gates.
+## Start here
+
+- Work in this checkout, normally `/home/loki/vibe_ws`, with the session's working
+  directory and writable scope set here. Do not modify `/home/loki/unitree_ros2`
+  or the internal training/assets checkouts during release work.
+- The root repository is `drcl-deploy/vibe_ws`, branch `main`. Inspect its diff
+  before editing; preserve the user's manual README changes.
+- Module directories are independent Git repositories, ignored by the root.
+  `sources.repos` pins their exact commits. Check module status separately and
+  commit changes in their owning repository; never stage their source trees here.
+- Read `README.md` for current commands, then `docs/setup.md` and
+  `docs/testing.md`. `docs/migration.md` and most of `docs/build_progress.md` are
+  historical: old wrappers, paths and pending gates there may be superseded.
+
+## Code map
+
+| Location | Responsibility |
+|---|---|
+| Root scripts and locks | Fetch pinned sources/dependencies/exports, generate scenes, build and validate |
+| `unitree_mujoco/` | Native G1 simulation, robot XML, joystick input and camera TCP stream |
+| `cyclonedds_ws/src/vision_encoders/` | Camera frames to patch/CLS tokens through the frozen ONNX encoder |
+| `cyclonedds_ws/src/cpp_control/` | Manifest-driven ViBe tracker, motion playback, robot control and shared ROS messages |
+| `cyclonedds_ws/src/cdr_tcp_bridge/` | Serialized ROS telemetry over TCP for offboard viewing/recording |
+| `cyclonedds_ws/src/sledgehammer/` | Frozen Repose V9.3 planner, target console and four packaged NPZ files |
+| `data/sample/` | Four small reference motions, required sidecars and scene geometry |
+
+`install.sh --system` runs `scripts/install.py`: sources, deps, artifacts, scene,
+sim, ros, doctor. `scripts/scenes.py` composes sample geometry with Unitree's G1.
+`setup_local.sh` / `setup.sh` only select the ROS/network/artifact environment.
+Runtime usage stays direct: simulator executable + tracker ROS launch; the
+optional planner adds one ROS launch. Do not reintroduce runtime wrapper APIs.
+
+## Contracts to preserve
+
+- Sample names are `walk`, `parkour`, `repose`, `uolm`. One `sample` shell variable
+  selects `generated/$sample/scene.xml`, `data/sample/$sample/motion.npz` and
+  `models/$sample/policy.onnx`. Do not require a separate policy-name lookup.
+- Local policies are `artifacts/models/<sample>/policy.onnx` with
+  `policy.manifest.json`; all four use `artifacts/encoders/theia-tiny.onnx` and
+  its manifest. `artifacts.lock.json` maps these names to immutable HF files.
+  Keep model/manifest bytes and source provenance unchanged; no ONNX in GitHub.
+- `setup_local.sh` sets `VIBE_ASSET_ROOT` to `artifacts/`; set
+  `VIBE_ARTIFACT_ROOT` before sourcing to override it. Launch paths can be
+  absolute. Same-stem manifests are discovered beside ONNX files by default;
+  `policy_manifest` / `encoder_manifest` can point elsewhere.
+- The public workspace has no internal `assets` or training-repository
+  dependency. Keep motion contact/object sidecars with their reference. Repose
+  uses two consecutive cube frontflips; UoLM uses the suitcase example.
+- Generated scenes live at `$XDG_DATA_HOME/vibe/scenes/<checkout>/`, default
+  `~/.local/share/vibe/scenes/`, with an ignored `generated` symlink. Regenerate
+  after moving the checkout; preserve hand edits under separate filenames.
+- G1 comes from `unitree_mujoco/unitree_robots/g1/g1_29dof_with_camera.xml`.
+  Preserve native 2 ms dynamics, actuator/contact settings, 42.5-degree camera,
+  112x63 imagery and the 0.62369 kg cube. Both cube examples start 1 m ahead;
+  the planner has its own `generated/repose/g1_repose.xml`. Do not restore the
+  earlier 5 ms/terrain changes that caused heavy Y-damping vibration.
+- The tracker stays in cpp_control; the frozen Repose planner and its NPZ data
+  belong in sledgehammer. Never delete `lok-i/planners-level3` or other legacy
+  branches, or merge compatibility branches, without explicit instructions.
+- Preserve Foxy/Humble compatibility, snake_case ROS/YAML names and existing
+  formatting. Use `vibe` / `ViBe`, not `Vibe`, in new prose; retain exported IDs.
+- README style: commands first, short comments, tables afterward, minimal notes.
+  Put detail in docs. Keep the existing `stream_vibes.sh` attention command.
+
+## Validation
+
+Use focused builds for changed modules, followed by their relevant tests.
+For workspace files/exports:
+
+```bash
+source setup_local.sh
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
+python3 scripts/doctor.py
+```
+
+For runtime, artifact wiring or scene changes, use the established regression:
+
+```bash
+bash scripts/regression.sh <checkpoint-name>
+python3 tests/sample_launch_smoke.py
+python3 tests/planner_graph_smoke.py
+python3 tests/planner_console_smoke.py  # when planner/console behavior changes
+```
+
+The regression includes V9.3, four policy inference/render checks, native damping,
+CUDA and isolated motion playback. Tests use separate DDS domains; keep them
+separate from manual runs. Documentation-only edits need link/syntax/diff checks,
+not another full runtime regression. Hardware acceptance requires explicit
+onboard/offboard checks, including QoS and disconnect behavior.
+
+## Handoff: 2026-10-13
+
+- All six implementation phases and the direct-launch revision are implemented.
+  The user reported all four samples and the planner working in simulation.
+  Dodge is outside this release's sample checks.
+- Latest changes align local policy names with samples and simplify README,
+  including the user's prose edits. HF paths, hashes, model contents and sample
+  payloads are unchanged. Existing local policy pairs were moved to the new names.
+- Validation passed after renaming: 19 workspace tests, 2 simulator CTests,
+  four policy/camera checks, native damping, CUDA, V9.3, all four motion-playback
+  checks through both gamepad/ROS inputs, sample launches and planner disconnect
+  checks. Logs: `.migration/sample-artifact-names/` (local, ignored).
+- Fresh HF download and repeat verification passed for all 10 policy/encoder
+  files. Actual launches outside `artifacts/` passed with adjacent manifests and
+  explicitly located manifests, including paths with spaces. These were startup
+  checks without robot state/joystick input, not hardware rollout tests.
+- All five module checkouts were clean and matched `sources.repos` at handoff.
+  The root release PR is merged. Module PRs below were still OPEN when checked:
+  [cpp_control #7](https://github.com/drcl-deploy/cpp_control/pull/7) (base `master`),
+  [vision_encoders #7](https://github.com/drcl-deploy/vision_encoders/pull/7),
+  [unitree_mujoco #4](https://github.com/lok-i/unitree_mujoco/pull/4),
+  [sledgehammer #1](https://github.com/drcl-deploy/sledgehammer/pull/1).
+- HF exports were published for review at
+  [lkrajan/vibe discussion #1](https://huggingface.co/lkrajan/vibe/discussions/1).
+  The lock pins commit `ff79137d921d0124fea5877e01d1065f10e852a3`; original
+  checkpoints and `v0.1.0` were not changed. Recheck review status before updating pins.
+
+## Remaining release work
+
+- User plans module PR review/merges, then a fresh clone test on another machine.
+  Fresh-OS provisioning and onboard/offboard validation are still pending.
+- cpp_control's PR still includes legacy Repose forwarding/documentation and
+  GEAR-SONIC planner code. Review its diff against `master` with the user before
+  landing; do not call it tracker-only or delete unrelated legacy work silently.
+- A clean offboard install omits cpp_control/vision_encoders message libraries
+  needed by the bridge's `full.yaml` profile. Address this packaging gap before
+  claiming offboard readiness.
+- Previous review flagged camera TCP shutdown/reconnect behavior when a connected
+  server stops sending. Recheck encoder/planner behavior before hardware acceptance.
+- cpp_control/vision_encoders retain known lint failures (853 in the recorded
+  package run). Root CI still targets `master` and does not validate this complete
+  deployment. Passing focused checks does not make the full lint/CI suite green.

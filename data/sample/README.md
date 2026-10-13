@@ -35,7 +35,8 @@ The sample retains its original object sidecar. The planner uses
 To adapt an example, replace its motion and required sidecars together, supply the
 matching geometry/start pose in `samples.json`, and regenerate. That file records
 the original source revisions and SHA-256 hashes; update them deliberately when
-changing a sample. Policy/encoder files belong in `artifacts/`.
+changing a sample. Its policy pair lives at `artifacts/models/<sample>/policy.onnx`
+and `policy.manifest.json`; all four use `artifacts/encoders/theia-tiny.onnx`.
 
 See [NOTICE.md](NOTICE.md) for sources. The selected Grail clip is a release
 example; which of the nine clips was used in the earlier hardware trial is unknown.

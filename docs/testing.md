@@ -47,8 +47,8 @@ The operator reported all four samples working in simulation on 2026-10-13.
 Dodge is outside this release check.
 
 Follow the two direct commands in [README](../README.md#without-planner).
-Restart simulator and tracker between samples; select the same sample and its
-policy in both terminals.
+Restart simulator and tracker between samples; set the same `sample` in both
+terminals. The scene, motion and policy paths follow that selection.
 
 | Sample | Observe |
 |---|---|
@@ -64,7 +64,7 @@ trial has not been established.
 
 ## manual planner
 
-Use the three [planner commands](../README.md#with-planner-for-cube-repose), which
+Use the three [planner commands](../README.md#with-planner-cube-repose), which
 select `generated/repose/g1_repose.xml`. **RB** stands/disarms, **A** arms, **Y**
 damps. Select the target in the console before arming. Exercise targets 0–5,
 a fresh trial, and an approach case.
