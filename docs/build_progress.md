@@ -203,3 +203,23 @@ and `docs/direct-ros-workflow` (planner documentation).
   domain 94. It sends no joystick, low-state or controller commands; this is
   terminal/ROS validation, not onboard hardware acceptance.
 - Evidence: `.migration/planner-console/`. Changes are committed locally.
+
+
+## Standalone motion entry correction
+
+- The operator's walk clip loaded and completed L1 prep, but A cleared the prep
+  flag before the base handler rechecked it. The tracker then refused entry and
+  restored nominal stand. Keep completed prep until the base accepts the clip;
+  a refused token-freshness check leaves prep retryable. Startup now prints the
+  loaded motion path, frame count, FPS and joint-order mapping.
+- Reproduced the failure before changing C++. The new regression runs all four
+  sample references to their final frame with both Unitree gamepad and ROS Joy
+  inputs, and checks early-A rejection, stale-token retry, RB reset and Y damping.
+  It runs on loopback domain 96 with remapped test topics and synthetic state and
+  tokens; it does not establish robot balance or task success.
+- Focused Humble build and both cpp_control runtime package tests pass. The full
+  workspace regression passes, including V9.3, native damping/rendering and all
+  payload hashes; the planner QoS/disconnect graph test also passes. Existing
+  package lint failures remain outside this focused runtime check.
+- Evidence: `.migration/motion-path-before/` and `.migration/motion-path-fix/`.
+  Restart terminal 2 and repeat RB → L1 → A with the same README commands.

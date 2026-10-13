@@ -18,6 +18,11 @@ The regression checks sample hashes and channels, repeatable scene generation,
 all four policy inference paths, Repose/UoLM contacts, rendering each sample,
 CUDA, and the frozen V9.3 planner. Its native 15-second `kd=5` check protects the
 robot, cube, contacts and 2 ms timestep that fixed the damping regression.
+It also plays every sample clip through the tracker using synthetic gamepad and
+ROS `/joy` inputs on loopback domain 96 with remapped test topics. This checks
+RB → L1 → A, premature/stale-token entry rejection, retry, RB reset and Y damping;
+it does not simulate balance or establish task completion. Run just this check
+with `python3 tests/motion_path_smoke.py` (`--sample walk` selects one sample).
 
 The sample launch smoke loads each reference through the actual ROS tracker
 launch on loopback domain 95. It sends no joystick or robot state. The planner
