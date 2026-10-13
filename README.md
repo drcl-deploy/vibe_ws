@@ -43,11 +43,9 @@ Run from `~/vibe_ws` in each terminal, with the gamepad connected.
 ```bash
 # terminal 1: simulator
 sample=walk  # walk | parkour | repose | uolm
-./unitree_mujoco/simulate/build/unitree_mujoco -r g1 -i 1 -n lo \
-  -s "$PWD/generated/$sample/scene.xml" --use_joystick 1 \
-  --camera_width 112 --camera_height 63 --camera_fps 50 \
-  --camera_depth_width 112 --camera_depth_height 63 \
-  --camera_textures 0 --camera_visual_groups 1
+./unitree_mujoco/simulate/build/unitree_mujoco -r g1 \
+  -s "$PWD/generated/$sample/scene.xml" \
+  --camera_fps 50 --camera_textures 0 --camera_visual_groups 1
 ```
 
 ```bash
@@ -70,11 +68,9 @@ ros2 launch cpp_control g1_vibe_sonic.launch.py \
 
 ```bash
 # terminal 1: simulator + cube
-./unitree_mujoco/simulate/build/unitree_mujoco -r g1 -i 1 -n lo \
-  -s "$PWD/generated/repose/g1_repose.xml" --use_joystick 1 \
-  --camera_width 112 --camera_height 63 --camera_fps 50 \
-  --camera_depth_width 112 --camera_depth_height 63 \
-  --camera_textures 0 --camera_visual_groups 1
+./unitree_mujoco/simulate/build/unitree_mujoco -r g1 \
+  -s "$PWD/generated/repose/g1_repose.xml" \
+  --camera_fps 50 --camera_textures 0 --camera_visual_groups 1
 ```
 
 ```bash
