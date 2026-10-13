@@ -8,7 +8,7 @@ in simulation. Dodge is outside the release check; onboard validation is separat
 ## Deployment exports — 2026-10-13
 
 - Published the four tested policy ONNX/manifest pairs beside their HF checkpoints,
-  plus `encoders/theia-tiny.{onnx,manifest.json}`, on a review branch and draft PR.
+  plus `encoders/theia-tiny.{onnx,manifest.json}`, on a review branch and PR.
 - The original checkpoints and `v0.1.0` tag are unchanged. Encoder attribution and
   its upstream license accompany the export; portable hashes/lineage are in HF
   `deployment.json`.
