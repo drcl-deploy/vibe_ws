@@ -1,0 +1,3 @@
+# Preserve frozen sample bytes; review geometry changes through source hashes.
+data/sample/**/*.npz binary
+data/sample/uolm/meshes/*.obj binary

@@ -1,0 +1,10 @@
+{
+ "clip": "terrain_curbs__curb_111__000",
+ "family": "curb_111",
+ "level": 0.0,
+ "frames": 499,
+ "source": "grail/terrain_curbs",
+ "take": "terrain_curbs__curb_111__000",
+ "clip_key": "curb_111_jason_g1_rigged_001_indoor1-terrain-curb_rand00001",
+ "src_fps": 25.0
+}

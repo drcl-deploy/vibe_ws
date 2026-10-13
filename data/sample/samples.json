@@ -1,0 +1,145 @@
+{
+  "schema": "vibe.samples.v1",
+  "source_revisions": {
+    "vibe": "f0f7f3183121da116f99a1ee0e2a690b4a2962c5",
+    "assets": "cc719481812cb6a5ba4c3299b36b7397314c3712",
+    "motions": "e635ed670162c8b4cc91dd6247d4f3b47368ab3c",
+    "native_repose_scene": "99c71244a8e954a30ec7cb0f7f66a4703a6a06ce"
+  },
+  "samples": {
+    "walk": {
+      "source_clip": "terrain_motions/grail/curb_111/level_0.00/sample0",
+      "policy": "models/perloco-grail/model_14999.onnx",
+      "robot_start": {
+        "xy": [
+          -0.101667612270448,
+          0.02178188741619233
+        ],
+        "yaw": 0.25766297214838296,
+        "ground_z": 0.0
+      },
+      "terrain_export": "exports/terrain"
+    },
+    "parkour": {
+      "source_clip": "terrain_motions/omni/climb_16/level_1.00/sample0",
+      "policy": "models/perloco-omre/model_14999.onnx",
+      "robot_start": {
+        "xy": [
+          0.0,
+          0.0
+        ],
+        "yaw": 0.0,
+        "ground_z": 0.05561797752808989
+      },
+      "terrain_export": "exports/omre_terrain"
+    },
+    "repose": {
+      "source_clip": "retargeted_motions/data/unitree_g1/custom/cube_frontflip/sample3",
+      "policy": "models/repose/model_59999.onnx",
+      "robot_start": {
+        "xy": [
+          0.0,
+          0.0
+        ],
+        "yaw": 0.0,
+        "ground_z": 0.0
+      },
+      "object_start": {
+        "pos": [
+          1.0,
+          0.0,
+          0.3
+        ],
+        "quat": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "goal_color": 5
+    },
+    "uolm": {
+      "source_clip": "retargeted_motions/data/unitree_g1/omomo/sub1_suitcase_010/sample1",
+      "policy": "models/uolm/model_24999.onnx",
+      "robot_start": {
+        "xy": [
+          0.0,
+          0.0
+        ],
+        "yaw": 0.0,
+        "ground_z": 0.0
+      },
+      "object_start": {
+        "pos": [
+          0.48025941848754883,
+          -0.01003696396946907,
+          0.017488880082964897
+        ],
+        "quat": [
+          0.6487906575202942,
+          0.642298698425293,
+          0.299565851688385,
+          0.2770980894565582
+        ]
+      },
+      "object_source": "omomo_objects/suitcase/suitcase_cvx_dcmp.xml"
+    }
+  },
+  "files": {
+    "parkour/build.md": "1cc525591665035e726c6bbe1babab8a34d50b07b77ab3951144b396ab1f4997",
+    "parkour/build.svg": "7931dbba8c4e0682cc3906d73e1ec7bb840da5e68bdaae06ebbd93b422e6ed81",
+    "parkour/metadata.json": "1bd228be25620a380d7f0c3c4abaa3c16aff1a6ee4d2de6ee1fdf5c539b68cf4",
+    "parkour/motion.npz": "49ce49eec19bde1e9bc053b1b19b1bfeb089548d0f0babd2c2045ca874608f6f",
+    "parkour/scene.xml": "81d07b40da38597d65e32b220ae61e09ca71765abf1cd950bd764ed6c24634de",
+    "parkour/terrain.json": "89b50a99d14a590c735b624379453e4be96c7f0c9f47454a6363c34f19a6a07d",
+    "parkour/terrain.xml": "0af16bf672c4a38434d4e58cff74e0d681434876418514d2d415237687322fe3",
+    "repose/contact_matrix.npz": "8bd0d573610263bc9f317b321cb6a9fac9c438dff4d3f96887b7241a2ca4d07d",
+    "repose/metadata.json": "c01352fbc9ba0304447c6d45f9937daaf27bd2afceb4c2df61c1237fef058738",
+    "repose/motion.npz": "4530c3474bdf8093d65558df16ab6f8b0ae2848799ce2de175258f9699506f0a",
+    "repose/object_motion.npz": "46b63422951c14c21a912761ed6a75657fe05b936fd0d163e85a6b5736d9edd7",
+    "repose/scene.xml": "82d56f1f181df6e20cad801226c49a266788ed7750442ec350edd8e67a1ba1b9",
+    "uolm/contact_matrix.npz": "375c4652d6dfdd0486fdda33a12f792494fc5785d0f7e1ef01082dd5a9af18e6",
+    "uolm/meshes/suitcase.mtl": "bea1989b4d3cd0dc2ecdbc3202c118e316a9d568d2b975d0eea1d0b8c33f34b8",
+    "uolm/meshes/suitcase.obj": "27609f8081d74a09deda7d084dbb6a51dbdbcf9f1c5c10bd69d2a3642aef8545",
+    "uolm/meshes/suitcase_cvx_000.obj": "e845d278f1af05d0145b403f5d78761922c211722634cc8731acc2b22de94eb1",
+    "uolm/meshes/suitcase_cvx_001.obj": "ded70045a08272268f7312e83113227b537667787fc4f305b16fbe755c6b6360",
+    "uolm/meshes/suitcase_cvx_002.obj": "0d597b77e91ee523b31d3a9a5405e8434f9dd1c09d7f5dc3e4bc8914918a635d",
+    "uolm/meshes/suitcase_cvx_003.obj": "4848288b43c4e7bdb1877dbe7a0e06ace798242ec22fbc2a0f54f3cd54bb7003",
+    "uolm/meshes/suitcase_cvx_004.obj": "51e4ca20ac61d66b7e0e184fa81b7e9319ed23e461d4cc106a8d445c2bc07519",
+    "uolm/meshes/suitcase_cvx_005.obj": "de4db81685d537c40e572941b239158a034b5b84da49884a64fc4d38f60cb791",
+    "uolm/meshes/suitcase_cvx_006.obj": "e41e3334b650fc997e2d975ebae24d4fe74b843d1148c3725812c81709b372d9",
+    "uolm/meshes/suitcase_cvx_007.obj": "6a07f0bd57df4506173e2b8992f5e309ebe060e9e03b967b0f78e95cf3625b9e",
+    "uolm/meshes/suitcase_cvx_008.obj": "09be6a0a33071b65ec6807059f6852869cde2f1b02214aff27e065bbbb7c924f",
+    "uolm/meshes/suitcase_cvx_009.obj": "1b7c92c54544e55e222c0bd1cdd68725794e8be2a4f6092409cd3cc484c16164",
+    "uolm/meshes/suitcase_cvx_010.obj": "f60cf876ccd631aa971971c231f9109fffb4351720622989c59ed4af7a100595",
+    "uolm/meshes/suitcase_cvx_011.obj": "c5764a1b1bca495d28ff4cdd0119d9a9958261ec5797f4e8490b0a9eb9683963",
+    "uolm/meshes/suitcase_cvx_012.obj": "90fcfc9e9cf657754c92232fc38b93ed4150136c94cd55e1afe3acf22a6352b1",
+    "uolm/meshes/suitcase_cvx_013.obj": "16d71be0aac2e216a7da4939a29e648d53fac01f9d9be61ecf734c417aa5165d",
+    "uolm/meshes/suitcase_cvx_014.obj": "850da537c9e3a3ebabdfad45985844557579ca11a5b15afb3aad5f12cde88acb",
+    "uolm/meshes/suitcase_cvx_015.obj": "2c333ac323254af203ca4d52b4660eabf79a77bbe18557d8e383ce87c8b90459",
+    "uolm/meshes/suitcase_cvx_016.obj": "635b13bf485c5a40bd758954899656b1cf516de3d5a7a81054184095dab39bf2",
+    "uolm/meshes/suitcase_cvx_017.obj": "8042e5268bdcb38117d893259250da2f9e08042e29c9c4019e2681e4b53f4917",
+    "uolm/meshes/suitcase_cvx_018.obj": "ed81a1f82e1c30989b921f30abaf00e323ee3440a4d9a55a95994a9dea08300d",
+    "uolm/meshes/suitcase_cvx_019.obj": "02563b0968d47e1367b498c0e3ac1dd7bce342c00c8b79f2e92d1fe0d01745d7",
+    "uolm/meshes/suitcase_cvx_020.obj": "b8bb130943a3051271eb9b3e2d709ccc6991abf0d334c36eee38235c84f9b1fc",
+    "uolm/meshes/suitcase_cvx_021.obj": "ac26ad0bc4ec9d7ef278592ee6dc03f10c5c44ba5976bee9d836b69bc3d11919",
+    "uolm/meshes/suitcase_cvx_022.obj": "a9847a2c0ae845929db19cc2ab31e790ba9672b7a240061356c6d7e39d5bb91f",
+    "uolm/meshes/suitcase_cvx_023.obj": "d9f94beed8a4ade9d1205961fb37a8ed3b36be0919b33c7bfe852c33c3015be3",
+    "uolm/meshes/suitcase_cvx_024.obj": "4eaea2909bc0ca85b09051231205e910369dfdaf86c5435d687af83733e8d566",
+    "uolm/meshes/suitcase_cvx_025.obj": "83494a53bbed34163fe2870689312fabec028fa5c74fd20a955e6d0c37cd95ce",
+    "uolm/metadata.json": "07b1dc081bb85e386203f933b98a645d1c4fb70711fd77ab81652d12990ab88e",
+    "uolm/motion.npz": "b174b391e38b5a122bea7b05120d00015e152c9f423c2ebddcb99c4e4c45a9ff",
+    "uolm/object.xml": "ae87f9e458533a596860e73010f5e29d1bee5b717f2fb91bc5aa8f12f184cbeb",
+    "uolm/object_motion.npz": "5fa6f10af86a2c1cd886ee00540f4b06d4c84e0f1a8bfbe5cb5a7f931b7d9ac9",
+    "uolm/scene.xml": "7d839d9936cd6d15ec76fceec02e34be9073d2d04a2ca4565f0ce83e87949899",
+    "uolm/textures/plastic.png": "8ce82cd738241c56418baab561f4c1dd40a25dd57d1090928087db12ea55f75e",
+    "walk/build.md": "e3708e1202f133a1d7b4bdebb34c306771647cea0bdbc2b7eeb12b92c83dd5df",
+    "walk/build.svg": "60c029c80b21096680ab771bfaa0a44403b7553f59221992181abac560a39b66",
+    "walk/metadata.json": "89140b247e0e07600eb82bd41f3df12b125b75fc411b9d64693bb89abe7186e6",
+    "walk/motion.npz": "97b0d5526301ea6505efaddea9b85e94a850426981b1b4a1c213c73e4f417dca",
+    "walk/scene.xml": "b5a65ce88f2bae8bee9e63d9c8ea6b8c676e0596452ea86cfdb783f9fd7178f3",
+    "walk/terrain.json": "856d869067070d4f286ecbb3261832af8ce001b07b576fe5973efc775a042fa7",
+    "walk/terrain.xml": "d5ad14ed05697f3279e86ada9edacce16bba6fc4ba151939f855a215f9541e15"
+  }
+}

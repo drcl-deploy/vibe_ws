@@ -1,9 +1,8 @@
 # setup
 
-The tested target is Ubuntu 22.04 / ROS Humble with an NVIDIA GPU. Install ROS
-and the NVIDIA driver first. `./install.sh --system` installs the remaining apt
-dependencies and builds this workspace. Without `--system`, it assumes those
-system packages already exist. Run from a fresh shell without another ROS overlay.
+Ubuntu 22.04 / ROS Humble is the tested target. Install ROS and the NVIDIA driver,
+then run `./install.sh --system` from a fresh shell. Without `--system`, setup
+assumes the system packages are already installed.
 
 ## stages
 
@@ -11,6 +10,7 @@ system packages already exist. Run from a fresh shell without another ROS overla
 ./install.sh --plan
 ./install.sh --stage sources
 ./install.sh --stage deps
+./install.sh --stage artifacts
 ./install.sh --stage scene
 ./install.sh --stage sim
 ./install.sh --stage ros
@@ -18,67 +18,72 @@ system packages already exist. Run from a fresh shell without another ROS overla
 ./install.sh --from-stage scene --jobs 2
 ```
 
-The full command runs these in order. Sources are pinned commits; an existing
-dirty or mismatched checkout stops setup without resetting local work. Dependency
-scripts reuse verified downloads. Generated scenes contain local absolute paths:
-rerun `--stage scene` after moving the workspace. Paths printed during setup:
+The full command runs these in order. Sources are pinned commits. Existing dirty
+or mismatched repositories stop setup without resetting local work. Verified
+dependencies are reused; MuJoCo 3.3.6 and the Unitree SDK live in `.deps/`.
 
-```text
-generated/g1/g1.xml                 G1 camera + floor
-generated/repose/g1_repose.xml      G1 camera + colored cube
-```
+## samples and scenes
 
-MuJoCo 3.3.6 and the exact tested Unitree SDK live under `.deps/`. ONNX Runtime
-is installed under the encoder package's ignored dependency directory. CUDA
-user-space libraries may come from the host or the encoder setup's pinned wheels;
-the host NVIDIA driver remains a prerequisite. Scene generation uses `.venv/`.
-
-## artifacts
-
-```text
-artifacts/                         ignored, local deployment inputs
-  models/<hash>/                   policy ONNX + manifest
-  encoders/<hash>/                 encoder ONNX + manifest
-  experiments/<name>.yaml          selection of those two exports
-cyclonedds_ws/src/sledgehammer/data/  versioned planner NPZ payload
-```
-
-`artifacts/` is a storage location, not a modified export format. Import checks
-policy/encoder token shapes and copies both pairs unchanged. A same-name import
-with identical inputs is repeatable; different inputs need a new name.
+The Git checkout includes `data/sample/{walk,parkour,repose,uolm}`: one reference
+per policy, terrain or object geometry, and required sidecars. See the
+[sample notes](../data/sample/README.md). No training checkout or `assets` package
+is needed.
 
 ```bash
-python3 scripts/artifacts.py import --name my-run --task-family perloco \
-  --policy /path/to/policy.onnx --encoder /path/to/encoder.onnx
-./run.sh tracker my-run --motion /path/to/motion.npz
+python3 scripts/scenes.py  # regenerate all scenes; prints scene + motion paths
+realpath generated/walk/scene.xml
 ```
 
-Keep the motion's contact/object sidecars alongside it. Set `VIBE_ARTIFACT_ROOT`
-to select another storage root. `VIBE_ASSET_ROOT` is the compatibility alias set
-by the environment scripts. Explicit YAML paths resolve name ambiguity.
+Generated XML lives in `$XDG_DATA_HOME/vibe/scenes/<checkout>/`, defaulting to
+`~/.local/share/vibe/scenes/`. `generated/` is an ignored symlink. Each checkout
+gets its own output so mesh paths cannot leak between clones. Regenerate after
+moving the workspace; save hand-edited scenes under different filenames.
 
-The tracked `experiments/repose-v9.3.yaml` selects the exact historical regression
-exports; `artifacts.lock.json` records their hashes. A fresh export can be used
-under another experiment name, but is not automatically that frozen baseline.
+`generated/<sample>/scene.xml` starts each task at its reference placement.
+`generated/repose/g1_repose.xml` retains the tested planner's separate start.
+The G1 still comes from `unitree_mujoco/unitree_robots/g1/g1_29dof_with_camera.xml`.
+Setup preserves the native 2 ms dynamics and 42.5 degree camera.
 
-If pre-exported models are published on Hugging Face, the intended release unit
-is the policy, matching encoder and both manifests. `scripts/artifacts.py fetch
---lock <file>` accepts only immutable HF commit IDs and SHA-256 checksums. No
-published ONNX download lock exists yet, and installation does not upload files.
+## policy and encoder exports
 
-## profiles
+Simulation and onboard setup download the four sample policy pairs and shared
+112×63 Theia-tiny encoder pair from [lkrajan/vibe](https://huggingface.co/lkrajan/vibe)
+into ignored `artifacts/`. `artifacts.lock.json` pins the HF commit, remote paths,
+SHA-256 hashes and sizes. Matching local files are reused; different local exports
+are left untouched and stop the download. Offboard setup skips model downloads.
+
+For your own models, place unchanged ONNX exports beside their `.manifest.json`
+files and pass their paths directly to the tracker launch.
+
+`setup_local.sh` sets `VIBE_ASSET_ROOT` to `artifacts/`. Set `VIBE_ARTIFACT_ROOT`
+before sourcing to use another model directory. Relative launch paths resolve
+there; use absolute paths for `data/sample/.../motion.npz`.
 
 ```bash
-./install.sh --profile onboard     # no simulator/scene build
-./install.sh --profile offboard    # telemetry bridge build only
+python3 scripts/doctor.py  # all sample exports + installed build + sample hashes
+python3 scripts/doctor.py --policy /path/to/policy.onnx --encoder /path/to/encoder.onnx
 ```
 
-For onboard operation, set `VIBE_ROBOT_INTERFACE` to the robot-facing interface
-and source `setup.sh`; `VIBE_PROFILE=onboard ./run.sh tracker <experiment>` uses
-that profile. Offboard setup uses `VIBE_ROBOT_HOST` and `source setup.sh offboard`.
-See the bridge package documentation for telemetry-client launch options.
+To fetch or verify only the sample exports:
 
-Simulation uses domain 1 on loopback, onboard uses domain 0 on the explicit robot
-interface, and offboard telemetry uses domain 71. The simulator wrappers always
-select loopback. Foxy-compatible interfaces are preserved, but only the Humble
-simulation build has been exercised here; Jetson/Foxy hardware gates remain open.
+```bash
+python3 scripts/artifacts.py --lock artifacts.lock.json
+```
+
+The lock currently references the published deployment review commit. The original
+HF `v0.1.0` tag remains the checkpoint-only release.
+
+## onboard and offboard
+
+```bash
+./install.sh --profile onboard  # tracker, encoder, planner and bridge
+./install.sh --profile offboard # telemetry bridge only
+```
+
+Onboard: set `VIBE_ROBOT_INTERFACE`, source `setup.sh onboard`, then use the direct
+ROS launch with `env:=real` for the planner. Offboard: set `VIBE_ROBOT_HOST` and
+source `setup.sh offboard`.
+
+Simulation uses DDS domain 1 on loopback, onboard domain 0 on the selected
+interface, and offboard telemetry domain 71. Foxy interfaces remain supported;
+Jetson/Foxy hardware validation is separate from the Humble simulation checks.

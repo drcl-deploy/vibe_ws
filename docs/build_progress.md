@@ -1,6 +1,51 @@
 # Release build progress
 
-The operator joystick gate is deferred to the end at the user's request.
+Current usage is in the root README; entries below preserve the earlier build
+history. The user reported the corrected cube/planner workflow working and,
+on 2026-10-13, all four standalone samples (walk, parkour, repose, uolm) working
+in simulation. Dodge is outside the release check; onboard validation is separate.
+
+## Deployment exports — 2026-10-13
+
+- Published the four tested policy ONNX/manifest pairs beside their HF checkpoints,
+  plus `encoders/theia-tiny.{onnx,manifest.json}`, on a review branch and PR.
+- The original checkpoints and `v0.1.0` tag are unchanged. Encoder attribution and
+  its upstream license accompany the export; portable hashes/lineage are in HF
+  `deployment.json`.
+- The workspace lock now pins that immutable HF commit. Simulation/onboard setup
+  downloads the sample bundle; offboard setup skips it. No ONNX is tracked in GitHub.
+- Source branches are being published for review. Known module/packaging issues
+  from the final review remain open; fresh-machine testing follows the PR merges.
+
+## Self-contained samples — 2026-10-12
+
+- Ship walk (Grail sample0), parkour (OmRe sample0), repose (frontflip sample1)
+  and uolm (suitcase sample1), totaling about 9.3 MB of inputs. Required contact
+  and object sidecars are byte-identical to their source files.
+- Removed the workspace assets checkout, source pin, editable package and its
+  unused Python dependencies. The independent internal training checkout stays
+  intact. Preserved the unpublished assets fix in an external Git bundle.
+- One standard-library scene script composes all four examples. The planner's
+  separate cube start remains unchanged; the deterministic 15-second damping
+  trajectory has maximum qpos/qvel difference 0 against the saved baseline.
+- Removed verified obsolete artifacts/data copies, the old /tmp release replay,
+  and the duplicate temporary Dodge export. Active policies/encoders remain
+  ignored; the sample payload is tracked directly in this repository.
+- Complete installer passes after cleanup. All 18 workspace tests, four policy
+  inference checks, sample camera renders, Repose/UoLM contact checks, CUDA and
+  V9.3 pass. Four isolated sample ROS launches and both planner graph/console
+  checks pass. No joystick input was synthesized.
+- An isolated /tmp replay built a new venv, SDK, simulator and ROS packages and
+  passed the regression without assets. Exact local review commits supplied the
+  sources; model files and the MuJoCo vendor download were reused. ONNX Runtime
+  was downloaded anew. This is a clean build replay, not verification that all
+  review pins are already published or that fresh-OS apt provisioning passes.
+- Package tests reproduce 853 existing lint failures in cpp_control and
+  vision_encoders (961 tests, 57 skipped, no test errors). Bridge/planner runtime
+  tests pass. These independent source repositories were not modified.
+- Evidence: .migration/samples-before, samples-scenes, samples-clean,
+  samples-replay and the samples-{launch,graph,console,package-*}.log files.
+
 
 ## Phase 2 — artifact wiring
 
@@ -99,3 +144,112 @@ The operator joystick gate is deferred to the end at the user's request.
   clean-OS provisioning and onboard/offboard hardware validation remain open.
 - Hugging Face ONNX publication is pending. Local exporter imports are usable;
   no policy/encoder binaries have been committed or uploaded.
+
+## Direct ROS workflow revision
+
+The operator requested native executable/ROS commands instead of a runtime script
+API. Work is isolated on `refactor/direct-ros-workflow` (workspace/controller)
+and `docs/direct-ros-workflow` (planner documentation).
+
+- Removed `run.sh`, its Python dispatcher/supervisor, named experiment descriptors,
+  descriptor resolution and the export import API. Exports are used directly.
+- Retained installation, pinned downloads and checks as setup/test utilities.
+- Moved the existing one-second planner heartbeat guard into the C++ tracker.
+  It starts independently, refuses arming until status arrives, and exits on
+  subsequent heartbeat loss; ROS launch stops its encoder/bridge siblings.
+- README usage now shows the simulator executable, `ros2 launch cpp_control`,
+  and `ros2 launch sledgehammer` explicitly. Earlier phase notes above record
+  the superseded workflow, not another supported runtime entry point.
+- The joystick is visible at `/dev/input/js0`; the operator rollout is pending.
+- Validation: focused Humble build passed; 14 workspace tests; both camera
+  tests; real-policy inference; CUDA; V9.3 with zero failures; all 63 historical
+  and four packaged data hashes. Native tracker/encoder shutdown was exercised
+  on isolated domain 93 with no joystick input. All nine planner tests pass;
+  cpp_control retains its existing lint failures. Logs: `.migration/direct-ros-workflow/`.
+- This revision is committed on the local review branches; the operator can
+  test the built checkout before publishing or merging them.
+
+
+## Native scene dynamics correction
+
+- The operator found heavy vibration under Y damping. Earlier parity work had
+  changed the timestep from 2 to 5 ms, integration/solver settings, cube contacts
+  and floor appearance. Previous automated checks had missed dynamic settling.
+- Restored Phase 0 native physics, cube inertia/friction and the original flat
+  grid floor/lighting. Kept the 0.62369 kg cube, colored visual faces and 42.5°
+  camera; no controller gains or G1 actuators changed.
+- A 15-second MuJoCo 3.3.6 `kd=5` simulation reproduces the regression: final
+  joint-speed RMS 10.4636 rad/s before the fix, 0.0152809 after it. Restored
+  qpos/qvel match Phase 0 at every step with maximum difference zero.
+- Added compiled native robot/contact/damping checks to the routine regression.
+  The deterministic test does not cover DDS scheduling or closed-loop inference.
+- Generated scenes now live under `~/.local/share/vibe/scenes/<checkout>/`
+  (honoring XDG_DATA_HOME), with the ignored `generated` shortcut retaining the
+  direct executable commands. Setup prints the actual file paths. Storage tests
+  cover preservation of local files and separation of relocated/copied checkouts.
+- Evidence and pre-fix XML: `.migration/native-scene-dynamics/`. Restart the
+  running simulator to load the repaired scene, then repeat the joystick gate.
+- Validation: 16 workspace tests, 10 assets tests, the native damping check,
+  both simulator camera tests and the generated scene's actual RGB-D stream
+  pass. Policy inference, CUDA provider, V9.3 (zero failures), all 63 historical
+  hashes and four planner payload hashes pass. Assets' Python tests use host
+  MuJoCo 3.3.5; all native dynamics and stream checks use pinned C++ 3.3.6.
+- The original unitree_ros2 checkout is untouched. Fixes are committed locally
+  on the workspace review branch and assets' `fix/native-scene-dynamics` branch.
+
+
+## Default planner console and two usage paths
+
+- README usage now starts with adapter tracking (two terminals), followed by
+  cube Repose with the planner (three terminals). Both show direct executable
+  and ROS commands.
+- `ros2 launch sledgehammer planner.launch.py env:=sim` opens the existing
+  console in the invoking terminal by default. `env:=real` uses the same TTY
+  path for onboard SSH/tmux. Color keys publish on the existing shared target
+  topic; initial blue remains explicit in the tracker command.
+- Both planner log streams stay in the ROS launch log while the console draws.
+  q/Ctrl-C stop planner and console together and restore terminal settings.
+  `console:=false` supports unattended launches; a missing TTY also skips the UI.
+- Validation: focused Humble build and all nine sledgehammer package tests pass,
+  including V9.3 with frozen data. The PTY smoke passes sim/real launches,
+  numeric/named colors, R, q/Ctrl-C cleanup and headless startup on isolated DDS
+  domain 94. It sends no joystick, low-state or controller commands; this is
+  terminal/ROS validation, not onboard hardware acceptance.
+- Evidence: `.migration/planner-console/`. Changes are committed locally.
+
+
+## Standalone motion entry correction
+
+- The operator's walk clip loaded and completed L1 prep, but A cleared the prep
+  flag before the base handler rechecked it. The tracker then refused entry and
+  restored nominal stand. Keep completed prep until the base accepts the clip;
+  a refused token-freshness check leaves prep retryable. Startup now prints the
+  loaded motion path, frame count, FPS and joint-order mapping.
+- Reproduced the failure before changing C++. The new regression runs all four
+  sample references to their final frame with both Unitree gamepad and ROS Joy
+  inputs, and checks early-A rejection, stale-token retry, RB reset and Y damping.
+  It runs on loopback domain 96 with remapped test topics and synthetic state and
+  tokens; it does not establish robot balance or task success.
+- Focused Humble build and both cpp_control runtime package tests pass. The full
+  workspace regression passes, including V9.3, native damping/rendering and all
+  payload hashes; the planner QoS/disconnect graph test also passes. Existing
+  package lint failures remain outside this focused runtime check.
+- Evidence: `.migration/motion-path-before/` and `.migration/motion-path-fix/`.
+  Restart terminal 2 and repeat RB → L1 → A with the same README commands.
+
+
+## Double-frontflip Repose sample
+
+- Replaced `cube_frontflip/sample1` with the original `sample3` and matching
+  contact/object sidecars: 384 frames at 50 Hz, two consecutive forward tips.
+  All source arrays remain byte-identical; recorded hashes were updated.
+- Restored the standalone cube to the earlier native start: position
+  `(1.0, 0.0, 0.3)`, identity orientation. The previous sample's closer pose came
+  from its recording. The planner scene is byte-identical to its prior version.
+- The reference rotations from the restored blue-up start go blue → orange →
+  pink, so README now uses `goal_color:=5` for the standalone sample.
+- All 19 workspace tests, native dynamics/rendering, four clip playback checks
+  through both joystick paths, CUDA and V9.3 pass. Evidence:
+  `.migration/repose-double/`; previous scene/manifest: `.migration/repose-double-before/`.
+  Synthetic playback does not establish physical task completion. Restart both
+  simulator and tracker for the operator's double-flip check.

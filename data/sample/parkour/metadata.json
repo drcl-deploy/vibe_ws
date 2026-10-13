@@ -1,0 +1,9 @@
+{
+ "clip": "climb_16_z_scale_1.0",
+ "family": "climb_16",
+ "level": 1.0,
+ "frames": 284,
+ "source": "omniretarget/robot-terrain",
+ "member": "robot-terrain/climb_16_z_scale_1.0.npz",
+ "src_fps": 30.0
+}

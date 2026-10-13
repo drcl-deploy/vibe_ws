@@ -1,92 +1,70 @@
-# ViBe parity checkpoint
+# ViBe parity and native simulation
 
-The intended big-cube mass is **0.62369 kg**, as confirmed by the user. The
-published training reference (`ed4ee6c`) incorrectly specifies 1.5 kg. The local
-`~/drcl_projects/vibe` branch `fix/repose-deployment-mass` corrects that constant
-and README branding. It has not been pushed. The ONNX artifacts are unchanged.
+The intended big-cube mass is **0.62369 kg**. The published training reference
+(`ed4ee6c`) says 1.5 kg; the local `~/drcl_projects/vibe` branch
+`fix/repose-deployment-mass` corrects that constant and has not been pushed.
+Policy and encoder ONNX files remain unchanged.
 
-## Fixed and tested
+## Native physics regression and correction
 
-- Simulation renders at native 112 x 63 by default, with the reference 42.5-degree
-  vertical FOV, position and quaternion. Width/height remain configurable for
-  other exports. The encoder preserves incoming pixels and only resizes when
-  the manifest requires it. The old intermediate resize is an explicit override.
-- RGB-D intrinsics scale `fx` and `fy` independently. The real TCP/PNG test covers
-  both native and legacy 640 x 480 renders with a differently proportioned depth
-  plane, checking headers, PNG dimensions and focal lengths.
-- The generated Repose scene uses an invisible box collider and six massless,
-  noncolliding colored faces, matching public `vibe.assets.repose` exactly for
-  mass, inertia, geometry, RGBA and contact settings after the mass correction.
-  It uses the public play floor color and task timestep/solver settings. Robot
-  visual groups are converted in a generated copy, preserving robot dynamics.
-- Use `--camera_textures 0 --camera_visual_groups 1` with this scene: the camera
-  draws groups 0/2, with textures and shadows disabled. Generic object scenes
-  retain texture support. The [runbook](testing.md) supplies the full command.
-- The CUDA encoder disables TF32 on ONNX Runtime 1.18+ to honor fp32 export
-  precision. The runtime documents that control in its
-  [CUDA provider options](https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html#use_tf32).
-  Older JetPack/ORT retains its supported API and still needs target-specific
-  numerical validation; no Orin result is claimed here.
-- README and release prose use **ViBe**; paths/repositories use **vibe**.
-  Existing task IDs such as `Vibe-Repose-BigCubeFloor-ImgFeat-Ext` are preserved.
+The first joystick test exposed persistent vibration in **Y** damping mode.
+The earlier scene-parity change had copied training's 5 ms timestep and solver
+settings into the native SDK simulator. Its bridge computes motor PD torques
+explicitly; copying those options did not preserve the tested native behavior.
+The earlier loading, rendering and planner checks did not exercise damping.
 
-The scene's options come from the public Repose task (`timestep=0.005`,
-`iterations=10`, `ls_iterations=20`) and its pinned
-[mjlab 1.4.0 defaults](https://github.com/mujocolab/mjlab/blob/v1.4.0/src/mjlab/sim/sim.py).
-This is a separate behavior checkpoint, not a claim that the old scene is
-unchanged: cube friction changes from `(0.6, 0.6, 0.0001)` to the public builder's
-`(1.0, 0.005, 0.0001)`, inertia is computed without the old XML rounding, timestep
-changes from 0.002 to 0.005, and integration/solver/appearance settings align
-with the reference. The Phase 1 baseline remains commit `75cbb03`.
+The generated Repose scene now restores the Phase 0 native settings:
 
-## Evidence
-
-| Check | Result |
+| Setting | Native V9.3 |
 |---|---|
-| Assets package suite | 10 passed; existing host SciPy/NumPy compatibility warning |
-| MuJoCo 3.3.6 model and real OpenGL/TCP stream tests | 2 passed |
-| Generated Repose scene on actual 3.3.6 stream server | native and 640 x 480 checks passed |
-| Compiled cube vs corrected public Python builder | exact array equality for tested properties |
-| Native encoder images | all 8 published input frames byte-identical to source PNG pixels |
-| CUDA encoder vs CPU ONNX reference | max patch error 4.4107437e-6; max CLS error 4.1723251e-7 |
-| V9.3 planner and policy self-tests | passed; planner zero failures |
-| Existing ROS package suites | runtime suites pass; known lint suites still fail |
+| Timestep / integrator | 0.002 s / Euler |
+| Solver / iterations / line search | Newton / 100 / 50 |
+| Cube mass / principal inertia | 0.62369 kg / 0.0386285 kg m² |
+| Cube friction | `(0.6, 0.6, 0.0001)` |
+| Ground | original flat grid floor and lighting; no heightfield |
 
-The numerical threshold stayed at 1e-4. Before disabling TF32, a seeded frame
-failed with max patch error 0.0028199. The unchanged frame passed after the fix,
-then the eight-frame gate passed. The published geometry builder comparison ran
-under the available training environment (Python MuJoCo 3.8.1); actual generated
-scene loading/rendering also passed on deployment's compiled MuJoCo 3.3.6.
+The source remains `unitree_mujoco/unitree_robots/g1/g1_29dof_with_camera.xml`.
+Generation copies it with absolute mesh paths and remaps visual groups; robot
+joint damping, armature, actuators and contacts remain unchanged. The camera
+retains the approved 42.5-degree FOV. Six noncolliding colored cube faces remain
+for the camera; the cube's physical properties follow the native baseline.
 
-Evidence lives in `.migration/parity/`. Re-run the CUDA comparison in a fresh
-shell with the host's Python ONNX Runtime, OpenCV and ROS dependencies installed:
+Using the simulator's exact MuJoCo **3.3.6** library, a deterministic 15-second
+test applies Y's `kd=5` damping law. Over its final five seconds:
 
-```bash
-cd ~/vibe_ws
-source setup_local.sh
-ROS_DOMAIN_ID=93 python3 tests/integration/encoder_parity.py \
-  --model-path "$PWD/artifacts/encoders/theia-tiny.onnx" \
-  --node-path "$PWD/cyclonedds_ws/install/vision_encoders/lib/vision_encoders/encoder_node" \
-  --log-dir "$PWD/.migration/parity/recheck"
-```
+| Scene | Joint speed RMS | Peak joint speed |
+|---|---|---|
+| Frozen Phase 0 | 0.0152809 rad/s | 0.0813374 rad/s |
+| Previous 5 ms scene | 10.4636 rad/s | 40.8747 rad/s |
+| Restored native scene | 0.0152809 rad/s | 0.0813374 rad/s |
 
-## Remaining limits and release work
+The restored scene's `qpos` and `qvel` match Phase 0 at every tested step (maximum
+difference **0**). This is an offline damping trajectory, with per-step torque
+refresh; it does not test asynchronous SDK/DDS scheduling or policy rollouts.
+`scripts/regression.sh` now checks native robot/contact settings and settling
+against the pinned C++ MuJoCo library. The frozen Phase 0 comparison is additional
+local evidence in `.migration/native-scene-dynamics/`.
 
-These checks establish specific camera, cube and encoder contracts. They do not
-prove pixel-identical whole scenes across OpenGL/MuJoCo Warp, identical robot
-models/dynamics, identical C++ observation assembly on real trajectories, or
-bit-for-bit closed-loop behavior. Lighting/backend/runtime differences and the
-full public checkpoint-to-ONNX export gate still need evaluation. The user has
-deferred the physical-joystick rollout to the end.
+## Camera and encoder checks retained
 
-The assets revisions differ because the deployment branch includes the colored
-cube fix; the older public assets pin has a generic wood cube. Public Repose
-builds its own primitive cube, so blindly changing assets revisions is not a
-parity fix. The new generator is tested against that actual primitive builder.
+- Native 112 × 63 rendering, 42.5-degree vertical FOV and reference camera pose.
+  The encoder preserves incoming pixels unless its manifest requires resizing.
+- RGB-D intrinsics scale `fx` and `fy` independently. Real OpenGL/TCP tests cover
+  native and 640 × 480 rendering with a differently proportioned depth plane.
+- `--camera_textures 0 --camera_visual_groups 1` selects groups 0/2 and disables
+  camera textures/shadows. Viewer floor appearance and policy-camera rendering
+  are distinct; no whole-scene pixel identity is claimed.
+- CUDA encoding disables TF32 on ONNX Runtime 1.18+ for fp32 exports. The prior
+  eight-frame comparison preserved source image bytes and measured maximum
+  patch/CLS errors of 4.4107437e-6 / 4.1723251e-7 against CPU ONNX inference,
+  below the unchanged 1e-4 threshold. Evidence: `.migration/parity/`.
 
-**The release is not complete.** Phase 1 and these corrective automated gates
-are done. Still pending: Phase 2 artifact descriptor/path wiring; Phase 3
-resumable installer and clean-machine dependencies; Phase 4 planner extraction;
-Phase 5 frozen planner payload; Phase 6 final launch flows and deployment gates.
-Module fixes are kept on separate branches and pinned by `sources.repos`.
-The workspace snapshot is a development checkpoint, not a completed release.
+The previous claim of exact public cube/contact/solver parity is superseded by
+the native physics correction above. Training and native SDK simulation have
+different control/integration arrangements. Artifact compatibility does not
+establish bit-identical closed-loop trajectories across those backends.
+
+All six implementation phases are recorded in [build progress](build_progress.md).
+The operator must restart the simulator to load regenerated XML and rerun the
+joystick gate. Clean-OS provisioning, onboard/offboard validation, fresh-public-
+export numerical comparison and optional Hugging Face publication remain open.

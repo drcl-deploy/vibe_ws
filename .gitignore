@@ -1,5 +1,4 @@
 # Independently versioned sources; sources.repos is their source of truth.
-/assets/
 /unitree_mujoco/
 /cyclonedds_ws/src/cdr_tcp_bridge/
 /cyclonedds_ws/src/vision_encoders/
@@ -8,7 +7,7 @@
 
 # Downloaded artifacts, generated state and local migration evidence.
 /artifacts/
-/generated/
+/generated
 /.deps/
 /.migration/
 **/build/
@@ -26,5 +25,6 @@
 *.onnx
 *.onnx.data
 *.npz
+!/data/sample/**/*.npz
 *.pt
 *.pth

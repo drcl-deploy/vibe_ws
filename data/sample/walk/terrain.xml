@@ -1,0 +1,11 @@
+<mujoco model="terrain_grail_curb_111_level_0.00">
+  <compiler angle="radian"/>
+
+  <worldbody>
+    <body name="terrain">
+      <geom name="ground" size="6 6 0.25" pos="0.637881 0.121478 -0.25" quat="0.699058 0 0 0.715065" type="box" mass="0" rgba="0.35 0.36 0.38 1"/>
+      <geom name="box_0" size="0.242936 0.6 0.115839" pos="0.878857 0.210794 0.115839" quat="0.999936 0 0 0.0113181" type="box" mass="0" rgba="0.24 0.46 0.86 1"/>
+      <geom name="box_1" size="0.114824 0.6 0.070734" pos="1.43547 0.0613722 0.070734" quat="0.999936 0 0 0.0113181" type="box" mass="0" rgba="0.24 0.46 0.86 1"/>
+    </body>
+  </worldbody>
+</mujoco>

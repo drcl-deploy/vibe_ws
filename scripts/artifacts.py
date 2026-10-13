@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stage unchanged ViBe exports, or fetch files from an explicitly pinned HF lock."""
+"""Download unchanged model files from an explicitly pinned Hugging Face lock."""
 
 import argparse
 import hashlib
@@ -8,14 +8,11 @@ import os
 from pathlib import Path
 import re
 import shutil
-import shlex
 import tempfile
 import urllib.parse
 import urllib.request
 
-import yaml
-
-from experiment import FAMILIES, ROOT, load, pair
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def digest(path):
@@ -42,36 +39,6 @@ def checked_copy(source, target, expected):
         temporary.replace(target)
     finally:
         temporary.unlink(missing_ok=True)
-
-
-def import_exports(name, policy, encoder, family, artifact_root):
-    if not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9_.-]*', name):
-        raise ValueError('Use a simple experiment name')
-    policy, policy_manifest, _ = pair(policy, Path.cwd())
-    encoder, encoder_manifest, _ = pair(encoder, Path.cwd())
-    artifact_root = artifact_root.expanduser().resolve()
-    descriptor = artifact_root / 'experiments' / (name + '.yaml')
-    # Validate together before copying any input or publishing a descriptor.
-    config = dict(schema='vibe.experiment.v1', task_family=family,
-                  policy=policy, encoder=encoder, scene='repose' if family == 'repose' else 'g1')
-    with tempfile.TemporaryDirectory() as directory:
-        candidate = Path(directory) / 'experiment.yaml'
-        candidate.write_text(yaml.safe_dump(config))
-        load(str(candidate), artifact_root=artifact_root)
-    for key, source, manifest in [('policy', policy, policy_manifest), ('encoder', encoder, encoder_manifest)]:
-        subdir = ('models' if key == 'policy' else 'encoders') + '/' + digest(source)[:16]
-        for filename in [source, manifest]:
-            destination = artifact_root / subdir / Path(filename).name
-            checked_copy(filename, destination, digest(filename))
-        config[key] = subdir + '/' + Path(source).name
-    if family == 'repose':
-        config.update(goal_color=4, planner='v9.3')
-    if descriptor.exists() and yaml.safe_load(descriptor.read_text()) != config:
-        raise ValueError('Different experiment exists; left untouched: ' + str(descriptor))
-    descriptor.parent.mkdir(parents=True, exist_ok=True)
-    descriptor.write_text(yaml.safe_dump(config, sort_keys=False))
-    print('Experiment: ' + str(descriptor))
-    print('VIBE_ARTIFACT_ROOT=' + shlex.quote(str(artifact_root)) + ' ./run.sh tracker ' + shlex.quote(name))
 
 
 def fetch(lock_path, artifact_root):
@@ -108,19 +75,10 @@ def fetch(lock_path, artifact_root):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, default=Path(os.environ.get('VIBE_ARTIFACT_ROOT', ROOT / 'artifacts')))
-    commands = parser.add_subparsers(dest='command', required=True)
-    add = commands.add_parser('import')
-    add.add_argument('--name', required=True)
-    add.add_argument('--policy', required=True)
-    add.add_argument('--encoder', required=True)
-    add.add_argument('--task-family', choices=sorted(FAMILIES), required=True)
-    download = commands.add_parser('fetch')
-    download.add_argument('--lock', required=True)
+    parser.add_argument('--lock', required=True)
     args = parser.parse_args()
-    if args.command == 'import':
-        import_exports(args.name, args.policy, args.encoder, args.task_family, args.root)
-    else:
-        fetch(args.lock, args.root)
+    fetch(args.lock, args.root)
+
 
 
 if __name__ == '__main__':
