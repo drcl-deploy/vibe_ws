@@ -96,6 +96,19 @@ public availability of every review pin remain separate publication checks.
 
 ## evidence
 
+The planner cleanup rebuilt cpp_control from empty build/install directories and
+rebuilt sledgehammer against it. The full regression, sample launches, planner
+graph/console checks, controller deploy self-test and all nine planner CTests
+passed. Standalone SONIC startup/shutdown passed with its default stand and an
+explicit motion clip on isolated DDS, without robot state or joystick input.
+The clean install excludes the retired kinematic planner and cpp_control Repose
+redirects; the original terminal attention viewer is installed and callable.
+
+All 92 paths tracked on cpp_control's `master` remain present. Across this cleanup,
+112 protected runtime/configuration/README/data files retain identical hashes,
+including manual walking and yaw. Logs are under `.migration/planner-cleanup/`.
+The operator's repeat of the five README cases on this cleaned build is pending.
+
 The runtime recovery build passed the full automated regression, sample launches,
 planner graph/console checks and focused cpp_control/sledgehammer CTests.
 Recovery and regression logs are under `.migration/runtime-recovery/`. The

@@ -119,16 +119,30 @@ onboard/offboard checks, including QoS and disconnect behavior.
 
 ## Remaining release work
 
+- The approved planner cleanup is committed in cpp_control as `adc7456`, pinned
+  in `sources.repos`. It removes only the unused `sonic_kinematic` integration
+  and four cpp_control Repose forwarding launches. Manual reference-based
+  walking, yaw, active stand, standalone SONIC, external planner interfaces and
+  README commands are unchanged. All 92 master paths are preserved; the original
+  terminal attention viewer and previously removed tracked Python files were
+  restored. Never broaden this into removing the working walking/yaw features.
+- Clean cpp_control build/install, sledgehammer rebuild, standalone SONIC
+  stand/clip startup, restored viewer, full regression, sample launches, planner
+  graph/console and focused CTests passed. Logs: `.migration/planner-cleanup/`.
+  The user's five-case README retest after this cleanup is pending.
 - User plans module PR review/merges, then a fresh clone test on another machine.
   Fresh-OS provisioning and onboard/offboard validation are still pending.
-- cpp_control's PR still includes legacy Repose forwarding/documentation and
-  GEAR-SONIC planner code. Review its diff against `master` with the user before
-  landing; do not call it tracker-only or delete unrelated legacy work silently.
+- The final cpp_control review is [PR #8](https://github.com/drcl-deploy/cpp_control/pull/8)
+  against `master`, superseding #7. Review the complete ViBe/reference/telemetry
+  additions before landing. Research branches remain intact. Encoder #8 and
+  sledgehammer #2 remain stacked on their earlier PRs; the planner needs the
+  encoder's shared camera reader. Workspace [PR #3](https://github.com/drcl-deploy/vibe_ws/pull/3)
+  pins the matching commits.
 - A clean offboard install omits cpp_control/vision_encoders message libraries
   needed by the bridge's `full.yaml` profile. Address this packaging gap before
   claiming offboard readiness.
-- Previous review flagged camera TCP shutdown/reconnect behavior when a connected
-  server stops sending. Recheck encoder/planner behavior before hardware acceptance.
+- Camera TCP reads/shutdown now have bounded waits, with encoder/planner recovery
+  checks passing in simulation. Hardware reconnect acceptance is still pending.
 - cpp_control/vision_encoders retain known lint failures (853 in the recorded
   package run). Root CI still targets `master` and does not validate this complete
   deployment. Passing focused checks does not make the full lint/CI suite green.
