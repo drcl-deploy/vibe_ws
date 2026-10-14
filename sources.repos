@@ -6,7 +6,7 @@ repositories:
   cyclonedds_ws/src/cdr_tcp_bridge:
     type: git
     url: https://github.com/lok-i/cdr_tcp_bridge.git
-    version: 790dbf824ba181836223abed5ce3e88ebdd801eb
+    version: 53c5d76886bf279ef2ea32d1f261e4ebb7b9aad1
   cyclonedds_ws/src/vision_encoders:
     type: git
     url: https://github.com/drcl-deploy/vision_encoders.git
@@ -14,8 +14,8 @@ repositories:
   cyclonedds_ws/src/cpp_control:
     type: git
     url: https://github.com/drcl-deploy/cpp_control.git
-    version: 0c4da2226501b7922ffd71c4f7f206f120891b3d
+    version: 27736d71bed21dd739af054370205ab793b58322
   cyclonedds_ws/src/sledgehammer:
     type: git
     url: https://github.com/drcl-deploy/sledgehammer.git
-    version: 5b223bdf9c11b0c431b9fd415dbe3f9c6dc11581
+    version: d19ab5470305f7d89a0be8b90177162d76334347

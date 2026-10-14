@@ -156,14 +156,12 @@ def main():
             cmake = ['--cmake-args', '-DCMAKE_BUILD_TYPE=Release',
                      '-DPython3_EXECUTABLE=/usr/bin/python3', '-DPYTHON_EXECUTABLE=/usr/bin/python3']
             ros_command(build + ['unitree_go', 'unitree_hg', 'unitree_api'] + cmake)
-            packages = ['cdr_tcp_bridge', 'vision_encoders', 'cpp_control']
-            if args.profile != 'offboard':
-                if (ROOT / 'cyclonedds_ws/src/sledgehammer/package.xml').is_file():
-                    packages.append('sledgehammer')
+            packages = ['cdr_tcp_bridge', 'vision_encoders', 'cpp_control', 'sledgehammer']
             ort = str(ROOT / 'cyclonedds_ws/src/vision_encoders/thirdparty/onnxruntime')
             runtime = 'OFF' if args.profile == 'offboard' else 'ON'
             flags = ['-DCPP_CONTROL_BUILD_RUNTIME=' + runtime,
-                     '-DVISION_ENCODERS_BUILD_RUNTIME=' + runtime]
+                     '-DVISION_ENCODERS_BUILD_RUNTIME=' + runtime,
+                     '-DSLEDGEHAMMER_BUILD_RUNTIME=' + runtime]
             if runtime == 'ON':
                 flags += ['-DONNXRUNTIME_ROOT=' + ort, '-DONNXRUNTIME_ROOT_DIR=' + ort]
             ros_command(build + packages + cmake + flags, overlay=True)

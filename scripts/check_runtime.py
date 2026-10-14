@@ -26,6 +26,8 @@ def main():
 
     config = Path(get_package_share_directory('cdr_tcp_bridge')) / 'config'
     types = set()
+    # Calibration labels are recorded by the offboard viewer, not the TCP bridge.
+    types.add('sledgehammer/msg/CalibrationState')
     for name in ['full.yaml', 'repose_calibration.yaml']:
         for channel in yaml.safe_load((config / name).read_text())['channels']:
             types.add(channel['type'])

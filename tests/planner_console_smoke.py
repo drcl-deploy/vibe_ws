@@ -22,7 +22,7 @@ def main():
         '<CycloneDDS><Domain><General><Interfaces><NetworkInterface name="lo" />'
         '</Interfaces></General></Domain></CycloneDDS>')
     import rclpy
-    from cpp_control.msg import PlannerStatus
+    from sledgehammer.msg import PlannerStatus
     from std_msgs.msg import Int32
 
     # sim and real select their shipped YAML; camera is loopback only, with no

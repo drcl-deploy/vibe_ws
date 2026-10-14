@@ -46,7 +46,7 @@ def main():
     import rclpy
     import yaml
     from rclpy.qos import QoSProfile, ReliabilityPolicy
-    from cpp_control.msg import CubeObservation, PlannerStatus
+    from sledgehammer.msg import CubeObservation, PlannerStatus
     from sensor_msgs.msg import Image
     from unitree_hg.msg import LowCmd, LowState
     from vision_encoders.msg import ImageTokens

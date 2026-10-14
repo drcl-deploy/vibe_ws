@@ -10,6 +10,7 @@ and onboard/offboard behavior require the operator runs below.
 source setup_local.sh
 bash scripts/regression.sh
 python3 tests/sample_launch_smoke.py
+python3 tests/sample_launch_smoke.py --task-launches  # walk / parkour / repose / uolm wrappers
 python3 tests/planner_graph_smoke.py
 python3 tests/planner_console_smoke.py
 python3 tests/runtime_recovery_smoke.py  # also included in regression.sh
@@ -56,6 +57,7 @@ Installation checks:
 /usr/bin/python3 -m unittest discover -s cyclonedds_ws/src/vision_encoders/tests -p test_setup.py -v
 /usr/bin/python3 -m unittest discover -s cyclonedds_ws/src/cpp_control/tests -p test_ros_environment.py -v
 /usr/bin/python3 scripts/doctor.py --profile onboard  # or sim / offboard
+/usr/bin/python3 tests/repose_message_smoke.py  # from a sourced workspace
 ```
 
 Doctor loads the bridge profiles' Python and C++ message libraries, checks Python
@@ -63,6 +65,13 @@ runtime dependencies, and loads the CUDA provider for sim/onboard. `--build-only
 skips these imports and model checks. CI runs the actual offboard installer in
 Humble/Jazzy containers on x86 and ARM runners. It does not exercise JetPack CUDA
 or replace native onboard acceptance.
+
+The message smoke checks that Repose types are installed only in sledgehammer,
+their fields match the former cpp_control schemas, and the installed replay tools
+read old type names from an actual SQLite bag. Frozen CDR fixtures were captured
+from cpp_control `0c4da22` before migrating the definitions. The planner graph
+check verifies that its standard heartbeat keeps the tracker alive, and that
+heartbeat loss still stops tracker/encoder even while detailed status continues.
 
 ## manual samples
 
@@ -110,6 +119,18 @@ were reused, and ONNX Runtime was downloaded. Fresh-OS `--system` provisioning a
 public availability of every review pin remain separate publication checks.
 
 ## evidence
+
+The package-boundary cleanup rebuilt cpp_control and sledgehammer from empty
+build/install directories. The legacy bag checks, all four generic and named
+sample launches, full runtime regression, planner graph/console and focused
+controller/planner/bridge CTests passed. A separate clean offboard build loaded
+all 13 required message types and replayed legacy data without an ONNX/CUDA SDK
+or controller/encoder/planner executables. Evidence: `.migration/package-boundary/`.
+
+The tracker retains the same planner-entry and one-second timeout behavior;
+its liveness subscription now uses `std_msgs/msg/Empty` independently of Repose
+telemetry. The operator's five-case manual retest and hardware acceptance remain
+separate from these automated checks.
 
 The portability changes passed 25 workspace tests, three ROS environment tests,
 and three SDK setup tests, including archive extraction with nested source-build

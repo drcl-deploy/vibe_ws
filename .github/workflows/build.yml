@@ -38,11 +38,12 @@ jobs:
           /usr/bin/python3 -m unittest discover -s tests -v
           /usr/bin/python3 -m unittest discover -s cyclonedds_ws/src/vision_encoders/tests -p test_setup.py -v
           /usr/bin/python3 -m unittest discover -s cyclonedds_ws/src/cpp_control/tests -p test_ros_environment.py -v
-      - name: Bridge tests
+      - name: Message replay and bridge tests
         shell: bash
         run: |
           source "/opt/ros/$ROS_DISTRO/setup.bash"
           source cyclonedds_ws/install/local_setup.bash
+          /usr/bin/python3 tests/repose_message_smoke.py
           cd cyclonedds_ws
           colcon test --packages-select cdr_tcp_bridge --return-code-on-test-failure
           colcon test-result --verbose

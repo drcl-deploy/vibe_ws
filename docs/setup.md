@@ -117,6 +117,10 @@ Onboard: set `VIBE_ROBOT_INTERFACE`, source `setup.sh onboard`, then use the dir
 ROS launch with `env:=real` for the planner. Offboard: set `VIBE_ROBOT_HOST` and
 source `setup.sh offboard`.
 
+Offboard builds cpp_control, vision_encoders and sledgehammer interfaces/tools
+with their runtime targets disabled. It includes Repose telemetry and calibration
+message support without compiling a controller, encoder or planner executable.
+
 Simulation uses DDS domain 1 on loopback, onboard domain 0 on the selected
 interface, and offboard telemetry domain 71. Foxy retains onboard/offboard support
 and its older CycloneDDS interface syntax; simulation setup requires Humble/Jazzy

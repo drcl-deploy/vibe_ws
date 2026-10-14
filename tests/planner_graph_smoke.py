@@ -37,6 +37,8 @@ def main():
     import rclpy
     from rclpy.qos import QoSProfile, ReliabilityPolicy
     from cpp_control.msg import ControllerStatus, MotionReference
+    from sledgehammer.msg import PlannerStatus
+    from std_msgs.msg import Empty
     from unitree_hg.msg import LowState
     import yaml
 
@@ -47,6 +49,9 @@ def main():
                                        QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT))
     references = []
     sub = node.create_subscription(MotionReference, '/tracker/reference', references.append, 10)
+    heartbeats = []
+    node.create_subscription(Empty, '/vibe/planner/heartbeat', heartbeats.append,
+                             QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT))
     state = LowState()
     state.imu_state.quaternion = [1., 0., 0., 0.]
     status = ControllerStatus()
@@ -83,6 +88,7 @@ def main():
                 assert status_pub.get_subscription_count() > 0, 'ControllerStatus QoS incompatible'
                 pump(0.5)
                 assert not references, 'Disarmed planner sent a reference'
+                assert heartbeats, 'Disarmed planner did not publish its standard heartbeat'
                 status.accepting = True
                 pump(0.8)
                 assert references, 'Fresh accepting controller did not receive a reference'
@@ -119,16 +125,24 @@ def main():
                     'stand_walk_motion:=' + str(ROOT / 'cyclonedds_ws/install/sledgehammer/share/sledgehammer/data/sys1_walk/walk_forward_amateur_001__A001/motion.npz')],
                     stdout=tlog, stderr=subprocess.STDOUT, start_new_session=True)
                 deadline = time.monotonic() + 30
-                while node.count_subscribers('/vibe/planner/status') == 0 and time.monotonic() < deadline:
+                while node.count_subscribers('/vibe/planner/heartbeat') < 2 and time.monotonic() < deadline:
                     assert tracker.poll() is None, 'Direct tracker launch failed at startup'
                     rclpy.spin_once(node, timeout_sec=0.1)
-                assert node.count_subscribers('/vibe/planner/status') > 0, 'Native heartbeat subscription missing'
+                assert node.count_subscribers('/vibe/planner/heartbeat') >= 2, 'Native heartbeat subscription missing'
+                assert node.count_subscribers('/vibe/planner/status') == 0, 'Tracker still depends on Repose status'
                 until = time.monotonic() + 1.5
                 while time.monotonic() < until:
                     rclpy.spin_once(node, timeout_sec=0.1)
                     assert tracker.poll() is None, 'Healthy planner did not keep tracker alive'
                 stop_process(planner)
                 planner = None
+                # Detailed telemetry is not liveness: stale/replayed status must
+                # not keep the controller alive after its planner stops ticking.
+                noise = node.create_publisher(PlannerStatus, '/vibe/planner/status', 10)
+                until = time.monotonic() + 3
+                while tracker.poll() is None and time.monotonic() < until:
+                    noise.publish(PlannerStatus())
+                    rclpy.spin_once(node, timeout_sec=0.05)
                 tracker.wait(timeout=15)
                 text = (folder / 'tracker.log').read_text()
                 assert 'planner heartbeat lost' in text, 'Native tracker did not report planner loss'
@@ -137,7 +151,7 @@ def main():
                 while node.count_publishers('/enc/tokens') and time.monotonic() < deadline:
                     rclpy.spin_once(node, timeout_sec=0.1)
                 assert node.count_publishers('/enc/tokens') == 0, 'Encoder survived direct launch shutdown'
-                print('PASS: native tracker heartbeat guard stops the direct tracker/encoder launch', flush=True)
+                print('PASS: heartbeat loss stops tracker/encoder despite continuing Repose status', flush=True)
             except BaseException:
                 print((folder / 'planner.log').read_text()[-5000:])
                 print((folder / 'tracker.log').read_text()[-3000:])

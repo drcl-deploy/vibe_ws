@@ -21,9 +21,9 @@
 | Root scripts and locks | Fetch pinned sources/dependencies/exports, generate scenes, build and validate |
 | `unitree_mujoco/` | Native G1 simulation, robot XML, joystick input and camera TCP stream |
 | `cyclonedds_ws/src/vision_encoders/` | Camera frames to patch/CLS tokens through the frozen ONNX encoder |
-| `cyclonedds_ws/src/cpp_control/` | Manifest-driven ViBe tracker, motion playback, robot control and shared ROS messages |
+| `cyclonedds_ws/src/cpp_control/` | Manifest-driven ViBe tracker, motion playback, robot control and controller interfaces |
 | `cyclonedds_ws/src/cdr_tcp_bridge/` | Serialized ROS telemetry over TCP for offboard viewing/recording |
-| `cyclonedds_ws/src/sledgehammer/` | Frozen Repose V9.3 planner, target console and four packaged NPZ files |
+| `cyclonedds_ws/src/sledgehammer/` | Frozen Repose V9.3 planner, planner messages, target console and four packaged NPZ files |
 | `data/sample/` | Four small reference motions, required sidecars and scene geometry |
 
 `install.sh --system` runs `scripts/install.py`: sources, deps, artifacts, scene,
@@ -56,8 +56,11 @@ optional planner adds one ROS launch. Do not reintroduce runtime wrapper APIs.
   112x63 imagery and the 0.62369 kg cube. Both cube examples start 1 m ahead;
   the planner has its own `generated/repose/g1_repose.xml`. Do not restore the
   earlier 5 ms/terrain changes that caused heavy Y-damping vibration.
-- The tracker stays in cpp_control; the frozen Repose planner and its NPZ data
-  belong in sledgehammer. Never delete `lok-i/planners-level3` or other legacy
+- The tracker, MotionReference and ControllerStatus stay in cpp_control. The
+  frozen Repose planner, its NPZ data, PlannerStatus, CubeObservation and
+  CalibrationState belong in sledgehammer. Planner liveness uses std_msgs/Empty
+  on /vibe/planner/heartbeat, emitted from the same planner tick as status.
+  Never delete `lok-i/planners-level3` or other legacy
   branches, or merge compatibility branches, without explicit instructions.
 - Preserve Foxy/Humble compatibility, snake_case ROS/YAML names and existing
   formatting. Use `vibe` / `ViBe`, not `Vibe`, in new prose; retain exported IDs.
@@ -80,6 +83,8 @@ For runtime, artifact wiring or scene changes, use the established regression:
 ```bash
 bash scripts/regression.sh <checkpoint-name>
 python3 tests/sample_launch_smoke.py
+python3 tests/sample_launch_smoke.py --task-launches  # when task launch names/wiring change
+python3 tests/repose_message_smoke.py  # when message ownership or replay changes
 python3 tests/planner_graph_smoke.py
 python3 tests/planner_console_smoke.py  # when planner/console behavior changes
 ```
@@ -119,6 +124,23 @@ onboard/offboard checks, including QoS and disconnect behavior.
 
 ## Remaining release work
 
+- The approved package-boundary cleanup renames only the branch-added Grail/OmRe
+  wrappers to g1_vibe_walk / g1_vibe_parkour. Generic ViBe, standalone SONIC and
+  every master path remain. The cpp_control README and new docs/vibe.md replace
+  the five stale branch-added ViBe notes; workspace README commands are unchanged.
+- Repose messages moved byte-for-byte to sledgehammer; the tracker uses a standard
+  heartbeat with the existing freshness/timeout logic. Bridge profiles and all
+  consumers use the new names. Bundled replay/validation readers accept old bag
+  names; this does not add live ROS aliases for legacy types.
+- SLEDGEHAMMER_BUILD_RUNTIME=OFF supplies offboard messages/tools without CUDA or
+  planner binaries. Clean normal/offboard builds, 13 type-support imports, legacy
+  bag replay, full regression, both sample-launch paths and planner graph/console
+  checks passed. Logs: .migration/package-boundary/. Final native ARM CUDA and
+  five-case manual acceptance remain pending.
+- Encoder #8 and sledgehammer #2 were merged into their parent branches, not main.
+  Encoder #7 and sledgehammer #1 were still open when last checked. Do not bump
+  pins to main until the complete module changes have landed there.
+
 - The approved planner cleanup is committed in cpp_control as `adc7456`, pinned
   in `sources.repos`. It removes only the unused `sonic_kinematic` integration
   and four cpp_control Repose forwarding launches. Manual reference-based
@@ -134,9 +156,10 @@ onboard/offboard checks, including QoS and disconnect behavior.
   Fresh-OS provisioning and onboard/offboard validation are still pending.
 - The final cpp_control review is [PR #8](https://github.com/drcl-deploy/cpp_control/pull/8)
   against `master`, superseding #7. Review the complete ViBe/reference/telemetry
-  additions before landing. Research branches remain intact. Encoder #8 and
-  sledgehammer #2 remain stacked on their earlier PRs; the planner needs the
-  encoder's shared camera reader. Workspace [PR #3](https://github.com/drcl-deploy/vibe_ws/pull/3)
+  additions before landing. Research branches remain intact. Encoder #7 and
+  sledgehammer #1 include their merged recovery PRs. The message-ownership
+  companion branches in sledgehammer and cdr_tcp_bridge must land with cpp_control.
+  Workspace [PR #3](https://github.com/drcl-deploy/vibe_ws/pull/3)
   pins the matching commits.
 - Installation portability changes support explicit/unique Foxy/Humble/Jazzy
   selection, OS Python for ROS tools, and a bounded ARM ONNX Runtime source build

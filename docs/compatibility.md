@@ -50,8 +50,15 @@ configuration format. Source paths identify the owning module.
   bindings. Keep robot/backend handling in the robot layer; exported IDs and
   existing task contracts stay compatible.
 - A new planner runs separately and exchanges `MotionReference` and
-  `ControllerStatus`. Keep its algorithm independently testable, following
+  `ControllerStatus`. With `planner:=true`, publish `std_msgs/msg/Empty` on
+  `/vibe/planner/heartbeat` from the planner tick. Detailed Repose status and
+  observation types belong to sledgehammer. Keep the algorithm independently testable, following
   sledgehammer's planner/core split.
+
+The bundled experiment/calibration replay tools accept bags recorded with the
+former `cpp_control/msg/{PlannerStatus,CubeObservation,CalibrationState}` names.
+Their message fields are unchanged; only ownership moved to sledgehammer.
+This does not alias old type names for live ROS publishers or `ros2 bag play`.
 
 ## scenes and references
 
