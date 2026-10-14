@@ -142,11 +142,18 @@ onboard/offboard checks, including QoS and disconnect behavior.
   Encoder #6 was closed as superseded: #7 already includes its CUDA runtime
   changes. Sledgehammer #3 had landed in its old parent branch after #1 merged;
   #4 brings that exact tested tree onto main. Do not remove the legacy branches.
+- cpp_control #8 also merged on 2026-10-14 as `e6ea520` on master. Its checkout
+  and source pin now use that merge commit; its tree is identical to the reviewed
+  `dad4031`. All five modules now use merged main/master commits. Only the
+  workspace PR #3 remains for the user's final review.
 - ROS build/install/log, simulator build, and Unitree SDK build/install outputs
   were deleted for the user's fresh README installation. Downloaded SDKs,
   artifacts, setup venv and regression evidence remain. All five module source
   trees match the tested release versions; 25 workspace and three encoder setup
-  tests passed. No runtime rebuild was run after clearing these outputs.
+  tests passed. The user subsequently reported the fresh README installation
+  and simulation working. Later cpp_control edits only adjusted its README:
+  preserve the standalone workflow, add a brief ViBe install note and launch
+  template. Workspace README commands remain unchanged.
 
 - The approved planner cleanup (`adc7456`, included in the current cpp_control
   pin) removes only the unused `sonic_kinematic` integration
@@ -159,12 +166,10 @@ onboard/offboard checks, including QoS and disconnect behavior.
   stand/clip startup, restored viewer, full regression, sample launches, planner
   graph/console and focused CTests passed. Logs: `.migration/planner-cleanup/`.
   The user's five-case README retest after this cleanup is pending.
-- User plans a fresh README install/test before merging cpp_control #8 and
-  workspace #3. The other four modules have landed in main.
+- User is reviewing workspace #3 after merging all five modules.
   Fresh-OS provisioning and onboard/offboard validation are still pending.
-- The final cpp_control review is [PR #8](https://github.com/drcl-deploy/cpp_control/pull/8)
-  against `master`, superseding #7. Review the complete ViBe/reference/telemetry
-  additions before landing. Research branches remain intact. Encoder #7 and
+- The final cpp_control review was [PR #8](https://github.com/drcl-deploy/cpp_control/pull/8),
+  now merged into `master`, superseding #7. Research branches remain intact. Encoder #7 and
   sledgehammer #1 include their merged recovery PRs. The message-ownership
   companions are now on sledgehammer and cdr_tcp_bridge main.
   Workspace [PR #3](https://github.com/drcl-deploy/vibe_ws/pull/3)
