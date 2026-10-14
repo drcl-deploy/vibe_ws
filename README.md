@@ -26,7 +26,7 @@ cd vibe_ws
 
 ## usage
 
-Run from the workspace root in each terminal, with a gamepad connected.
+run from the workspace root in each terminal, with a gamepad connected.
 
 ### without planner
 
@@ -46,9 +46,6 @@ ros2 launch cpp_control g1_vibe_sonic.launch.py \
   encoder_path:=encoders/theia-tiny.onnx \
   motion_path:="$PWD/data/sample/$sample/motion.npz"
 ```
-
-- **RB** stand → **L1** prep → **A** run · **Y** damping.
-- Use the same `sample` in both terminals; the scene, motion and policy follow it.
 
 | Sample | Demo |
 |---|---|
@@ -82,9 +79,7 @@ source setup_local.sh
 ros2 launch sledgehammer planner.launch.py env:=sim
 ```
 
-- **Gamepad:** **RB** stand/disarm · **A** arm · **Y** damping.
-- **Console:** **0–5** or **r/o/g/y/b/p** target · **R** new trial · **q** quit. Select a target before arming.
-- Restart the tracker after restarting the planner.
+- **console:** **0–5** or **r/o/g/y/b/p** target · **R** new trial · **q** quit. Select a target before arming.
 
 to visualize the **learnt attention maps** , run in another terminal:
 ```bash
