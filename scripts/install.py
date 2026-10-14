@@ -56,8 +56,12 @@ def bootstrap(system, distro):
         'import sys; print("{}.{}".format(*sys.version_info[:2]))'], text=True).strip()
     if version != '{}.{}'.format(*sys.version_info[:2]):
         raise ValueError('The setup venv uses a different Python version; move .venv aside and retry.')
+    # vcstool 0.3 still imports pkg_resources. New Python 3.12 venvs have no
+    # setuptools, and unconstrained installation can select a release without it.
+    setuptools = '80.9.0' if sys.version_info >= (3, 9) else '68.2.2'
     run([python, '-m', 'pip', 'install', '--disable-pip-version-check',
-         'PyYAML==6.0.2', 'vcstool==0.3.0'])
+         'setuptools==' + setuptools, 'PyYAML==6.0.2', 'vcstool==0.3.0'])
+    run([venv / 'bin/vcs', '--version'])
     os.execv(str(python), [str(python), str(Path(__file__).resolve())]
              + [arg for arg in sys.argv[1:] if arg != '--system'])
 
