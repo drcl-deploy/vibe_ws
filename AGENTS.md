@@ -137,12 +137,19 @@ onboard/offboard checks, including QoS and disconnect behavior.
   bag replay, full regression, both sample-launch paths and planner graph/console
   checks passed. Logs: .migration/package-boundary/. Final native ARM CUDA and
   five-case manual acceptance remain pending.
-- Encoder #8 and sledgehammer #2 were merged into their parent branches, not main.
-  Encoder #7 and sledgehammer #1 were still open when last checked. Do not bump
-  pins to main until the complete module changes have landed there.
+- On 2026-10-14, encoder #7, sledgehammer #1/#4, simulator #4 and bridge #2
+  landed in main. Their checkouts and sources.repos now use the merged commits.
+  Encoder #6 was closed as superseded: #7 already includes its CUDA runtime
+  changes. Sledgehammer #3 had landed in its old parent branch after #1 merged;
+  #4 brings that exact tested tree onto main. Do not remove the legacy branches.
+- ROS build/install/log, simulator build, and Unitree SDK build/install outputs
+  were deleted for the user's fresh README installation. Downloaded SDKs,
+  artifacts, setup venv and regression evidence remain. All five module source
+  trees match the tested release versions; 25 workspace and three encoder setup
+  tests passed. No runtime rebuild was run after clearing these outputs.
 
-- The approved planner cleanup is committed in cpp_control as `adc7456`, pinned
-  in `sources.repos`. It removes only the unused `sonic_kinematic` integration
+- The approved planner cleanup (`adc7456`, included in the current cpp_control
+  pin) removes only the unused `sonic_kinematic` integration
   and four cpp_control Repose forwarding launches. Manual reference-based
   walking, yaw, active stand, standalone SONIC, external planner interfaces and
   README commands are unchanged. All 92 master paths are preserved; the original
@@ -152,13 +159,14 @@ onboard/offboard checks, including QoS and disconnect behavior.
   stand/clip startup, restored viewer, full regression, sample launches, planner
   graph/console and focused CTests passed. Logs: `.migration/planner-cleanup/`.
   The user's five-case README retest after this cleanup is pending.
-- User plans module PR review/merges, then a fresh clone test on another machine.
+- User plans a fresh README install/test before merging cpp_control #8 and
+  workspace #3. The other four modules have landed in main.
   Fresh-OS provisioning and onboard/offboard validation are still pending.
 - The final cpp_control review is [PR #8](https://github.com/drcl-deploy/cpp_control/pull/8)
   against `master`, superseding #7. Review the complete ViBe/reference/telemetry
   additions before landing. Research branches remain intact. Encoder #7 and
   sledgehammer #1 include their merged recovery PRs. The message-ownership
-  companion branches in sledgehammer and cdr_tcp_bridge must land with cpp_control.
+  companions are now on sledgehammer and cdr_tcp_bridge main.
   Workspace [PR #3](https://github.com/drcl-deploy/vibe_ws/pull/3)
   pins the matching commits.
 - Installation portability changes support explicit/unique Foxy/Humble/Jazzy
