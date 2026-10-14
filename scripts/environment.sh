@@ -21,21 +21,13 @@ _vibe_setup_environment() {
     echo 'Set VIBE_ROBOT_HOST to the onboard camera/bridge host.' >&2
     return 1
   fi
-  distro=${ROS_DISTRO:-}
-  if [[ -z "$distro" ]]; then
-    if [[ -f /opt/ros/humble/setup.bash ]]; then distro=humble;
-    elif [[ -f /opt/ros/foxy/setup.bash ]]; then distro=foxy; fi
-  fi
-  case "$distro" in
-    humble|foxy) ;;
-    *) echo 'This workspace supports ROS Humble or Foxy.' >&2; return 1 ;;
-  esac
+  distro="$(/usr/bin/python3 "$root/scripts/ros_env.py" --workspace "$root/cyclonedds_ws")" || return 1
   if [[ ! -f "/opt/ros/$distro/setup.bash" || ! -f "$root/cyclonedds_ws/install/setup.bash" ]]; then
     echo "ROS $distro or the workspace overlay is missing; build the workspace first." >&2
     return 1
   fi
   source "/opt/ros/$distro/setup.bash" || return 1
-  source "$root/cyclonedds_ws/install/setup.bash" || return 1
+  source "$root/cyclonedds_ws/install/local_setup.bash" || return 1
   export VIBE_WORKSPACE_ROOT="$root"
   export UNITREE_ROS2_ROOT="$root"  # Existing package compatibility.
   export VIBE_ASSET_ROOT="${VIBE_ARTIFACT_ROOT:-$root/artifacts}"
@@ -45,7 +37,11 @@ _vibe_setup_environment() {
   export VIBE_CAMERA_ADDRESS="$camera_address"
   export VIBE_BRIDGE_ADDRESS="$bridge_address"
   export BRIDGE_ROS_DOMAIN_ID="$bridge_domain_id"
-  export CYCLONEDDS_URI="<CycloneDDS><Domain><General><Interfaces><NetworkInterface name=\"$interface\" priority=\"default\" multicast=\"default\" /></Interfaces></General></Domain></CycloneDDS>"
+  if [[ "$distro" == foxy ]]; then
+    export CYCLONEDDS_URI="<CycloneDDS><Domain><General><NetworkInterfaceAddress>$interface</NetworkInterfaceAddress></General></Domain></CycloneDDS>"
+  else
+    export CYCLONEDDS_URI="<CycloneDDS><Domain><General><Interfaces><NetworkInterface name=\"$interface\" priority=\"default\" multicast=\"default\" /></Interfaces></General></Domain></CycloneDDS>"
+  fi
   unset ROS_LOCALHOST_ONLY
   echo "ViBe $profile: DDS domain $domain_id, interface $interface"
   echo "Artifacts: $VIBE_ASSET_ROOT"

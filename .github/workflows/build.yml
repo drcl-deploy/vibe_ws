@@ -1,0 +1,48 @@
+name: Install and validate workspace
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  offboard:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        ros:
+          - {distro: humble, image: 'ros:humble-ros-base-jammy'}
+          - {distro: jazzy, image: 'ros:jazzy-ros-base-noble'}
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: ${{ matrix.ros.image }}
+    env:
+      ROS_DISTRO: ${{ matrix.ros.distro }}
+      DEBIAN_FRONTEND: noninteractive
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Prepare checkout tools
+        run: |
+          apt-get update
+          apt-get install -y git git-lfs ca-certificates
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Install offboard from pinned sources without CUDA
+        run: ./install.sh --system --profile offboard --jobs 2
+      - name: Workspace tests
+        run: |
+          /usr/bin/python3 -m unittest discover -s tests -v
+          /usr/bin/python3 -m unittest discover -s cyclonedds_ws/src/vision_encoders/tests -p test_setup.py -v
+          /usr/bin/python3 -m unittest discover -s cyclonedds_ws/src/cpp_control/tests -p test_ros_environment.py -v
+      - name: Bridge tests
+        shell: bash
+        run: |
+          source "/opt/ros/$ROS_DISTRO/setup.bash"
+          source cyclonedds_ws/install/local_setup.bash
+          cd cyclonedds_ws
+          colcon test --packages-select cdr_tcp_bridge --return-code-on-test-failure
+          colcon test-result --verbose

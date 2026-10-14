@@ -8,6 +8,8 @@ import os
 from pathlib import Path
 import subprocess
 
+from ros_env import select_distro, shell_command
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -92,11 +94,18 @@ def main():
             print('OK encoder: ' + str(args.encoder))
         except (OSError, ValueError, KeyError) as error:
             failures.append('Artifacts: ' + str(error))
+    if not args.build_only:
+        try:
+            subprocess.run(shell_command(
+                ['/usr/bin/python3', ROOT / 'scripts/check_runtime.py', '--profile', args.profile],
+                select_distro(), ROOT / 'cyclonedds_ws'), check=True)
+        except (OSError, ValueError, subprocess.CalledProcessError) as error:
+            failures.append('Runtime dependencies: ' + str(error))
     for failure in failures:
         print('FAIL ' + failure)
     if failures:
         raise SystemExit(1)
-    print('Automated file checks passed. Run scripts/regression.sh for runtime checks.')
+    print('Automated installation checks passed. Run scripts/regression.sh for runtime checks.')
     print('Manual joystick rollout and hardware validation remain operator gates.')
 
 

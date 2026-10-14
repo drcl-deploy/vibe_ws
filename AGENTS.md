@@ -138,11 +138,20 @@ onboard/offboard checks, including QoS and disconnect behavior.
   sledgehammer #2 remain stacked on their earlier PRs; the planner needs the
   encoder's shared camera reader. Workspace [PR #3](https://github.com/drcl-deploy/vibe_ws/pull/3)
   pins the matching commits.
-- A clean offboard install omits cpp_control/vision_encoders message libraries
-  needed by the bridge's `full.yaml` profile. Address this packaging gap before
-  claiming offboard readiness.
+- Installation portability changes support explicit/unique Foxy/Humble/Jazzy
+  selection, OS Python for ROS tools, and a bounded ARM ONNX Runtime source build
+  matched to JetPack CUDA/cuDNN. Foxy simulation setup remains unsupported.
+- Offboard now builds cpp_control/vision_encoders messages and viewing tools with
+  runtime targets disabled. A fresh isolated x86/Humble offboard build passed
+  all 12 bridge Python/C++ type-support imports without an ONNX/CUDA SDK. Doctor
+  checks these imports and sim/onboard CUDA-provider loading. Native ARM and
+  fresh-OS/hardware acceptance remain pending.
+- Portability validation passed 25 workspace tests, three environment tests,
+  three SDK setup tests, normal ROS build, full runtime regression, sample launch
+  and planner graph/console checks. Logs: `.migration/portability/`.
 - Camera TCP reads/shutdown now have bounded waits, with encoder/planner recovery
   checks passing in simulation. Hardware reconnect acceptance is still pending.
 - cpp_control/vision_encoders retain known lint failures (853 in the recorded
-  package run). Root CI still targets `master` and does not validate this complete
-  deployment. Passing focused checks does not make the full lint/CI suite green.
+  package run). Root CI now targets `main` and runs the offboard installer and
+  tests on x86/ARM with Humble/Jazzy. It does not cover native CUDA installation.
+  Passing focused checks does not make the full package lint suite green.

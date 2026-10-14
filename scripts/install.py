@@ -9,6 +9,8 @@ import shlex
 import subprocess
 import sys
 
+from ros_env import check_overlay, identity, select_distro, shell_command
+
 ROOT = Path(__file__).resolve().parents[1]
 STAGES = ['sources', 'deps', 'artifacts', 'scene', 'sim', 'ros', 'doctor']
 
@@ -19,17 +21,45 @@ def run(command, cwd=ROOT, env=None):
 
 
 def ros_command(command, overlay=False):
-    distro = os.environ.get('ROS_DISTRO', 'humble')
-    if distro not in {'foxy', 'humble'}:
-        raise ValueError('ROS_DISTRO must be foxy or humble')
-    setup = Path('/opt/ros') / distro / 'setup.bash'
-    if not setup.is_file():
-        raise ValueError('Install ROS ' + distro + ' first: missing ' + str(setup))
-    script = 'set -e; source ' + shlex.quote(str(setup)) + '; '
-    if overlay:
-        script += 'source ' + shlex.quote(str(ROOT / 'cyclonedds_ws/install/setup.bash')) + '; '
-    script += shlex.join([str(part) for part in command])
-    run(['bash', '-c', script], cwd=ROOT / 'cyclonedds_ws')
+    distro = select_distro()
+    workspace = ROOT / 'cyclonedds_ws'
+    run(shell_command(command, distro, workspace if overlay else None), cwd=workspace)
+
+
+def system_packages(distro):
+    packages = ['build-essential', 'cmake', 'git', 'git-lfs', 'curl', 'pkg-config',
+                'python3-venv', 'python3-pip', 'python3-dev', 'python3-colcon-common-extensions',
+                'python3-numpy', 'python3-yaml', 'python3-opencv',
+                'python3-matplotlib', 'python3-pyqt5',
+                'libyaml-cpp-dev', 'libopencv-dev', 'libboost-program-options-dev',
+                'libglfw3-dev', 'libgl1-mesa-dev', 'libfmt-dev', 'libeigen3-dev', 'zlib1g-dev']
+    packages += ['ros-' + distro + '-' + name for name in (
+        'rmw-cyclonedds-cpp', 'rosidl-generator-dds-idl', 'ros2launch',
+        'ament-cmake-gtest', 'ament-lint-auto', 'ament-lint-common',
+        'rosbag2', 'rosbag2-py', 'rosbag2-storage-default-plugins',
+        'rclpy', 'rosidl-runtime-py', 'sensor-msgs', 'geometry-msgs')]
+    return packages
+
+
+def bootstrap(system, distro):
+    if system:
+        privilege = [] if os.geteuid() == 0 else ['sudo']
+        run(privilege + ['apt-get', 'update'])
+        run(privilege + ['apt-get', 'install', '-y'] + system_packages(distro))
+    venv = ROOT / '.venv'
+    if Path(sys.prefix) == venv:
+        return
+    python = venv / 'bin/python'
+    if not python.exists():
+        run(['/usr/bin/python3', '-m', 'venv', venv])
+    version = subprocess.check_output([str(python), '-c',
+        'import sys; print("{}.{}".format(*sys.version_info[:2]))'], text=True).strip()
+    if version != '{}.{}'.format(*sys.version_info[:2]):
+        raise ValueError('The setup venv uses a different Python version; move .venv aside and retry.')
+    run([python, '-m', 'pip', 'install', '--disable-pip-version-check',
+         'PyYAML==6.0.2', 'vcstool==0.3.0'])
+    os.execv(str(python), [str(python), str(Path(__file__).resolve())]
+             + [arg for arg in sys.argv[1:] if arg != '--system'])
 
 
 def sdk_setup(jobs):
@@ -59,9 +89,14 @@ def main():
     parser.add_argument('--profile', choices=['sim', 'onboard', 'offboard'], default='sim')
     parser.add_argument('--jobs', type=int, default=2)
     parser.add_argument('--plan', action='store_true', help='show stages without changing the workspace')
+    parser.add_argument('--system', action='store_true', help='install system dependencies with apt')
+    parser.add_argument('--ort-archive', type=Path, help='use a validated local ONNX Runtime SDK archive')
+    parser.add_argument('--ort-sha256', help='SHA-256 of --ort-archive')
     args = parser.parse_args()
     if args.jobs < 1 or (args.stage and args.from_stage):
         parser.error('Use positive --jobs and either --stage or --from-stage')
+    if bool(args.ort_archive) != bool(args.ort_sha256):
+        parser.error('--ort-archive and --ort-sha256 must be supplied together')
     selected = args.stage or STAGES
     if args.from_stage:
         selected = STAGES[STAGES.index(args.from_stage):]
@@ -72,6 +107,15 @@ def main():
     if args.plan:
         print(' -> '.join(selected))
         return
+    distro = None
+    if args.system or any(stage in selected for stage in ('ros', 'doctor')):
+        distro = select_distro()
+        os.environ['ROS_DISTRO'] = distro
+        check_overlay(ROOT / 'cyclonedds_ws', distro, runtime=args.profile != 'offboard')
+    if args.profile == 'sim' and 'deps' in selected and sys.version_info < (3, 10):
+        raise ValueError('Simulation setup requires Python 3.10+ (Humble/Jazzy). '
+                         'Foxy is supported for --profile onboard or offboard.')
+    bootstrap(args.system, distro)
     ros_environment = dict(os.environ, PYTHONDONTWRITEBYTECODE='1')
     ros_environment['PATH'] = str(ROOT / '.venv/bin') + os.pathsep + os.environ['PATH']
     for stage in selected:
@@ -80,15 +124,16 @@ def main():
             run([sys.executable, 'scripts/sources.py', 'import'], env=ros_environment)
         elif stage == 'deps':
             if args.profile == 'sim':
-                if sys.version_info < (3, 10):
-                    raise ValueError('Simulation asset generation requires Python 3.10+; use Humble/22.04')
                 run([sys.executable, '-m', 'pip', 'install', '-r', 'requirements-setup.txt'])
                 sdk_setup(args.jobs)
                 run(['bash', 'unitree_mujoco/scripts/setup_mujoco.sh', '--install-dir', ROOT / '.deps/mujoco-3.3.6'])
             if args.profile in {'sim', 'onboard'}:
-                command = ['bash', 'cyclonedds_ws/src/vision_encoders/scripts/setup_onnxruntime.sh']
+                command = ['bash', 'cyclonedds_ws/src/vision_encoders/scripts/setup_onnxruntime.sh',
+                           '--jobs', str(args.jobs)]
                 if os.uname().machine == 'x86_64':
                     command.append('--install-cuda-runtime')
+                if args.ort_archive:
+                    command += ['--archive', args.ort_archive.resolve(), '--sha256', args.ort_sha256]
                 run(command)
         elif stage == 'artifacts':
             run([sys.executable, 'scripts/artifacts.py', '--lock', ROOT / 'artifacts.lock.json'])
@@ -101,21 +146,27 @@ def main():
                  '-DCMAKE_BUILD_TYPE=Release', '-DBUILD_TESTING=ON'])
             run(['cmake', '--build', 'unitree_mujoco/simulate/build', '-j', str(args.jobs)])
         elif stage == 'ros':
-            build = ['colcon', 'build', '--symlink-install', '--executor', 'sequential',
+            build = ['/usr/bin/colcon', 'build', '--symlink-install', '--executor', 'sequential',
                      '--parallel-workers', str(args.jobs), '--packages-select']
             os.environ['CMAKE_BUILD_PARALLEL_LEVEL'] = str(args.jobs)
-            ros_command(build + ['unitree_go', 'unitree_hg', 'unitree_api',
-                                 '--cmake-args', '-DCMAKE_BUILD_TYPE=Release'])
-            packages = ['cdr_tcp_bridge']
+            cmake = ['--cmake-args', '-DCMAKE_BUILD_TYPE=Release',
+                     '-DPython3_EXECUTABLE=/usr/bin/python3', '-DPYTHON_EXECUTABLE=/usr/bin/python3']
+            ros_command(build + ['unitree_go', 'unitree_hg', 'unitree_api'] + cmake)
+            packages = ['cdr_tcp_bridge', 'vision_encoders', 'cpp_control']
             if args.profile != 'offboard':
-                packages += ['vision_encoders', 'cpp_control']
                 if (ROOT / 'cyclonedds_ws/src/sledgehammer/package.xml').is_file():
                     packages.append('sledgehammer')
             ort = str(ROOT / 'cyclonedds_ws/src/vision_encoders/thirdparty/onnxruntime')
-            ros_command(build + packages + ['--cmake-args', '-DCMAKE_BUILD_TYPE=Release',
-                        '-DONNXRUNTIME_ROOT=' + ort, '-DONNXRUNTIME_ROOT_DIR=' + ort], overlay=True)
+            runtime = 'OFF' if args.profile == 'offboard' else 'ON'
+            flags = ['-DCPP_CONTROL_BUILD_RUNTIME=' + runtime,
+                     '-DVISION_ENCODERS_BUILD_RUNTIME=' + runtime]
+            if runtime == 'ON':
+                flags += ['-DONNXRUNTIME_ROOT=' + ort, '-DONNXRUNTIME_ROOT_DIR=' + ort]
+            ros_command(build + packages + cmake + flags, overlay=True)
+            marker = ROOT / 'cyclonedds_ws/install/vibe_build.json'
+            marker.write_text(json.dumps(identity(distro, runtime == 'ON'), indent=2) + '\n')
         else:
-            run([sys.executable, 'scripts/doctor.py', '--profile', args.profile, '--build-only'])
+            run(['/usr/bin/python3', 'scripts/doctor.py', '--profile', args.profile])
     print('\nCompleted stages: ' + ', '.join(selected))
     print('ONNX exports stay in ignored artifacts/.')
     if args.profile == 'sim' and 'doctor' in selected:

@@ -49,6 +49,21 @@ Bridge and planner runtime tests pass. The encoder and cpp_control packages have
 pre-existing lint failures; a successful focused regression does not mean the
 entire colcon lint suite is green.
 
+Installation checks:
+
+```bash
+/usr/bin/python3 -m unittest discover -s tests -v
+/usr/bin/python3 -m unittest discover -s cyclonedds_ws/src/vision_encoders/tests -p test_setup.py -v
+/usr/bin/python3 -m unittest discover -s cyclonedds_ws/src/cpp_control/tests -p test_ros_environment.py -v
+/usr/bin/python3 scripts/doctor.py --profile onboard  # or sim / offboard
+```
+
+Doctor loads the bridge profiles' Python and C++ message libraries, checks Python
+runtime dependencies, and loads the CUDA provider for sim/onboard. `--build-only`
+skips these imports and model checks. CI runs the actual offboard installer in
+Humble/Jazzy containers on x86 and ARM runners. It does not exercise JetPack CUDA
+or replace native onboard acceptance.
+
 ## manual samples
 
 The operator reported all four samples working in simulation on 2026-10-13.
@@ -95,6 +110,21 @@ were reused, and ONNX Runtime was downloaded. Fresh-OS `--system` provisioning a
 public availability of every review pin remain separate publication checks.
 
 ## evidence
+
+The portability changes passed 25 workspace tests, three ROS environment tests,
+and three SDK setup tests, including archive extraction with nested source-build
+headers and custom dependency paths. The normal Humble build and a fresh isolated
+offboard build both passed doctor. The offboard checkout had no ONNX/CUDA SDK;
+all 12 bridge message types loaded through Python and C++ typesupport.
+Removing a C++ typesupport library made doctor fail as intended. The installed
+live viewer and both Repose diagnostic viewers started with the setup venv active
+and stopped cleanly on Ctrl-C. Controller, nine planner, and three bridge CTests
+passed as well.
+
+The full runtime regression, four sample launches and planner graph/console
+checks passed after the installation changes. Logs are under
+`.migration/portability/`. These are x86/Humble results; native ARM source builds,
+fresh-OS provisioning, and hardware operation still require target-host checks.
 
 The planner cleanup rebuilt cpp_control from empty build/install directories and
 rebuilt sledgehammer against it. The full regression, sample launches, planner

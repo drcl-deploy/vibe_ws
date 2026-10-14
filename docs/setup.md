@@ -1,8 +1,14 @@
 # setup
 
-Ubuntu 22.04 / ROS Humble is the tested target. Install ROS and the NVIDIA driver,
+Ubuntu 22.04 / ROS Humble is the tested target; setup also accepts Ubuntu 24.04 /
+ROS Jazzy. Install ROS and the NVIDIA driver (JetPack on Jetson),
 then run `./install.sh --system` from a fresh shell. Without `--system`, setup
 assumes the system packages are already installed.
+
+The installer honors `ROS_DISTRO`. In a fresh shell it selects the only installed
+Foxy/Humble/Jazzy distribution; if several are installed, set `ROS_DISTRO`
+explicitly. `--system` works in any argument position and `--plan` never installs
+packages. ROS and viewer tools use `/usr/bin/python3`; `.venv` is for setup tools.
 
 ## stages
 
@@ -21,6 +27,11 @@ assumes the system packages are already installed.
 The full command runs these in order. Sources are pinned commits. Existing dirty
 or mismatched repositories stop setup without resetting local work. Verified
 dependencies are reused; MuJoCo 3.3.6 and the Unitree SDK live in `.deps/`.
+
+Builds record their ROS distribution, Python version, CPU architecture and runtime
+profile. When changing these, use a separate checkout or move
+`cyclonedds_ws/build` and `cyclonedds_ws/install` aside before rebuilding. Setup
+rejects incompatible existing overlays and never deletes them for you.
 
 ## samples and scenes
 
@@ -98,8 +109,8 @@ The README's `stream_vibes.sh` command starts the offboard client and viewer.
 ## onboard and offboard
 
 ```bash
-./install.sh --profile onboard  # tracker, encoder, planner and bridge
-./install.sh --profile offboard # telemetry bridge only
+./install.sh --system --profile onboard --jobs 2  # tracker, encoder, planner and bridge
+./install.sh --system --profile offboard          # bridge, messages and viewer tools; no CUDA
 ```
 
 Onboard: set `VIBE_ROBOT_INTERFACE`, source `setup.sh onboard`, then use the direct
@@ -107,5 +118,37 @@ ROS launch with `env:=real` for the planner. Offboard: set `VIBE_ROBOT_HOST` and
 source `setup.sh offboard`.
 
 Simulation uses DDS domain 1 on loopback, onboard domain 0 on the selected
-interface, and offboard telemetry domain 71. Foxy interfaces remain supported;
-Jetson/Foxy hardware validation is separate from the Humble simulation checks.
+interface, and offboard telemetry domain 71. Foxy retains onboard/offboard support
+and its older CycloneDDS interface syntax; simulation setup requires Humble/Jazzy
+and Python 3.10+. Foxy and Jetson hardware acceptance are separate from the Humble
+simulation checks.
+
+## ARM and ONNX Runtime
+
+The x86 installer downloads the pinned ONNX Runtime GPU SDK and supplies missing
+CUDA runtime libraries locally. ARM setup uses JetPack's CUDA/cuDNN and builds a
+pinned native SDK with a local CMake 3.28.4 toolchain. `--jobs` limits compilation;
+use `--jobs 1` on a memory-constrained robot. Orin/Xavier GPU architectures are
+detected from the device tree; another supported device needs
+`VISION_ENCODERS_CUDA_ARCHITECTURES` set explicitly.
+
+| Host libraries | ARM ONNX Runtime |
+|---|---|
+| CUDA 11 + cuDNN 8 | 1.15.1 |
+| CUDA 12 + cuDNN 8 | 1.18.0 |
+| CUDA 12 + cuDNN 9 | 1.22.0 |
+
+Install JetPack development libraries before source builds. Set `CUDA_HOME` or
+`CUDNN_HOME` if they are outside `/usr/local/cuda` and `/usr`. Other library pairs
+fail early; setup does not replace JetPack's libraries. ORT 1.22 also requires
+GCC 11.1 or newer. A validated local GPU SDK can avoid the source build:
+
+```bash
+./install.sh --system --profile onboard \
+  --ort-archive /path/to/onnxruntime-sdk.tgz --ort-sha256 <sha256>
+```
+
+Installation finishes by checking viewer imports, bridge message libraries and
+(for sim/onboard) CUDA-provider loading, without starting control nodes. Native
+Jetson build/inference and onboard/offboard communication still need target-host
+acceptance; architecture-selection tests do not establish that acceptance.

@@ -11,6 +11,10 @@
   },
   "onnxruntime": {
     "x86_64": "1.22.0",
+    "aarch64_cuda11_cudnn8": "1.15.1",
+    "aarch64_cuda12_cudnn8": "1.18.0",
+    "aarch64_cuda12_cudnn9": "1.22.0",
+    "source_build_cmake": "3.28.4",
     "setup": "cyclonedds_ws/src/vision_encoders/scripts/setup_onnxruntime.sh"
   }
 }
