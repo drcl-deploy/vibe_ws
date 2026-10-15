@@ -66,6 +66,13 @@ skips these imports and model checks. CI runs the actual offboard installer in
 Humble/Jazzy containers on x86 and ARM runners. It does not exercise JetPack CUDA
 or replace native onboard acceptance.
 
+Installer tests exercise clean pinned upgrades, local-work preservation, failed
+clones, interrupted artifact/SDK installation, incomplete setup venvs and build
+rotation interrupted between moves. They check that unchanged retries retain
+completed objects, changed inputs retire obsolete installed messages, and saved
+onboard/offboard profiles survive a plain rerun. CI repeats `./install.sh` after
+the fresh offboard install and checks that its build cache and profile survive.
+
 The message smoke checks that Repose types are installed only in sledgehammer,
 their fields match the former cpp_control schemas, and the installed replay tools
 read old type names from an actual SQLite bag. Frozen CDR fixtures were captured

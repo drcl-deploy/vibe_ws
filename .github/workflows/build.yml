@@ -33,6 +33,14 @@ jobs:
           lfs: true
       - name: Install offboard from pinned sources without CUDA
         run: ./install.sh --system --profile offboard --jobs 2
+      - name: Retry without extra arguments
+        run: |
+          touch cyclonedds_ws/build/.retry-sentinel
+          ./install.sh
+          test -f cyclonedds_ws/build/.retry-sentinel
+          test ! -e cyclonedds_ws/install/cpp_control/lib/cpp_control/g1_vibe_sonic_node
+          test ! -e cyclonedds_ws/install/vision_encoders/lib/vision_encoders/encoder_node
+          test ! -e cyclonedds_ws/install/sledgehammer/lib/sledgehammer/g1_repose_planner_node
       - name: Workspace tests
         run: |
           /usr/bin/python3 -m unittest discover -s tests -v

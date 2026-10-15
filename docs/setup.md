@@ -9,6 +9,50 @@ The installer honors `ROS_DISTRO`. In a fresh shell it selects the only installe
 Foxy/Humble/Jazzy distribution; if several are installed, set `ROS_DISTRO`
 explicitly. `--system` works in any argument position and `--plan` never installs
 packages. ROS and viewer tools use `/usr/bin/python3`; `.venv` is for setup tools.
+Later runs remember the selected profile, job limit, ROS distribution and any
+custom ONNX Runtime archive. Explicit arguments and `ROS_DISTRO` override them.
+Use `--ort-archive auto` to return from a saved custom SDK to automatic selection.
+
+## retry and update
+
+```bash
+./install.sh                 # retry or verify the current release
+
+# update an existing checkout
+git pull --ff-only
+./install.sh
+```
+
+Healthy dependencies and verified artifacts are reused. Interrupted compilation
+keeps completed objects; incomplete installer-owned SDKs and the setup venv are
+preserved aside and rebuilt. Downloads and new source checkouts are prepared
+before publishing them to their final paths. A failed model update leaves the
+previous model intact.
+
+The source stage advances clean managed repositories to `sources.repos` pins.
+A clean checkout from an older installer can be adopted when the update is a
+fast-forward from the expected remote, or its exact pin appears in the
+workspace's committed lock history. Local edits, independent commits and
+custom exports stop setup with their paths; they are never reset or overwritten.
+Model updates replace only files matching a recorded or previously locked checksum.
+An existing unknown incomplete directory is left for the operator to inspect.
+
+Build inputs include source pins, SDK identity, ROS/Python/architecture and
+profile. When these change, setup moves the affected generated build/install
+outputs aside, preventing obsolete installed files from surviving an upgrade.
+The same inputs reuse the current build, including a partially completed one.
+The first run of this installer adopts existing sources/artifacts and rebuilds
+unrecorded generated outputs once.
+
+Receipts, failure details and logs live under `.cache/vibe-install/`; preserved
+outputs are in its `previous/` directory. Artifact ownership is recorded in
+`artifacts/.vibe-artifacts.json`, or beside the chosen custom artifact root.
+Retain these receipts for future upgrades. Each failure prints the stage, log
+path and retry command. Only one installer can run in a checkout at a time.
+
+Use `--system` again if a release needs additional OS packages. Setup checks
+system requirements and doctor verifies the completed installation. Updating
+the workspace itself remains the explicit `git pull` above.
 
 ## stages
 
@@ -24,14 +68,12 @@ packages. ROS and viewer tools use `/usr/bin/python3`; `.venv` is for setup tool
 ./install.sh --from-stage scene --jobs 2
 ```
 
-The full command runs these in order. Sources are pinned commits. Existing dirty
-or mismatched repositories stop setup without resetting local work. Verified
-dependencies are reused; MuJoCo 3.3.6 and the Unitree SDK live in `.deps/`.
+The full command runs these in order. Stage selectors are optional tools for
+development and diagnosis; ordinary retries use the full command. MuJoCo 3.3.6
+and the Unitree SDK live in `.deps/`.
 
-Builds record their ROS distribution, Python version, CPU architecture and runtime
-profile. When changing these, use a separate checkout or move
-`cyclonedds_ws/build` and `cyclonedds_ws/install` aside before rebuilding. Setup
-rejects incompatible existing overlays and never deletes them for you.
+Shell setup still rejects incompatible installed overlays. Run the installer to
+prepare the selected profile, then source its setup script in a fresh terminal.
 
 ## samples and scenes
 

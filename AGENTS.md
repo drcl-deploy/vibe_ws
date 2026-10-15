@@ -124,6 +124,24 @@ onboard/offboard checks, including QoS and disconnect behavior.
 
 ## Remaining release work
 
+- Installer retries and upgrades now reconcile the current locks through the
+  existing install.sh command. Clean managed module pins advance automatically;
+  older release pins and artifacts can be recognized from committed lock history.
+  Unknown commits, edits, ignored-file collisions and custom exports stay intact.
+  Receipts/logs live in .cache/vibe-install; artifact receipts stay with artifacts.
+  Profile, ROS selection, job count and custom SDK archive persist between runs.
+  Changed build identities rotate generated outputs to previous/; matching inputs
+  retain partial builds. Incomplete owned SDKs/venvs recover on rerun. The first
+  receipt-aware run rebuilds previously unrecorded generated outputs once.
+- Installer validation includes 47 workspace tests, complete normal installation,
+  incremental retry with all 463 object timestamps retained, fresh offboard
+  installation/retry without CUDA or runtime executables, installed legacy replay,
+  bridge tests, the full runtime regression and sample/planner launch checks.
+  Evidence: .migration/installer-retry/ and .migration/installer-retry-regression/.
+  Native JetPack source build and onboard/offboard hardware acceptance remain pending.
+- README operator/gamepad and restart notes were removed at the user's request;
+  detailed controls remain in docs/testing.md and future demo links are planned.
+
 - The approved package-boundary cleanup renames only the branch-added Grail/OmRe
   wrappers to g1_vibe_walk / g1_vibe_parkour. Generic ViBe, standalone SONIC and
   every master path remain. The cpp_control README and new docs/vibe.md replace
