@@ -42,6 +42,7 @@ cyclonedds_ws/build/sledgehammer/repose_planner_selftest \
   --frames cyclonedds_ws/src/sledgehammer/data/sys1_bundle.npz \
   --approach cyclonedds_ws/src/sledgehammer/data/sys1_walk/walk_forward_amateur_001__A001/motion.npz
 ros2 run vision_encoders cuda_provider_check
+python3 tests/runtime_recovery_smoke.py --logs ".migration/$phase/runtime-recovery"
 python3 tests/motion_path_smoke.py --logs ".migration/$phase/motion-path"
 python3 - <<'PY'
 from pathlib import Path

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Load each sample through the direct ROS launch, without state or joystick input."""
 
+import argparse
 import json
 import os
 from pathlib import Path
@@ -13,6 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--task-launches', action='store_true', help='check the named task wrappers')
+    args = parser.parse_args()
     env = dict(os.environ, ROS_DOMAIN_ID='95', RMW_IMPLEMENTATION='rmw_cyclonedds_cpp',
                PYTHONDONTWRITEBYTECODE='1')
     env['CYCLONEDDS_URI'] = '<CycloneDDS><Domain><General><Interfaces><NetworkInterface name="lo" /></Interfaces></General></Domain></CycloneDDS>'
@@ -21,8 +25,9 @@ def main():
     logs = ROOT / '.migration/samples-launch'
     logs.mkdir(parents=True, exist_ok=True)
     for name, spec in samples.items():
-        logfile = logs / (name + '.log')
-        command = ['ros2', 'launch', 'cpp_control', 'g1_vibe_sonic.launch.py',
+        launch = 'g1_vibe_' + name + '.launch.py' if args.task_launches else 'g1_vibe_sonic.launch.py'
+        logfile = logs / (name + ('-task' if args.task_launches else '') + '.log')
+        command = ['ros2', 'launch', 'cpp_control', launch,
                    'policy_path:=' + str(artifacts / spec['policy']),
                    'encoder_path:=' + str(artifacts / 'encoders/theia-tiny.onnx'),
                    'motion_path:=' + str(ROOT / 'data/sample' / name / 'motion.npz'),

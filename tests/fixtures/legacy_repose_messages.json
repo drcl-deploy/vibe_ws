@@ -1,0 +1,160 @@
+{
+  "PlannerStatus": {
+    "old_type": "cpp_control/msg/PlannerStatus",
+    "cdr": "AAEAAAEAAAAOAAAAbGFiZWwgZml4dHVyZQAAAAAAUEAAAIhAAACoQAAAyEAAAOhAAAAEQQAAFEEAACRBCwAAAAwAAAABDgAAEwAAAGNhbmRfbGFiZWwgZml4dHVyZQAAAACCQQAAikEAAJJBAACaQQAAokEBAAAAFgAAABcAAAAYAAAAAADKQRoAAAAbAAAAAQEAAB4AAAAfAAAAIAAAACEAAAAiAAAAIwAAACQAAAAlAAAAJgAAACcAAAAoAAAAAQAAACoAAAArAAAAAAAxQgAANUIBAQAAMAAAAA8AAAByZWFzb24gZml4dHVyZQAAAABJQgAATUIAAFFCNQAAABAAAAB2ZXJzaW9uIGZpeHR1cmUAAABdQg==",
+    "fields": {
+      "mode": 1,
+      "label": "label fixture",
+      "cost": 3.25,
+      "entry_yaw": 4.25,
+      "entry_translation_m": 5.25,
+      "entry_bearing_rad": 6.25,
+      "entry_forward_m": 7.25,
+      "entry_lateral_m": 8.25,
+      "approach_requested_m": 9.25,
+      "approach_covered_m": 10.25,
+      "frames": 11,
+      "lead_in_frames": 12,
+      "committed": true,
+      "cand_mode": 14,
+      "cand_label": "cand_label fixture",
+      "cand_cost": 16.25,
+      "cand_entry_translation_m": 17.25,
+      "cand_entry_bearing_rad": 18.25,
+      "cand_entry_forward_m": 19.25,
+      "cand_entry_lateral_m": 20.25,
+      "candidate_locked": true,
+      "candidate_lock_row": 22,
+      "candidate_lock_sym": 23,
+      "search_phase": 24,
+      "approach_progress_m": 25.25,
+      "approach_attempts": 26,
+      "approach_no_progress": 27,
+      "approach_only": true,
+      "approach_turn_locked": true,
+      "approach_turn_attempts": 30,
+      "approach_turn_row": 31,
+      "approach_turn_sym": 32,
+      "delta": 33,
+      "rung": 34,
+      "tips": 35,
+      "stall": 36,
+      "burned": 37,
+      "rolls": 38,
+      "episode": 39,
+      "target_color": 40,
+      "done": true,
+      "n_reads": 42,
+      "n_votes": 43,
+      "omega_cam": 44.25,
+      "accept_rate": 45.25,
+      "sees": true,
+      "pose_ok": true,
+      "color": 48,
+      "reason": "reason fixture",
+      "range_m": 50.25,
+      "bearing_rad": 51.25,
+      "phi_rad": 52.25,
+      "n_px": 53,
+      "version": "version fixture",
+      "observe_ms": 55.25
+    },
+    "schema_sha256": "5f0811f99f4d156d1a26fc7a490db632bdf83b32ee7d09a1b579907cebe68621"
+  },
+  "CubeObservation": {
+    "old_type": "cpp_control/msg/CubeObservation",
+    "cdr": "AAEAAHsAAADIAQAABwAAAGNhbWVyYQAAAAAAAAIAAAAAAAAAAQEBAQcAAAAPAAAAcmVhc29uIGZpeHR1cmUAAAAAgD4AAKA/AAAQQAAAJEELAAAAAABEQQAAVEEAAIA+AACgPwAAEEAAAFBAAACIQAAAqEAAAMhAAADoQAAABEEAAIA+AACgPwAAEEACAAAAAQAAAAIAAAACAAAAAQAAAAIAAAACAAAAAACgPwAAIEACAAAAAACgPwAAIEACAAAAAACgPwAAIEACAAAAAACgPwAAIEACAAAAAACgPwAAIEA=",
+    "fields": {
+      "header": {
+        "stamp": {
+          "sec": 123,
+          "nanosec": 456
+        },
+        "frame_id": "camera"
+      },
+      "sequence": 2,
+      "state_ready": true,
+      "stand_locked": true,
+      "color_ok": true,
+      "pose_ok": true,
+      "color": 7,
+      "reason": "reason fixture",
+      "position": [
+        0.25,
+        1.25,
+        2.25
+      ],
+      "phi_rad": 10.25,
+      "n_px": 11,
+      "range_m": 12.25,
+      "bearing_rad": 13.25,
+      "camera_rotation": [
+        0.25,
+        1.25,
+        2.25,
+        3.25,
+        4.25,
+        5.25,
+        6.25,
+        7.25,
+        8.25
+      ],
+      "camera_translation": [
+        0.25,
+        1.25,
+        2.25
+      ],
+      "candidate_color": [
+        1,
+        2
+      ],
+      "candidate_pixels": [
+        1,
+        2
+      ],
+      "candidate_up_dot": [
+        1.25,
+        2.5
+      ],
+      "candidate_visible": [
+        1.25,
+        2.5
+      ],
+      "candidate_big": [
+        1.25,
+        2.5
+      ],
+      "candidate_center_x": [
+        1.25,
+        2.5
+      ],
+      "candidate_center_y": [
+        1.25,
+        2.5
+      ]
+    },
+    "schema_sha256": "0ebec841d5373cf672ab137b0f91b8e85703dfc03ede9c467d905f45dd99f116"
+  },
+  "CalibrationState": {
+    "old_type": "cpp_control/msg/CalibrationState",
+    "cdr": "AAEAAHsAAADIAQAABwAAAGNhbWVyYQAAAAAAAAIAAAAAAAAAAwAAAAQAAAAFAAAABgAAAAcAAAABAQ==",
+    "fields": {
+      "header": {
+        "stamp": {
+          "sec": 123,
+          "nanosec": 456
+        },
+        "frame_id": "camera"
+      },
+      "source_sequence": 2,
+      "expected_color": 3,
+      "stage_index": 4,
+      "attempt": 5,
+      "sample_index": 6,
+      "samples_per_color": 7,
+      "capturing": true,
+      "complete": true
+    },
+    "schema_sha256": "c6f99729550ac75108ec885cf6f26cfe5ebb05c9f010a003a988ba3ae4c3024d"
+  }
+}

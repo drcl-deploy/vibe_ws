@@ -21,9 +21,9 @@
 | Root scripts and locks | Fetch pinned sources/dependencies/exports, generate scenes, build and validate |
 | `unitree_mujoco/` | Native G1 simulation, robot XML, joystick input and camera TCP stream |
 | `cyclonedds_ws/src/vision_encoders/` | Camera frames to patch/CLS tokens through the frozen ONNX encoder |
-| `cyclonedds_ws/src/cpp_control/` | Manifest-driven ViBe tracker, motion playback, robot control and shared ROS messages |
+| `cyclonedds_ws/src/cpp_control/` | Manifest-driven ViBe tracker, motion playback, robot control and controller interfaces |
 | `cyclonedds_ws/src/cdr_tcp_bridge/` | Serialized ROS telemetry over TCP for offboard viewing/recording |
-| `cyclonedds_ws/src/sledgehammer/` | Frozen Repose V9.3 planner, target console and four packaged NPZ files |
+| `cyclonedds_ws/src/sledgehammer/` | Frozen Repose V9.3 planner, planner messages, target console and four packaged NPZ files |
 | `data/sample/` | Four small reference motions, required sidecars and scene geometry |
 
 `install.sh --system` runs `scripts/install.py`: sources, deps, artifacts, scene,
@@ -56,8 +56,11 @@ optional planner adds one ROS launch. Do not reintroduce runtime wrapper APIs.
   112x63 imagery and the 0.62369 kg cube. Both cube examples start 1 m ahead;
   the planner has its own `generated/repose/g1_repose.xml`. Do not restore the
   earlier 5 ms/terrain changes that caused heavy Y-damping vibration.
-- The tracker stays in cpp_control; the frozen Repose planner and its NPZ data
-  belong in sledgehammer. Never delete `lok-i/planners-level3` or other legacy
+- The tracker, MotionReference and ControllerStatus stay in cpp_control. The
+  frozen Repose planner, its NPZ data, PlannerStatus, CubeObservation and
+  CalibrationState belong in sledgehammer. Planner liveness uses std_msgs/Empty
+  on /vibe/planner/heartbeat, emitted from the same planner tick as status.
+  Never delete `lok-i/planners-level3` or other legacy
   branches, or merge compatibility branches, without explicit instructions.
 - Preserve Foxy/Humble compatibility, snake_case ROS/YAML names and existing
   formatting. Use `vibe` / `ViBe`, not `Vibe`, in new prose; retain exported IDs.
@@ -80,6 +83,8 @@ For runtime, artifact wiring or scene changes, use the established regression:
 ```bash
 bash scripts/regression.sh <checkpoint-name>
 python3 tests/sample_launch_smoke.py
+python3 tests/sample_launch_smoke.py --task-launches  # when task launch names/wiring change
+python3 tests/repose_message_smoke.py  # when message ownership or replay changes
 python3 tests/planner_graph_smoke.py
 python3 tests/planner_console_smoke.py  # when planner/console behavior changes
 ```
@@ -119,16 +124,88 @@ onboard/offboard checks, including QoS and disconnect behavior.
 
 ## Remaining release work
 
-- User plans module PR review/merges, then a fresh clone test on another machine.
+- Installer retries and upgrades now reconcile the current locks through the
+  existing install.sh command. Clean managed module pins advance automatically;
+  older release pins and artifacts can be recognized from committed lock history.
+  Unknown commits, edits, ignored-file collisions and custom exports stay intact.
+  Receipts/logs live in .cache/vibe-install; artifact receipts stay with artifacts.
+  Profile, ROS selection, job count and custom SDK archive persist between runs.
+  Changed build identities rotate generated outputs to previous/; matching inputs
+  retain partial builds. Incomplete owned SDKs/venvs recover on rerun. The first
+  receipt-aware run rebuilds previously unrecorded generated outputs once.
+- Installer validation includes 47 workspace tests, complete normal installation,
+  incremental retry with all 463 object timestamps retained, fresh offboard
+  installation/retry without CUDA or runtime executables, installed legacy replay,
+  bridge tests, the full runtime regression and sample/planner launch checks.
+  Evidence: .migration/installer-retry/ and .migration/installer-retry-regression/.
+  Native JetPack source build and onboard/offboard hardware acceptance remain pending.
+- README operator/gamepad and restart notes were removed at the user's request;
+  detailed controls remain in docs/testing.md and future demo links are planned.
+
+- The approved package-boundary cleanup renames only the branch-added Grail/OmRe
+  wrappers to g1_vibe_walk / g1_vibe_parkour. Generic ViBe, standalone SONIC and
+  every master path remain. The cpp_control README and new docs/vibe.md replace
+  the five stale branch-added ViBe notes; workspace README commands are unchanged.
+- Repose messages moved byte-for-byte to sledgehammer; the tracker uses a standard
+  heartbeat with the existing freshness/timeout logic. Bridge profiles and all
+  consumers use the new names. Bundled replay/validation readers accept old bag
+  names; this does not add live ROS aliases for legacy types.
+- SLEDGEHAMMER_BUILD_RUNTIME=OFF supplies offboard messages/tools without CUDA or
+  planner binaries. Clean normal/offboard builds, 13 type-support imports, legacy
+  bag replay, full regression, both sample-launch paths and planner graph/console
+  checks passed. Logs: .migration/package-boundary/. Final native ARM CUDA and
+  five-case manual acceptance remain pending.
+- On 2026-10-14, encoder #7, sledgehammer #1/#4, simulator #4 and bridge #2
+  landed in main. Their checkouts and sources.repos now use the merged commits.
+  Encoder #6 was closed as superseded: #7 already includes its CUDA runtime
+  changes. Sledgehammer #3 had landed in its old parent branch after #1 merged;
+  #4 brings that exact tested tree onto main. Do not remove the legacy branches.
+- cpp_control #8 also merged on 2026-10-14 as `e6ea520` on master. Its checkout
+  and source pin now use that merge commit; its tree is identical to the reviewed
+  `dad4031`. All five modules now use merged main/master commits. Only the
+  workspace PR #3 remains for the user's final review.
+- ROS build/install/log, simulator build, and Unitree SDK build/install outputs
+  were deleted for the user's fresh README installation. Downloaded SDKs,
+  artifacts, setup venv and regression evidence remain. All five module source
+  trees match the tested release versions; 25 workspace and three encoder setup
+  tests passed. The user subsequently reported the fresh README installation
+  and simulation working. Later cpp_control edits only adjusted its README:
+  preserve the standalone workflow, add a brief ViBe install note and launch
+  template. Workspace README commands remain unchanged.
+
+- The approved planner cleanup (`adc7456`, included in the current cpp_control
+  pin) removes only the unused `sonic_kinematic` integration
+  and four cpp_control Repose forwarding launches. Manual reference-based
+  walking, yaw, active stand, standalone SONIC, external planner interfaces and
+  README commands are unchanged. All 92 master paths are preserved; the original
+  terminal attention viewer and previously removed tracked Python files were
+  restored. Never broaden this into removing the working walking/yaw features.
+- Clean cpp_control build/install, sledgehammer rebuild, standalone SONIC
+  stand/clip startup, restored viewer, full regression, sample launches, planner
+  graph/console and focused CTests passed. Logs: `.migration/planner-cleanup/`.
+  The user's five-case README retest after this cleanup is pending.
+- User is reviewing workspace #3 after merging all five modules.
   Fresh-OS provisioning and onboard/offboard validation are still pending.
-- cpp_control's PR still includes legacy Repose forwarding/documentation and
-  GEAR-SONIC planner code. Review its diff against `master` with the user before
-  landing; do not call it tracker-only or delete unrelated legacy work silently.
-- A clean offboard install omits cpp_control/vision_encoders message libraries
-  needed by the bridge's `full.yaml` profile. Address this packaging gap before
-  claiming offboard readiness.
-- Previous review flagged camera TCP shutdown/reconnect behavior when a connected
-  server stops sending. Recheck encoder/planner behavior before hardware acceptance.
+- The final cpp_control review was [PR #8](https://github.com/drcl-deploy/cpp_control/pull/8),
+  now merged into `master`, superseding #7. Research branches remain intact. Encoder #7 and
+  sledgehammer #1 include their merged recovery PRs. The message-ownership
+  companions are now on sledgehammer and cdr_tcp_bridge main.
+  Workspace [PR #3](https://github.com/drcl-deploy/vibe_ws/pull/3)
+  pins the matching commits.
+- Installation portability changes support explicit/unique Foxy/Humble/Jazzy
+  selection, OS Python for ROS tools, and a bounded ARM ONNX Runtime source build
+  matched to JetPack CUDA/cuDNN. Foxy simulation setup remains unsupported.
+- Offboard now builds cpp_control/vision_encoders messages and viewing tools with
+  runtime targets disabled. A fresh isolated x86/Humble offboard build passed
+  all 12 bridge Python/C++ type-support imports without an ONNX/CUDA SDK. Doctor
+  checks these imports and sim/onboard CUDA-provider loading. Native ARM and
+  fresh-OS/hardware acceptance remain pending.
+- Portability validation passed 25 workspace tests, three environment tests,
+  three SDK setup tests, normal ROS build, full runtime regression, sample launch
+  and planner graph/console checks. Logs: `.migration/portability/`.
+- Camera TCP reads/shutdown now have bounded waits, with encoder/planner recovery
+  checks passing in simulation. Hardware reconnect acceptance is still pending.
 - cpp_control/vision_encoders retain known lint failures (853 in the recorded
-  package run). Root CI still targets `master` and does not validate this complete
-  deployment. Passing focused checks does not make the full lint/CI suite green.
+  package run). Root CI now targets `main` and runs the offboard installer and
+  tests on x86/ARM with Humble/Jazzy. It does not cover native CUDA installation.
+  Passing focused checks does not make the full package lint suite green.

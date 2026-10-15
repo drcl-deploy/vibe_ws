@@ -1,8 +1,58 @@
 # setup
 
-Ubuntu 22.04 / ROS Humble is the tested target. Install ROS and the NVIDIA driver,
+Ubuntu 22.04 / ROS Humble is the tested target; setup also accepts Ubuntu 24.04 /
+ROS Jazzy. Install ROS and the NVIDIA driver (JetPack on Jetson),
 then run `./install.sh --system` from a fresh shell. Without `--system`, setup
 assumes the system packages are already installed.
+
+The installer honors `ROS_DISTRO`. In a fresh shell it selects the only installed
+Foxy/Humble/Jazzy distribution; if several are installed, set `ROS_DISTRO`
+explicitly. `--system` works in any argument position and `--plan` never installs
+packages. ROS and viewer tools use `/usr/bin/python3`; `.venv` is for setup tools.
+Later runs remember the selected profile, job limit, ROS distribution and any
+custom ONNX Runtime archive. Explicit arguments and `ROS_DISTRO` override them.
+Use `--ort-archive auto` to return from a saved custom SDK to automatic selection.
+
+## retry and update
+
+```bash
+./install.sh                 # retry or verify the current release
+
+# update an existing checkout
+git pull --ff-only
+./install.sh
+```
+
+Healthy dependencies and verified artifacts are reused. Interrupted compilation
+keeps completed objects; incomplete installer-owned SDKs and the setup venv are
+preserved aside and rebuilt. Downloads and new source checkouts are prepared
+before publishing them to their final paths. A failed model update leaves the
+previous model intact.
+
+The source stage advances clean managed repositories to `sources.repos` pins.
+A clean checkout from an older installer can be adopted when the update is a
+fast-forward from the expected remote, or its exact pin appears in the
+workspace's committed lock history. Local edits, independent commits and
+custom exports stop setup with their paths; they are never reset or overwritten.
+Model updates replace only files matching a recorded or previously locked checksum.
+An existing unknown incomplete directory is left for the operator to inspect.
+
+Build inputs include source pins, SDK identity, ROS/Python/architecture and
+profile. When these change, setup moves the affected generated build/install
+outputs aside, preventing obsolete installed files from surviving an upgrade.
+The same inputs reuse the current build, including a partially completed one.
+The first run of this installer adopts existing sources/artifacts and rebuilds
+unrecorded generated outputs once.
+
+Receipts, failure details and logs live under `.cache/vibe-install/`; preserved
+outputs are in its `previous/` directory. Artifact ownership is recorded in
+`artifacts/.vibe-artifacts.json`, or beside the chosen custom artifact root.
+Retain these receipts for future upgrades. Each failure prints the stage, log
+path and retry command. Only one installer can run in a checkout at a time.
+
+Use `--system` again if a release needs additional OS packages. Setup checks
+system requirements and doctor verifies the completed installation. Updating
+the workspace itself remains the explicit `git pull` above.
 
 ## stages
 
@@ -18,9 +68,12 @@ assumes the system packages are already installed.
 ./install.sh --from-stage scene --jobs 2
 ```
 
-The full command runs these in order. Sources are pinned commits. Existing dirty
-or mismatched repositories stop setup without resetting local work. Verified
-dependencies are reused; MuJoCo 3.3.6 and the Unitree SDK live in `.deps/`.
+The full command runs these in order. Stage selectors are optional tools for
+development and diagnosis; ordinary retries use the full command. MuJoCo 3.3.6
+and the Unitree SDK live in `.deps/`.
+
+Shell setup still rejects incompatible installed overlays. Run the installer to
+prepare the selected profile, then source its setup script in a fresh terminal.
 
 ## samples and scenes
 
@@ -79,17 +132,69 @@ python3 scripts/artifacts.py --lock artifacts.lock.json
 The lock currently references the published deployment review commit. The original
 HF `v0.1.0` tag remains the checkpoint-only release.
 
+## optional telemetry
+
+The tracker launch starts the bridge server by default. A server exit or an
+offboard client disconnect leaves the encoder and tracker running. Ctrl-C on
+the tracker launch still closes all its children.
+
+To run the server in its own terminal, add `enable_bridge:=false` to the tracker
+launch, then run:
+
+```bash
+source setup_local.sh  # setup.sh onboard on the robot
+ros2 run cdr_tcp_bridge bridge_server.sh
+```
+
+The README's `stream_vibes.sh` command starts the offboard client and viewer.
+
 ## onboard and offboard
 
 ```bash
-./install.sh --profile onboard  # tracker, encoder, planner and bridge
-./install.sh --profile offboard # telemetry bridge only
+./install.sh --system --profile onboard --jobs 2  # tracker, encoder, planner and bridge
+./install.sh --system --profile offboard          # bridge, messages and viewer tools; no CUDA
 ```
 
 Onboard: set `VIBE_ROBOT_INTERFACE`, source `setup.sh onboard`, then use the direct
 ROS launch with `env:=real` for the planner. Offboard: set `VIBE_ROBOT_HOST` and
 source `setup.sh offboard`.
 
+Offboard builds cpp_control, vision_encoders and sledgehammer interfaces/tools
+with their runtime targets disabled. It includes Repose telemetry and calibration
+message support without compiling a controller, encoder or planner executable.
+
 Simulation uses DDS domain 1 on loopback, onboard domain 0 on the selected
-interface, and offboard telemetry domain 71. Foxy interfaces remain supported;
-Jetson/Foxy hardware validation is separate from the Humble simulation checks.
+interface, and offboard telemetry domain 71. Foxy retains onboard/offboard support
+and its older CycloneDDS interface syntax; simulation setup requires Humble/Jazzy
+and Python 3.10+. Foxy and Jetson hardware acceptance are separate from the Humble
+simulation checks.
+
+## ARM and ONNX Runtime
+
+The x86 installer downloads the pinned ONNX Runtime GPU SDK and supplies missing
+CUDA runtime libraries locally. ARM setup uses JetPack's CUDA/cuDNN and builds a
+pinned native SDK with a local CMake 3.28.4 toolchain. `--jobs` limits compilation;
+use `--jobs 1` on a memory-constrained robot. Orin/Xavier GPU architectures are
+detected from the device tree; another supported device needs
+`VISION_ENCODERS_CUDA_ARCHITECTURES` set explicitly.
+
+| Host libraries | ARM ONNX Runtime |
+|---|---|
+| CUDA 11 + cuDNN 8 | 1.15.1 |
+| CUDA 12 + cuDNN 8 | 1.18.0 |
+| CUDA 12 + cuDNN 9 | 1.22.0 |
+
+Install JetPack development libraries before source builds. Set `CUDA_HOME` or
+`CUDNN_HOME` if they are outside `/usr/local/cuda` and `/usr`. Other library pairs
+fail early; setup does not replace JetPack's libraries. ORT 1.22 also requires
+GCC 11.1 or newer. A validated local GPU SDK can avoid the source build:
+
+```bash
+./install.sh --system --profile onboard \
+  --ort-archive /path/to/onnxruntime-sdk.tgz --ort-sha256 <sha256>
+```
+
+Installation finishes by checking viewer imports, bridge message libraries and
+(for sim/onboard) CUDA-provider loading, without starting control nodes. Native
+Jetson build/inference and onboard/offboard communication still need target-host
+acceptance; architecture-selection tests do not establish that acceptance.

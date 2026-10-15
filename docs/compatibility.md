@@ -26,6 +26,40 @@ names `walk` and `parkour` do not change these task IDs. All four samples use
 112×63 images and the same Theia-tiny encoder. Dodge's separate 112×64 export
 remains optional and has no packaged sample environment.
 
+## transfer conventions
+
+These are the existing runtime conventions for the four released samples.
+The manifests and named source files remain authoritative; this table adds no
+configuration format. Source paths identify the owning module.
+
+| Area | Convention and source |
+|---|---|
+| Camera | All four policies use 112×63 Theia-tiny input. The native head camera has 42.5° vertical FOV; its mount is in `unitree_mujoco/unitree_robots/g1/g1_29dof_with_camera.xml`. Encoder normalization is baked into ONNX; the node preserves native pixels and resizes only when needed. Real RGB-D intrinsics travel per plane on the camera wire; the planner's mount/palette calibration is in `sledgehammer/config/repose_planner/g1_real_v9_3.yaml`. Real-camera calibration still needs onboard validation. |
+| Coordinates | G1 motor/action order is MJ order; sample NPZ and typed reference rows use IsaacLab order. `cpp_control/include/common/g1/joint_orders.hpp` owns the mapping. Quaternions are wxyz. `MotionClock` heading-aligns the reference on engage; root twist is expressed in the reference anchor frame. UoLM's object goal stays in the canonical clip frame. See cpp_control's `docs/motion.md`. |
+| History/reset | Port history lengths come from the policy manifest. `HistoryTerm` writes oldest to newest and backfills with the first observation after reset. A cold engage resets histories/actions; a planner reference swap within policy mode retains histories. Implementation: `cpp_control/include/common/obs_terms.hpp` and `src/tasks/tracker/g1_sonic.cpp`. |
+| Cadence | Released policy manifests specify 20 ms (50 Hz), matching tracker `control_dt`. The tracker currently warns on mismatch and runs at configured `control_dt`; it does not reject it. Reference playback advances by that configured period. Native MuJoCo dynamics stay at 2 ms; the two periods serve different purposes. |
+| Actuation | Policy output maps to `q = default_joint_pos + scale * action`, with stiffness/damping from the manifest. The Unitree backend sends these as motor position/PD commands. The native simulator computes PD torque from them in `unitree_mujoco/simulate/src/unitree_sdk2_bridge.h`. Hardware timing and command-loss behavior require onboard acceptance. |
+| Failure response | Camera connection/frame reads time out after two seconds and reconnect; shutdown and retry waits check cancellation every 100 ms. Stale vision refuses new policy entry but only warns during an active policy. Planner heartbeat loss shuts down the tracker after one second without issuing active damping. The planner stops references on stale controller/robot state; the tracker itself has no robot-state timeout. Telemetry server/client loss leaves control running. |
+
+## extending the workspace
+
+- A new checkpoint within a supported task family uses the existing direct
+  launch with its policy/encoder paths and manifests; no path-specific C++ is
+  needed.
+- New task semantics belong in cpp_control's task profile and observation
+  bindings. Keep robot/backend handling in the robot layer; exported IDs and
+  existing task contracts stay compatible.
+- A new planner runs separately and exchanges `MotionReference` and
+  `ControllerStatus`. With `planner:=true`, publish `std_msgs/msg/Empty` on
+  `/vibe/planner/heartbeat` from the planner tick. Detailed Repose status and
+  observation types belong to sledgehammer. Keep the algorithm independently testable, following
+  sledgehammer's planner/core split.
+
+The bundled experiment/calibration replay tools accept bags recorded with the
+former `cpp_control/msg/{PlannerStatus,CubeObservation,CalibrationState}` names.
+Their message fields are unchanged; only ownership moved to sledgehammer.
+This does not alias old type names for live ROS publishers or `ros2 bag play`.
+
 ## scenes and references
 
 `data/sample/samples.json` records source revisions, reference identities, start
