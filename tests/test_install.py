@@ -5,10 +5,54 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from ros_env import check_overlay, identity, select_distro
+import check_runtime
+import install as installer
+
+
+class InstallationDependencyTest(unittest.TestCase):
+    def test_profiles_require_only_their_available_system_dependencies(self):
+        for distro in ['foxy', 'humble', 'jazzy']:
+            for profile in ['sim', 'onboard', 'offboard']:
+                with self.subTest(distro=distro, profile=profile):
+                    packages = installer.system_packages(distro, profile)
+                    self.assertIn('python3-venv', packages)
+                    self.assertIn('ros-' + distro + '-rosbag2', packages)
+                    for graphics in ['libglfw3-dev', 'libgl1-mesa-dev']:
+                        self.assertEqual(graphics in packages, profile == 'sim')
+                    for viewer in ['python3-matplotlib', 'python3-pyqt5']:
+                        self.assertEqual(viewer in packages, profile != 'onboard')
+                    self.assertEqual('ros-' + distro + '-rosbag2-py' in packages,
+                                     profile != 'onboard' and distro != 'foxy')
+
+    def test_doctor_checks_bag_replay_only_where_it_is_available_and_used(self):
+        for distro in ['foxy', 'humble', 'jazzy']:
+            for profile in ['sim', 'onboard', 'offboard']:
+                with self.subTest(distro=distro, profile=profile):
+                    modules = check_runtime.runtime_modules(profile, distro)
+                    for runtime in ['numpy', 'cv2', 'rclpy', 'yaml']:
+                        self.assertIn(runtime, modules)
+                    self.assertEqual('PyQt5.QtCore' in modules, profile != 'onboard')
+                    self.assertEqual('rosbag2_py' in modules,
+                                     profile != 'onboard' and distro != 'foxy')
+
+    def test_foxy_onboard_preflight_reports_only_missing_setup_dependency(self):
+        installed = set(installer.system_packages('foxy', 'onboard')) - {'python3-venv'}
+        probe = subprocess.CompletedProcess([], 1, stdout=''.join(
+            name + ' installed\n' for name in sorted(installed)))
+        with tempfile.TemporaryDirectory() as directory, \
+             patch.object(installer, 'ROOT', Path(directory)), \
+             patch.object(installer, 'choose_distro', return_value='foxy'), \
+             patch.object(installer.subprocess, 'run', return_value=probe), \
+             patch.dict(os.environ, {'ROS_DISTRO': 'foxy'}):
+            args, stages, preferences = installer.parse_args(['--profile', 'onboard', '--jobs', '1'])
+            with self.assertRaisesRegex(ValueError,
+                    r'^Missing system packages: python3-venv\. Run ./install.sh --system --profile onboard\.$'):
+                installer.execute(args, stages, preferences, lambda stage: None)
 
 
 class InstallationSelectionTest(unittest.TestCase):

@@ -7,22 +7,33 @@ import importlib
 from pathlib import Path
 import subprocess
 
+from ros_env import select_distro
+
+
+def runtime_modules(profile, distro):
+    modules = ['numpy', 'cv2', 'rclpy', 'yaml']
+    if profile != 'onboard':
+        modules += ['PyQt5.QtCore', 'matplotlib.backends.backend_qt5agg']
+        if distro != 'foxy':
+            modules.append('rosbag2_py')
+    return modules
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--profile', choices=['sim', 'onboard', 'offboard'], required=True)
     args = parser.parse_args()
+    distro = select_distro()
     from ament_index_python.packages import get_package_prefix, get_package_share_directory
     from rclpy.type_support import check_for_type_support
     from rosidl_runtime_py.utilities import get_message
     import yaml
 
-    modules = ['numpy', 'cv2', 'rclpy', 'yaml', 'rosbag2_py']
-    if args.profile != 'onboard':
-        modules += ['PyQt5.QtCore', 'matplotlib.backends.backend_qt5agg']
-    for module in modules:
+    for module in runtime_modules(args.profile, distro):
         importlib.import_module(module)
     print('OK ROS Python runtime dependencies')
+    if distro == 'foxy' and args.profile != 'onboard':
+        print('NOTE Python bag replay requires Humble/Jazzy; Foxy supports live viewing and ROS bag CLI recording.')
 
     config = Path(get_package_share_directory('cdr_tcp_bridge')) / 'config'
     types = set()

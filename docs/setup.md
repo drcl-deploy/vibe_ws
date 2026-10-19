@@ -54,6 +54,11 @@ Use `--system` again if a release needs additional OS packages. Setup checks
 system requirements and doctor verifies the completed installation. Updating
 the workspace itself remains the explicit `git pull` above.
 
+If APT stops with `EXPKEYSIG`, repair the host's ROS repository signing keys using
+the [ROS migration guide](https://discourse.ros.org/t/ros-signing-key-migration-guide/43937).
+Running without `--system` skips APT and reports any missing system packages;
+it still requires `python3-venv` for the setup environment.
+
 ## stages
 
 ```bash
@@ -162,6 +167,12 @@ source `setup.sh offboard`.
 Offboard builds cpp_control, vision_encoders and sledgehammer interfaces/tools
 with their runtime targets disabled. It includes Repose telemetry and calibration
 message support without compiling a controller, encoder or planner executable.
+
+Onboard setup excludes simulator graphics and desktop viewer dependencies.
+CLI bag recording is included in every profile. Python bag replay is checked
+only for sim/offboard on Humble/Jazzy: standard Foxy has no `rosbag2_py` package,
+so its offboard profile supports live viewing and CLI recording without Python
+bag replay.
 
 Simulation uses DDS domain 1 on loopback, onboard domain 0 on the selected
 interface, and offboard telemetry domain 71. Foxy retains onboard/offboard support
