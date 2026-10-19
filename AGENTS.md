@@ -124,6 +124,16 @@ onboard/offboard checks, including QoS and disconnect behavior.
 
 ## Remaining release work
 
+- On 2026-10-19, the G1 Orin NX completed the full native ONNX Runtime 1.15.1
+  CUDA 11.4 SDK build/install, all shared-library dependency checks, and the
+  native CUDA provider-load check. Encoder PR #9 contains two localized fixes
+  for disabled flash attention; workspace PR #6 pins that review branch.
+  Evidence: .migration/jetpack5-ort-build/native-sdk-build.log. Native ROS build,
+  model inference and hardware rollout acceptance remain pending. After the
+  battery swap the robot clock was January 1970, with NTP active but unsynced;
+  correct it before HTTPS downloads. The completed SDK recovery session is
+  available as tmux vibe-sdk-recovery on unitree@gilfoyle.
+
 - Installer retries and upgrades now reconcile the current locks through the
   existing install.sh command. Clean managed module pins advance automatically;
   older release pins and artifacts can be recognized from committed lock history.
