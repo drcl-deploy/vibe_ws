@@ -1,0 +1,12 @@
+session_name: vibe
+start_directory: ./
+shell_command_before:
+  - export VIBE_ROBOT_INTERFACE=${VIBE_ROBOT_INTERFACE:-eth0}
+  - source ./setup.sh onboard
+windows:
+  - window_name: deploy
+    layout: tiled
+    panes:
+      - null
+      - null
+      - null
