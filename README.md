@@ -21,6 +21,13 @@ cd vibe_ws
 ./install.sh --system  # fetch, generate scenes, build
 ```
 
+To sync updated module pins:
+
+```bash
+git pull --ff-only
+./install.sh --stage sources
+```
+
 > [!NOTE]
 > For [custom models](docs/setup.md#policy-and-encoder-exports), use absolute paths or place it under `artifacts/`.
 
