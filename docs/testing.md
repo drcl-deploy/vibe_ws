@@ -129,6 +129,11 @@ public availability of every review pin remain separate publication checks.
 
 ## evidence
 
+On 2026-10-20, the operator confirmed standalone SONIC walking with the shared
+R1/RB → L1 → A prep path in simulation and on the G1. The native Foxy ROS build
+completed successfully. This acceptance covers standalone walking/prep; the four
+ViBe task rollouts on hardware remain separate checks.
+
 The package-boundary cleanup rebuilt cpp_control and sledgehammer from empty
 build/install directories. The legacy bag checks, all four generic and named
 sample launches, full runtime regression, planner graph/console and focused

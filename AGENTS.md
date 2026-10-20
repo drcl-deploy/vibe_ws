@@ -129,10 +129,16 @@ onboard/offboard checks, including QoS and disconnect behavior.
   ramp and reject manual clip entry until prep completes; planner/stand-reactive
   behavior stays unchanged. Workspace sources.repos pins that branch commit.
   The full local regression, four sample launches, planner graph and standalone
-  gamepad/ROS-joy prep checks passed. The operator's R1 → L1 → A hardware retest
-  remains pending. The G1's portable deploy.yaml is now tracked; its workspace
+  gamepad/ROS-joy prep checks passed. The operator accepted R1 → L1 → A walking
+  in simulation and on G1; the native Foxy ROS build also completed successfully.
+  The G1's portable deploy.yaml is now tracked; its workspace
   Git author/committer is configured locally as lok-i. README includes hardware
   RGB/depth camera commands and onboard/offboard sourcing for telemetry.
+  Release PRs: vision_encoders #9 → cpp_control #10 → vibe_ws #6. Refresh the
+  two review-branch pins to actual merged default-branch commits before merging
+  the workspace. Onboard audit: all five module pins match and source trees are
+  clean; the ignored ORT source has exactly the two published encoder patches.
+  Generated CTest logs were preserved under the ignored installer cache.
 
 - On 2026-10-19, the G1 Orin NX completed the full native ONNX Runtime 1.15.1
   CUDA 11.4 SDK build/install, all shared-library dependency checks, and the
