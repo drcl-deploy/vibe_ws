@@ -44,6 +44,7 @@ cyclonedds_ws/build/sledgehammer/repose_planner_selftest \
 ros2 run vision_encoders cuda_provider_check
 python3 tests/runtime_recovery_smoke.py --logs ".migration/$phase/runtime-recovery"
 python3 tests/motion_path_smoke.py --logs ".migration/$phase/motion-path"
+python3 tests/motion_path_smoke.py --sonic --logs ".migration/$phase/sonic-motion-path"
 python3 - <<'PY'
 from pathlib import Path
 import hashlib

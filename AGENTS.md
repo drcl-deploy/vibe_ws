@@ -124,6 +124,34 @@ onboard/offboard checks, including QoS and disconnect behavior.
 
 ## Remaining release work
 
+- On 2026-10-20, standalone SONIC gained the existing ViBe L1 prep path in
+  cpp_control #10, now merged into `master` as `6dc69b6`. Both trackers share
+  the arm-reference ramp and reject manual clip entry until prep completes;
+  planner/stand-reactive behavior stays unchanged.
+  The full local regression, four sample launches, planner graph and standalone
+  gamepad/ROS-joy prep checks passed. The operator accepted R1 → L1 → A walking
+  in simulation and on G1; the native Foxy ROS build also completed successfully.
+  The G1's portable deploy.yaml is now tracked; its workspace
+  Git author/committer is configured locally as lok-i. README includes hardware
+  RGB/depth camera commands and onboard/offboard sourcing for telemetry.
+  Release PRs vision_encoders #9 and cpp_control #10 are merged. Workspace #6
+  pins their actual default-branch commits: encoder `9b2a500`, controller
+  `6dc69b6`. Both merged trees are identical to the tested review heads. All five
+  local module checkouts now match merged main/master pins. The pre-merge onboard
+  audit found matching pins and clean source trees; its ignored ORT source has
+  exactly the two published encoder patches.
+  Generated CTest logs were preserved under the ignored installer cache.
+
+- On 2026-10-19, the G1 Orin NX completed the full native ONNX Runtime 1.15.1
+  CUDA 11.4 SDK build/install, all shared-library dependency checks, and the
+  native CUDA provider-load check. Encoder PR #9 contains two localized fixes
+  for disabled flash attention; workspace PR #6 pins that review branch.
+  Evidence: .migration/jetpack5-ort-build/native-sdk-build.log. Native ROS build,
+  model inference and hardware rollout acceptance remain pending. After the
+  battery swap the robot clock was January 1970, with NTP active but unsynced;
+  correct it before HTTPS downloads. The completed SDK recovery session is
+  available as tmux vibe-sdk-recovery on unitree@gilfoyle.
+
 - Installer retries and upgrades now reconcile the current locks through the
   existing install.sh command. Clean managed module pins advance automatically;
   older release pins and artifacts can be recognized from committed lock history.

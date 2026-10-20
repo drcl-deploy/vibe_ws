@@ -47,35 +47,42 @@ def ros_command(command, overlay=False):
     run(shell_command(command, distro, workspace if overlay else None), cwd=workspace)
 
 
-def system_packages(distro):
+def system_packages(distro, profile='sim'):
     packages = ['build-essential', 'cmake', 'git', 'git-lfs', 'curl', 'pkg-config',
                 'python3-venv', 'python3-pip', 'python3-dev', 'python3-colcon-common-extensions',
                 'python3-numpy', 'python3-yaml', 'python3-opencv',
-                'python3-matplotlib', 'python3-pyqt5',
                 'libyaml-cpp-dev', 'libopencv-dev', 'libboost-program-options-dev',
-                'libglfw3-dev', 'libgl1-mesa-dev', 'libfmt-dev', 'libeigen3-dev', 'zlib1g-dev']
+                'libfmt-dev', 'libeigen3-dev', 'zlib1g-dev']
+    if profile == 'sim':
+        packages += ['libglfw3-dev', 'libgl1-mesa-dev']
+    if profile != 'onboard':
+        packages += ['python3-matplotlib', 'python3-pyqt5']
     packages += ['ros-' + distro + '-' + name for name in (
         'rmw-cyclonedds-cpp', 'rosidl-generator-dds-idl', 'ros2launch',
         'ament-cmake-gtest', 'ament-lint-auto', 'ament-lint-common',
-        'rosbag2', 'rosbag2-py', 'rosbag2-storage-default-plugins',
+        'rosbag2', 'rosbag2-storage-default-plugins',
         'rclpy', 'rosidl-runtime-py', 'sensor-msgs', 'geometry-msgs')]
+    # Python bag replay is an offboard tool; standard Foxy has no rosbag2_py.
+    if profile != 'onboard' and distro != 'foxy':
+        packages.append('ros-' + distro + '-rosbag2-py')
     return packages
 
 
-def bootstrap(system, distro):
+def bootstrap(system, distro, profile='sim'):
     if system:
         privilege = [] if os.geteuid() == 0 else ['sudo']
         run(privilege + ['apt-get', 'update'])
-        run(privilege + ['apt-get', 'install', '-y'] + system_packages(distro))
+        run(privilege + ['apt-get', 'install', '-y'] + system_packages(distro, profile))
     elif distro:
-        packages = system_packages(distro)
+        packages = system_packages(distro, profile)
         result = subprocess.run(['dpkg-query', '-W', '-f', '${Package} ${db:Status-Status}\n'] + packages,
                                 text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         installed = {line.split()[0] for line in result.stdout.splitlines()
                      if line.endswith(' installed')}
         missing = sorted(set(packages) - installed)
         if missing:
-            raise ValueError('Missing system packages: {}. Run ./install.sh --system.'.format(', '.join(missing)))
+            raise ValueError('Missing system packages: {}. Run ./install.sh --system --profile {}.'.format(
+                ', '.join(missing), profile))
     venv = ROOT / '.venv'
     if venv.is_symlink():
         raise ValueError('Setup venv is a symlink; left untouched: ' + str(venv))
@@ -291,7 +298,7 @@ def execute(args, selected, preferences, progress):
         raise ValueError('Simulation setup requires Python 3.10+ (Humble/Jazzy). '
                          'Foxy is supported for --profile onboard or offboard.')
     progress('system/setup Python')
-    python = bootstrap(args.system, distro)
+    python = bootstrap(args.system, distro, args.profile)
     environment = dict(os.environ, PYTHONDONTWRITEBYTECODE='1')
     environment['PATH'] = str(ROOT / '.venv/bin') + os.pathsep + os.environ['PATH']
     for stage in selected:

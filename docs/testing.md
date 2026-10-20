@@ -25,6 +25,8 @@ ROS `/joy` inputs on loopback domain 96 with remapped test topics. This checks
 RB → L1 → A, premature/stale-token entry rejection, retry, RB reset and Y damping;
 it does not simulate balance or establish task completion. Run just this check
 with `python3 tests/motion_path_smoke.py` (`--sample walk` selects one sample).
+Add `--sonic` to check standalone SONIC with the bundled walking reference,
+including staged-clip invalidation and prep resets on X/B/Y.
 
 The sample launch smoke loads each reference through the actual ROS tracker
 launch on loopback domain 95. It sends no joystick or robot state. The planner
@@ -126,6 +128,11 @@ were reused, and ONNX Runtime was downloaded. Fresh-OS `--system` provisioning a
 public availability of every review pin remain separate publication checks.
 
 ## evidence
+
+On 2026-10-20, the operator confirmed standalone SONIC walking with the shared
+R1/RB → L1 → A prep path in simulation and on the G1. The native Foxy ROS build
+completed successfully. This acceptance covers standalone walking/prep; the four
+ViBe task rollouts on hardware remain separate checks.
 
 The package-boundary cleanup rebuilt cpp_control and sledgehammer from empty
 build/install directories. The legacy bag checks, all four generic and named
