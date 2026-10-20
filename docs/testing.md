@@ -25,6 +25,8 @@ ROS `/joy` inputs on loopback domain 96 with remapped test topics. This checks
 RB → L1 → A, premature/stale-token entry rejection, retry, RB reset and Y damping;
 it does not simulate balance or establish task completion. Run just this check
 with `python3 tests/motion_path_smoke.py` (`--sample walk` selects one sample).
+Add `--sonic` to check standalone SONIC with the bundled walking reference,
+including staged-clip invalidation and prep resets on X/B/Y.
 
 The sample launch smoke loads each reference through the actual ROS tracker
 launch on loopback domain 95. It sends no joystick or robot state. The planner

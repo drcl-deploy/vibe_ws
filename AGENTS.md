@@ -124,6 +124,16 @@ onboard/offboard checks, including QoS and disconnect behavior.
 
 ## Remaining release work
 
+- On 2026-10-20, standalone SONIC gained the existing ViBe L1 prep path in
+  cpp_control `fix/sonic-prep` (`872ee90`). Both trackers share the arm-reference
+  ramp and reject manual clip entry until prep completes; planner/stand-reactive
+  behavior stays unchanged. Workspace sources.repos pins that branch commit.
+  The full local regression, four sample launches, planner graph and standalone
+  gamepad/ROS-joy prep checks passed. The operator's R1 → L1 → A hardware retest
+  remains pending. The G1's portable deploy.yaml is now tracked; its workspace
+  Git author/committer is configured locally as lok-i. README includes hardware
+  RGB/depth camera commands and onboard/offboard sourcing for telemetry.
+
 - On 2026-10-19, the G1 Orin NX completed the full native ONNX Runtime 1.15.1
   CUDA 11.4 SDK build/install, all shared-library dependency checks, and the
   native CUDA provider-load check. Encoder PR #9 contains two localized fixes

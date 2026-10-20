@@ -27,6 +27,18 @@ cd vibe_ws
 ## usage
 
 run from the workspace root in each terminal, with a gamepad connected.
+Source the matching environment in each ROS terminal:
+
+```bash
+# simulation
+source setup_local.sh
+```
+
+```bash
+# hardware
+export VIBE_ROBOT_INTERFACE=eth0
+source setup.sh onboard
+```
 
 ### without planner
 
@@ -38,8 +50,13 @@ sample=walk  # walk | parkour | repose | uolm
 ```
 
 ```bash
+# terminal 1: hardware camera (instead of the simulator)
+sudo -v
+/usr/bin/python3 cyclonedds_ws/src/vision_encoders/scripts/camera_streamer.py -v
+```
+
+```bash
 # terminal 2: encoder + tracker
-source setup_local.sh
 sample=walk  # walk | parkour | repose | uolm
 ros2 launch cpp_control g1_vibe_sonic.launch.py \
   policy_path:="models/$sample/policy.onnx" \
@@ -63,8 +80,13 @@ ros2 launch cpp_control g1_vibe_sonic.launch.py \
 ```
 
 ```bash
+# terminal 1: hardware camera (instead of the simulator)
+sudo -v
+/usr/bin/python3 cyclonedds_ws/src/vision_encoders/scripts/camera_streamer.py --depth -v
+```
+
+```bash
 # terminal 2: encoder + tracker
-source setup_local.sh
 ros2 launch cpp_control g1_vibe_sonic.launch.py \
   policy_path:=models/repose/policy.onnx \
   encoder_path:=encoders/theia-tiny.onnx \
@@ -75,8 +97,7 @@ ros2 launch cpp_control g1_vibe_sonic.launch.py \
 
 ```bash
 # terminal 3: planner + console
-source setup_local.sh
-ros2 launch sledgehammer planner.launch.py env:=sim
+ros2 launch sledgehammer planner.launch.py env:=sim  # hardware: env:=real
 ```
 
 - **console:** **0–5** or **r/o/g/y/b/p** target · **R** new trial · **q** quit. Select a target before arming.
@@ -86,6 +107,15 @@ to visualize the **learnt attention maps** , run in another terminal:
 source setup_local.sh
 bash cyclonedds_ws/src/cpp_control/scripts/vibe/stream_vibes.sh
 ```
+
+```bash
+# hardware: offboard workstation
+export VIBE_ROBOT_HOST=gilfoyle
+source setup.sh offboard
+bash cyclonedds_ws/src/cpp_control/scripts/vibe/stream_vibes.sh
+```
+
+Start the controller first; its launch starts the telemetry bridge.
 
 ## docs
 

@@ -164,6 +164,16 @@ Onboard: set `VIBE_ROBOT_INTERFACE`, source `setup.sh onboard`, then use the dir
 ROS launch with `env:=real` for the planner. Offboard: set `VIBE_ROBOT_HOST` and
 source `setup.sh offboard`.
 
+For three onboard terminals with the environment already sourced, install
+`tmuxp` and run from the workspace root:
+
+```bash
+tmuxp load deploy.yaml
+```
+
+The session defaults to `eth0`; export `VIBE_ROBOT_INTERFACE` first to select
+another interface. Each pane runs `source setup.sh onboard`.
+
 Offboard builds cpp_control, vision_encoders and sledgehammer interfaces/tools
 with their runtime targets disabled. It includes Repose telemetry and calibration
 message support without compiling a controller, encoder or planner executable.
