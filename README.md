@@ -21,7 +21,7 @@ cd vibe_ws
 ./install.sh --system  # fetch, generate scenes, build
 ```
 
-To sync updated module pins:
+To sync updated module sources only (no build):
 
 ```bash
 git pull --ff-only
