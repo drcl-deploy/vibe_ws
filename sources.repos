@@ -10,11 +10,11 @@ repositories:
   cyclonedds_ws/src/vision_encoders:
     type: git
     url: https://github.com/drcl-deploy/vision_encoders.git
-    version: 80e4c49a868a4ef21beaea47d7be615b37c34486
+    version: 9b2a500d46a4f7214ce1b1d3a5f1f8fc25b0ecf9
   cyclonedds_ws/src/cpp_control:
     type: git
     url: https://github.com/drcl-deploy/cpp_control.git
-    version: 872ee9099b800d3cabc49ee9776d91f697cb9ecd
+    version: 6dc69b6d2aa5858d0371976b1e9451bc873792ee
   cyclonedds_ws/src/sledgehammer:
     type: git
     url: https://github.com/drcl-deploy/sledgehammer.git
