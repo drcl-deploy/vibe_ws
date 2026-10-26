@@ -126,6 +126,7 @@ once the tracker and console are launched:
 
 1. **B** (zero) → **Y** (damping) → **X** (nominal pose) → **R1 / RB** (stand)
 2. console: select a target color with **0–5** or **r/o/g/y/b/p** · **R** new trial · **q** quit
+3. **A** (start policy, commanded by planner)
 
 > [!TIP]
 > during experiments, keep gamepad's **R1 / RB** and **Y** within reach:
@@ -134,7 +135,7 @@ once the tracker and console are launched:
 
 ### attention viewer
 
-to visualize the **learnt attention maps** , run in another terminal:
+to visualize the **learnt attention maps**, run in another terminal:
 
 ```bash
 # simulation
