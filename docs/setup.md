@@ -77,6 +77,22 @@ The full command runs these in order. Stage selectors are optional tools for
 development and diagnosis; ordinary retries use the full command. MuJoCo 3.3.6
 and the Unitree SDK live in `.deps/`.
 
+To sync module sources and rebuild only ROS packages, choose simulation or hardware:
+
+```bash
+git pull --ff-only
+./install.sh --stage sources
+
+# simulation
+./install.sh --stage ros --profile sim
+
+# hardware
+./install.sh --stage ros --profile onboard --jobs 4
+```
+
+This skips SDK, model, scene and simulator updates; use the full command above
+for a normal update.
+
 Shell setup still rejects incompatible installed overlays. Run the installer to
 prepare the selected profile, then source its setup script in a fresh terminal.
 

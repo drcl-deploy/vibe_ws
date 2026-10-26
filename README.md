@@ -26,23 +26,15 @@ cd vibe_ws
 ./install.sh --profile onboard --jobs 4
 ```
 
-To sync module sources and rebuild ROS packages, choose simulation or hardware:
-
-```bash
-git pull --ff-only
-./install.sh --stage sources
-
-# simulation
-./install.sh --stage ros --profile sim
-
-# hardware
-./install.sh --stage ros --profile onboard --jobs 4
-```
+For updates and installer options, see the [setup guide](docs/setup.md#retry-and-update).
 
 > [!NOTE]
-> For [custom models](docs/setup.md#policy-and-encoder-exports), use absolute paths or place it under `artifacts/`.
+> For [custom models](docs/setup.md#policy-and-encoder-exports), use absolute paths or place them under `artifacts/`.
 
 ## usage
+
+> [!WARNING]
+> Research use only, the authors accept no responsibility for any harm, damage, or malfunction. Deploy on hardware with caution at your own risk.
 
 run from the workspace root in each terminal, with a gamepad connected.
 Source the matching environment in each ROS terminal:
@@ -92,6 +84,11 @@ ros2 launch cpp_control g1_vibe_sonic.launch.py \
 | `repose` | Double cube frontflip |
 | `uolm` | Suitcase |
 
+once the tracker is launched:
+
+1. **B** (zero) → **Y** (damping) → **X** (nominal pose) → **R1 / RB** (stand)
+2. **L1 / LB** (go to first frame) → **A** (start policy)
+
 ### with planner (cube repose only)
 
 #### start simulation or hardware camera (terminal 1; choose one)
@@ -125,7 +122,15 @@ ros2 launch cpp_control g1_vibe_sonic.launch.py \
 ros2 launch sledgehammer planner.launch.py env:=sim  # hardware: env:=real
 ```
 
-- **console:** **0–5** or **r/o/g/y/b/p** target · **R** new trial · **q** quit. Select a target before arming.
+once the tracker and console are launched:
+
+1. **B** (zero) → **Y** (damping) → **X** (nominal pose) → **R1 / RB** (stand)
+2. console: select a target color with **0–5** or **r/o/g/y/b/p** · **R** new trial · **q** quit
+
+> [!TIP]
+> during experiments, keep gamepad's **R1 / RB** and **Y** within reach:
+> - **R1 / RB**: return to stand while recovery is feasible.
+> - **Y**: go to damping if a fall is unavoidable. Damping does not prevent a fall.
 
 ### attention viewer
 
