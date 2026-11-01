@@ -75,6 +75,10 @@ def generate(root=ROOT):
         pelvis.set('pos', ' '.join(map(str, [*start['xy'], z])))
         yaw = start['yaw'] / 2
         pelvis.set('quat', f'{math.cos(yaw)} 0 0 {math.sin(yaw)}')
+        # A policy can train on a different mount than the stock camera's.
+        if 'camera_quat' in spec:
+            robot.find(".//camera[@name='head_cam']").set(
+                'quat', ' '.join(map(str, spec['camera_quat'])))
         write_xml(robot, folder / 'robot.xml')
         scene = ET.parse(samples / name / 'scene.xml').getroot()
         if name == 'repose':
