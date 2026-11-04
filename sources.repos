@@ -13,8 +13,8 @@ repositories:
     version: 9b2a500d46a4f7214ce1b1d3a5f1f8fc25b0ecf9
   cyclonedds_ws/src/cpp_control:
     type: git
-    url: https://github.com/drcl-deploy/cpp_control.git
-    version: 6dc69b6d2aa5858d0371976b1e9451bc873792ee
+    url: https://github.com/sjdoane/cpp_control.git
+    version: 67edbcbb2a070e1c2d9dd61c6a9c07421095e182
   cyclonedds_ws/src/sledgehammer:
     type: git
     url: https://github.com/drcl-deploy/sledgehammer.git

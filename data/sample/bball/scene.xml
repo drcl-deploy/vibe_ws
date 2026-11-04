@@ -1,0 +1,11 @@
+<mujoco model="g1_bball">
+  <include file="robot.xml" />
+  <statistic center="0 0 0.5" extent="2.0" />
+  <visual>
+    <headlight ambient="0.3 0.3 0.3" diffuse="0.6 0.6 0.6" specular="0 0 0" />
+    <map zfar="30" />
+  </visual>
+  <option timestep="0.002" integrator="Euler" iterations="100" ls_iterations="50" tolerance="1e-8" ls_tolerance="0.01" solver="Newton" cone="pyramidal" />
+  <include file="terrain.xml" />
+  <include file="object.xml" />
+</mujoco>

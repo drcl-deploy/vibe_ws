@@ -84,6 +84,31 @@
         ]
       },
       "object_source": "omomo_objects/suitcase/suitcase_cvx_dcmp.xml"
+    },
+    "bball": {
+      "source_clip": "/home/sjdoane/bball/vibe-1027/overnight82/reference82-v2/generalist/basketball/room82_close_pickup_dribble_shot/sample0",
+      "policy": "models/bball/policy.onnx",
+      "robot_start": {
+        "xy": [
+          -2.24129319190979,
+          -1.7103749513626099
+        ],
+        "yaw": 0.31691442151558574,
+        "ground_z": -0.03650166320800785
+      },
+      "object_start": {
+        "pos": [
+          -1.8096868991851807,
+          -1.4719727039337158,
+          0.11999999731779099
+        ]
+      },
+      "camera_quat": [
+        0.5533875347222471,
+        0.44018432095434035,
+        -0.44018432095434035,
+        -0.5533875347222471
+      ]
     }
   },
   "files": {
